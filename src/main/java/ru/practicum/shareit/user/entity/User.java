@@ -1,4 +1,4 @@
-package ru.practicum.shareit.user.model;
+package ru.practicum.shareit.user.entity;
 
 import lombok.Builder;
 import lombok.Data;

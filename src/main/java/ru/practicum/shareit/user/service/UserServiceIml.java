@@ -1,0 +1,110 @@
+package ru.practicum.shareit.user.service;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import ru.practicum.shareit.user.dao.UserDao;
+import ru.practicum.shareit.user.entity.User;
+
+import java.util.List;
+import java.util.Optional;
+
+import static ru.practicum.shareit.constants.NamesLogsInService.SERVICE_FROM_DB;
+import static ru.practicum.shareit.constants.NamesLogsInService.SERVICE_IN_DB;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class UserServiceIml implements UserService {
+    private final UserDao userDao;
+
+    public User createUser(User user) {
+        checkEmail(user.getEmail());
+
+        log.debug("Add new [user = {}] {}", user, SERVICE_IN_DB);
+        Optional<User> createdUser = userDao.createUser(user);
+
+        if (createdUser.isPresent()) {
+            log.debug("New user has returned [user = {}] {}", createdUser.get(), SERVICE_FROM_DB);
+            return createdUser.get();
+        } else {
+            log.error("[user = {}] was not created", user);
+            throw new RuntimeException("User was not created");
+        }
+    }
+
+    public User findUserById(long idUser) {
+        log.debug("Get user by [id = {}] {}", idUser, SERVICE_IN_DB);
+        Optional<User> foundUser = userDao.findUserById(idUser);
+
+        if (foundUser.isPresent()) {
+            log.debug("Found [user = {}] {}", foundUser.get(), SERVICE_FROM_DB);
+            return foundUser.get();
+        } else {
+            log.error("User by [id = {}] was not found", idUser);
+            throw new RuntimeException("Not found");
+        }
+    }
+
+    public User updateUser(User user) {
+        User checkUser = findUserById(user.getId());
+
+        Optional<User> checkEmailUser = userDao.findUserByEmail(user.getEmail());
+
+        if (checkEmailUser.isPresent()) {
+            if (!checkEmailUser.get().equals(checkUser)) {
+                throw new RuntimeException("Duplicate email exist");
+            }
+        }
+
+        if (checkUser.getEmail().equals(user.getEmail()) && checkUser.getName().equals(user.getName())) {
+            log.warn("No need to update user data \n[userUpdate = {}]\n[userResult = {}]", user, checkUser);
+            return checkUser;
+
+        } else {
+
+            log.debug("Update [user = {}] {}", user, SERVICE_IN_DB);
+            Optional<User> updatedUser = userDao.updateUser(user);
+
+            if (updatedUser.isPresent()) {
+                log.debug("Updated user has returned [user = {}] {}", updatedUser.get(), SERVICE_FROM_DB);
+                return updatedUser.get();
+            } else {
+                log.error("[user = {}] was not updated", user);
+                throw new RuntimeException("User was not updated");
+            }
+        }
+    }
+
+    public void deleteUserById(long idUser) {
+        log.debug("Remove user by [id = {}] {}", idUser, SERVICE_IN_DB);
+        boolean isRemoved = userDao.deleteUserById(idUser);
+
+        if (isRemoved) {
+            log.debug("User by [id = {}] has removed {}", idUser, SERVICE_FROM_DB);
+        } else {
+            log.error("User by [id = {}] was not removed", idUser);
+            throw new RuntimeException("User not removed");
+        }
+    }
+
+    public List<User> getAllUsers() {
+        log.debug("Get all users {}", SERVICE_IN_DB);
+        List<User> listUsers = userDao.getAllUsers();
+
+        if (listUsers.isEmpty()) {
+            log.info("Has returned empty list users {}", SERVICE_FROM_DB);
+        } else {
+            log.info("Found list users [count={}] {}", listUsers.size(), SERVICE_FROM_DB);
+        }
+        return listUsers;
+    }
+
+    private void checkEmail(String email) {
+        if (userDao.findUserByEmail(email).isPresent()) {
+            throw new RuntimeException("Duplicate email exist");
+        }
+    }
+
+
+}
