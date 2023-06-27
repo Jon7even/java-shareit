@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.user.dao.UserDao;
+import ru.practicum.shareit.user.dto.UserUpdateInRepositoryDTO;
 import ru.practicum.shareit.user.entity.User;
 
 import java.util.List;
@@ -47,24 +48,46 @@ public class UserServiceIml implements UserService {
     }
 
     public User updateUser(User user) {
-        User checkUser = findUserById(user.getId());
+        User getUserById = findUserById(user.getId());
+        UserUpdateInRepositoryDTO updateUserInRepository = UserUpdateInRepositoryDTO.builder().id(user.getId()).build();
 
-        Optional<User> checkEmailUser = userDao.findUserByEmail(user.getEmail());
+        if (user.getEmail() == null) {
+            updateUserInRepository.setEmail(getUserById.getEmail());
+        } else {
+            Optional<User> checkedEmailUser = userDao.findUserByEmail(user.getEmail());
 
-        if (checkEmailUser.isPresent()) {
-            if (!checkEmailUser.get().equals(checkUser)) {
-                throw new RuntimeException("Duplicate email exist");
+            if (checkedEmailUser.isPresent()) {
+                boolean isEqualsEmailThisUser = checkedEmailUser.get().getId() == user.getId();
+
+                if (isEqualsEmailThisUser) {
+                    updateUserInRepository.setEmail(checkedEmailUser.get().getEmail());
+                } else {
+                    throw new RuntimeException("Duplicate email exist");
+                }
+
+            } else {
+                updateUserInRepository.setEmail(user.getEmail());
             }
         }
 
-        if (checkUser.getEmail().equals(user.getEmail()) && checkUser.getName().equals(user.getName())) {
-            log.warn("No need to update user data \n[userUpdate = {}]\n[userResult = {}]", user, checkUser);
-            return checkUser;
+
+        boolean isEqualsEmail = getUserById.getEmail().equals(user.getEmail());
+        boolean isEqualsName = getUserById.getName().equals(user.getName());
+
+        if (isEqualsEmail && isEqualsName) {
+            log.warn("No need to update user data \n[userUpdate = {}]\n[userResult = {}]", user, getUserById);
+            return getUserById;
 
         } else {
 
-            log.debug("Update [user = {}] {}", user, SERVICE_IN_DB);
-            Optional<User> updatedUser = userDao.updateUser(user);
+            if (isEqualsName || user.getName() == null) {
+                updateUserInRepository.setName(getUserById.getName());
+            } else {
+                updateUserInRepository.setName(user.getName());
+            }
+
+            log.debug("Update [user = {}] {}", updateUserInRepository, SERVICE_IN_DB);
+            Optional<User> updatedUser = userDao.updateUser(updateUserInRepository);
 
             if (updatedUser.isPresent()) {
                 log.debug("Updated user has returned [user = {}] {}", updatedUser.get(), SERVICE_FROM_DB);

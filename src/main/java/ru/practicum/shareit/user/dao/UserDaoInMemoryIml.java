@@ -2,6 +2,7 @@ package ru.practicum.shareit.user.dao;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import ru.practicum.shareit.user.dto.UserUpdateInRepositoryDTO;
 import ru.practicum.shareit.user.entity.User;
 
 import java.util.ArrayList;
@@ -27,25 +28,16 @@ public class UserDaoInMemoryIml implements UserDao {
         return Optional.ofNullable(users.get(idUser));
     }
 
-    public Optional<User> updateUser(User user) {
-        long idUser = user.getId();
+    public Optional<User> updateUser(UserUpdateInRepositoryDTO userUpdateInRepositoryDTO) {
+        long idUser = userUpdateInRepositoryDTO.getId();
 
-        if (user.getEmail().equals("empty")) {
-            User updateUser = users.get(idUser);
+        User updateUser = User.builder()
+                .id(userUpdateInRepositoryDTO.getId())
+                .name(userUpdateInRepositoryDTO.getName())
+                .email(userUpdateInRepositoryDTO.getEmail())
+                .build();
 
-            updateUser.setName(user.getName());
-            users.put(idUser, updateUser);
-
-        } else if (user.getName().equals("empty")) {
-            User updateUser = users.get(idUser);
-
-            updateUser.setEmail(user.getEmail());
-            users.put(idUser, updateUser);
-
-        } else {
-            users.put(idUser, user);
-        }
-
+        users.put(idUser, updateUser);
         return Optional.of(users.get(idUser));
     }
 
@@ -62,7 +54,4 @@ public class UserDaoInMemoryIml implements UserDao {
         return users.values().stream().filter(user -> user.getEmail().equalsIgnoreCase(email)).findFirst();
     }
 
-    /*public boolean isExistUserByEmail(String email) {
-        return users.values().stream().anyMatch(user -> user.getEmail().equalsIgnoreCase(email));
-    }*/
 }
