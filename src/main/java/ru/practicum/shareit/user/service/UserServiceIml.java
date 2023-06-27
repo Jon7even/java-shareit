@@ -3,6 +3,7 @@ package ru.practicum.shareit.user.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exception.*;
 import ru.practicum.shareit.user.dao.UserDao;
 import ru.practicum.shareit.user.dto.UserUpdateInRepositoryDTO;
 import ru.practicum.shareit.user.entity.User;
@@ -22,34 +23,36 @@ public class UserServiceIml implements UserService {
     public User createUser(User user) {
         checkEmail(user.getEmail());
 
-        log.debug("Add new [user = {}] {}", user, SERVICE_IN_DB);
+        log.debug("Add new [user={}] {}", user, SERVICE_IN_DB);
         Optional<User> createdUser = userDao.createUser(user);
 
         if (createdUser.isPresent()) {
-            log.debug("New user has returned [user = {}] {}", createdUser.get(), SERVICE_FROM_DB);
+            log.debug("New user has returned [user={}] {}", createdUser.get(), SERVICE_FROM_DB);
             return createdUser.get();
         } else {
-            log.error("[user = {}] was not created", user);
-            throw new RuntimeException("User was not created");
+            log.error("[user={}] was not created", user);
+            throw new EntityNotCreatedException("New user");
         }
     }
 
     public User findUserById(long idUser) {
-        log.debug("Get user by [id = {}] {}", idUser, SERVICE_IN_DB);
+        log.debug("Get user by [id={}] {}", idUser, SERVICE_IN_DB);
         Optional<User> foundUser = userDao.findUserById(idUser);
 
         if (foundUser.isPresent()) {
-            log.debug("Found [user = {}] {}", foundUser.get(), SERVICE_FROM_DB);
+            log.debug("Found [user={}] {}", foundUser.get(), SERVICE_FROM_DB);
             return foundUser.get();
         } else {
-            log.error("User by [id = {}] was not found", idUser);
-            throw new RuntimeException("Not found");
+            log.warn("User by [id={}] was not found", idUser);
+            throw new EntityNotFoundException(String.format("User with [idUser=%d]", idUser));
         }
     }
 
     public User updateUser(User user) {
-        User getUserById = findUserById(user.getId());
-        UserUpdateInRepositoryDTO updateUserInRepository = UserUpdateInRepositoryDTO.builder().id(user.getId()).build();
+        long userId = user.getId();
+
+        User getUserById = findUserById(userId);
+        UserUpdateInRepositoryDTO updateUserInRepository = UserUpdateInRepositoryDTO.builder().id(userId).build();
 
         if (user.getEmail() == null) {
             updateUserInRepository.setEmail(getUserById.getEmail());
@@ -57,12 +60,13 @@ public class UserServiceIml implements UserService {
             Optional<User> checkedEmailUser = userDao.findUserByEmail(user.getEmail());
 
             if (checkedEmailUser.isPresent()) {
-                boolean isEqualsEmailThisUser = checkedEmailUser.get().getId() == user.getId();
+                boolean isEqualsEmailThisUser = checkedEmailUser.get().getId() == userId;
 
                 if (isEqualsEmailThisUser) {
                     updateUserInRepository.setEmail(checkedEmailUser.get().getEmail());
                 } else {
-                    throw new RuntimeException("Duplicate email exist");
+                    log.error("User with [email={}] already exist [idUser={}]", user.getEmail(), userId);
+                    throw new EntityAlreadyExistsException("This email");
                 }
 
             } else {
@@ -70,12 +74,11 @@ public class UserServiceIml implements UserService {
             }
         }
 
-
         boolean isEqualsEmail = getUserById.getEmail().equals(user.getEmail());
         boolean isEqualsName = getUserById.getName().equals(user.getName());
 
         if (isEqualsEmail && isEqualsName) {
-            log.warn("No need to update user data \n[userUpdate = {}]\n[userResult = {}]", user, getUserById);
+            log.warn("No need to update user data \n[userUpdate={}]\n[userResult={}]", user, getUserById);
             return getUserById;
 
         } else {
@@ -86,28 +89,28 @@ public class UserServiceIml implements UserService {
                 updateUserInRepository.setName(user.getName());
             }
 
-            log.debug("Update [user = {}] {}", updateUserInRepository, SERVICE_IN_DB);
+            log.debug("Update [user={}] {}", updateUserInRepository, SERVICE_IN_DB);
             Optional<User> updatedUser = userDao.updateUser(updateUserInRepository);
 
             if (updatedUser.isPresent()) {
-                log.debug("Updated user has returned [user = {}] {}", updatedUser.get(), SERVICE_FROM_DB);
+                log.debug("Updated user has returned [user={}] {}", updatedUser.get(), SERVICE_FROM_DB);
                 return updatedUser.get();
             } else {
-                log.error("[user = {}] was not updated", user);
-                throw new RuntimeException("User was not updated");
+                log.error("[user={}] was not updated", user);
+                throw new EntityNotUpdatedException(String.format("User with [idUser=%d]", userId));
             }
         }
     }
 
     public void deleteUserById(long idUser) {
-        log.debug("Remove user by [id = {}] {}", idUser, SERVICE_IN_DB);
+        log.debug("Remove user by [id={}] {}", idUser, SERVICE_IN_DB);
         boolean isRemoved = userDao.deleteUserById(idUser);
 
         if (isRemoved) {
-            log.debug("User by [id = {}] has removed {}", idUser, SERVICE_FROM_DB);
+            log.debug("User by [id={}] has removed {}", idUser, SERVICE_FROM_DB);
         } else {
-            log.error("User by [id = {}] was not removed", idUser);
-            throw new RuntimeException("User not removed");
+            log.error("User by [id={}] was not removed", idUser);
+            throw new EntityNotDeletedException(String.format("User with [idUser=%d]", idUser));
         }
     }
 
@@ -125,7 +128,7 @@ public class UserServiceIml implements UserService {
 
     private void checkEmail(String email) {
         if (userDao.findUserByEmail(email).isPresent()) {
-            throw new RuntimeException("Duplicate email exist");
+            throw new EntityAlreadyExistsException("This email");
         }
     }
 
