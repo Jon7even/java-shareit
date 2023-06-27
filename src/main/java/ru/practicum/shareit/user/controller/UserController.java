@@ -22,25 +22,16 @@ import static ru.practicum.shareit.constants.NamesLogsInController.IN_CONTROLLER
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
-    //private final UserControllerMapper mapper;
+    private final UserControllerMapper mapper;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public UserResponseDTO createUser(@Valid @RequestBody UserRequestCreateDTO userRequestCreateDTO,
                                       HttpServletRequest request) {
         log.debug("On {} {} {}", request.getRequestURL(), IN_CONTROLLER_METHOD, request.getMethod());
-        User userCreate = userService.createUser(
-                User.builder()
-                        .name(userRequestCreateDTO.getName())
-                        .email(userRequestCreateDTO.getEmail())
-                        .build()
-        );
+        User userCreate = userService.createUser(mapper.toUserFromUserRequestCreateDTO(userRequestCreateDTO));
 
-        return UserResponseDTO.builder()
-                .id(userCreate.getId())
-                .name(userCreate.getName())
-                .email(userCreate.getEmail())
-                .build();
+        return mapper.toUserResponseDTOFromUser(userCreate);
     }
 
     @PatchMapping("/{userId}")
@@ -49,19 +40,9 @@ public class UserController {
                                       @Valid @RequestBody UserRequestUpdateDTO userRequestUpdateDTO,
                                       HttpServletRequest request) {
         log.debug("On {} {} {}", request.getRequestURL(), IN_CONTROLLER_METHOD, request.getMethod());
-        User userUpdate = userService.updateUser(
-                User.builder()
-                        .id(userId)
-                        .name(userRequestUpdateDTO.getName())
-                        .email(userRequestUpdateDTO.getEmail())
-                        .build()
-        );
+        User userUpdate = userService.updateUser(mapper.toUserFromUserRequestCreateDTO(userId, userRequestUpdateDTO));
 
-        return UserResponseDTO.builder()
-                .id(userUpdate.getId())
-                .name(userUpdate.getName())
-                .email(userUpdate.getEmail())
-                .build();
+        return mapper.toUserResponseDTOFromUser(userUpdate);
     }
 
     @GetMapping("/{userId}")
@@ -71,11 +52,7 @@ public class UserController {
         log.debug("On {} {} {}", request.getRequestURL(), IN_CONTROLLER_METHOD, request.getMethod());
         User getUserById = userService.findUserById(userId);
 
-        return UserResponseDTO.builder()
-                .id(getUserById.getId())
-                .name(getUserById.getName())
-                .email(getUserById.getEmail())
-                .build();
+        return mapper.toUserResponseDTOFromUser(getUserById);
     }
 
     @DeleteMapping("/{userId}")
@@ -90,6 +67,7 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     public List<User> getAllUsers(HttpServletRequest request) {
         log.debug("On {} {} {}", request.getRequestURL(), IN_CONTROLLER_METHOD, request.getMethod());
+
         return userService.getAllUsers();
     }
 
