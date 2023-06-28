@@ -22,6 +22,7 @@ import static ru.practicum.shareit.constants.NamesLogsInController.IN_CONTROLLER
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+
     private final UserControllerMapper mapper;
 
     @PostMapping

@@ -103,7 +103,9 @@ public class UserServiceIml implements UserService {
     }
 
     public void deleteUserById(long idUser) {
-        log.debug("Remove user by [id={}] {}", idUser, SERVICE_IN_DB);
+        User getUserById = findUserById(idUser);
+
+        log.debug("Remove [user={}] {}", getUserById, SERVICE_IN_DB);
         boolean isRemoved = userDao.deleteUserById(idUser);
 
         if (isRemoved) {
@@ -123,6 +125,7 @@ public class UserServiceIml implements UserService {
         } else {
             log.info("Found list users [count={}] {}", listUsers.size(), SERVICE_FROM_DB);
         }
+
         return listUsers;
     }
 
@@ -131,6 +134,5 @@ public class UserServiceIml implements UserService {
             throw new EntityAlreadyExistsException("This email");
         }
     }
-
 
 }

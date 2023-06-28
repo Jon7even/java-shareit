@@ -13,7 +13,6 @@ import java.util.Optional;
 @Repository
 @RequiredArgsConstructor
 public class UserDaoInMemoryIml implements UserDao {
-
     private final Map<Long, User> users;
     private static long generatorId;
 
@@ -21,6 +20,7 @@ public class UserDaoInMemoryIml implements UserDao {
         long idUser = ++generatorId;
         user.setId(idUser);
         users.put(idUser, user);
+
         return Optional.of(users.get(idUser));
     }
 
@@ -36,13 +36,14 @@ public class UserDaoInMemoryIml implements UserDao {
                 .name(userUpdateInRepositoryDTO.getName())
                 .email(userUpdateInRepositoryDTO.getEmail())
                 .build();
-
         users.put(idUser, updateUser);
+
         return Optional.of(users.get(idUser));
     }
 
     public boolean deleteUserById(long idUser) {
         users.remove(idUser);
+
         return findUserById(idUser).isEmpty();
     }
 
