@@ -16,6 +16,7 @@ public class UserDaoInMemoryIml implements UserDao {
     private final Map<Long, User> users;
     private static long generatorId;
 
+    @Override
     public Optional<User> createUser(User user) {
         long idUser = ++generatorId;
         user.setId(idUser);
@@ -24,10 +25,12 @@ public class UserDaoInMemoryIml implements UserDao {
         return Optional.of(users.get(idUser));
     }
 
+    @Override
     public Optional<User> findUserById(long idUser) {
         return Optional.ofNullable(users.get(idUser));
     }
 
+    @Override
     public Optional<User> updateUser(UserUpdateInRepositoryDTO userUpdateInRepositoryDTO) {
         long idUser = userUpdateInRepositoryDTO.getId();
 
@@ -41,16 +44,19 @@ public class UserDaoInMemoryIml implements UserDao {
         return Optional.of(users.get(idUser));
     }
 
+    @Override
     public boolean deleteUserById(long idUser) {
         users.remove(idUser);
 
         return findUserById(idUser).isEmpty();
     }
 
+    @Override
     public List<User> getAllUsers() {
         return new ArrayList<>(users.values());
     }
 
+    @Override
     public Optional<User> findUserByEmail(String email) {
         return users.values().stream().filter(user -> user.getEmail().equalsIgnoreCase(email)).findFirst();
     }

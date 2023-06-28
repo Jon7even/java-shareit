@@ -20,6 +20,7 @@ import static ru.practicum.shareit.constants.NamesLogsInService.SERVICE_IN_DB;
 public class UserServiceIml implements UserService {
     private final UserDao userDao;
 
+    @Override
     public User createUser(User user) {
         checkEmail(user.getEmail());
 
@@ -35,6 +36,7 @@ public class UserServiceIml implements UserService {
         }
     }
 
+    @Override
     public User findUserById(long idUser) {
         log.debug("Get user by [id={}] {}", idUser, SERVICE_IN_DB);
         Optional<User> foundUser = userDao.findUserById(idUser);
@@ -48,6 +50,7 @@ public class UserServiceIml implements UserService {
         }
     }
 
+    @Override
     public User updateUser(User user) {
         long userId = user.getId();
 
@@ -102,6 +105,7 @@ public class UserServiceIml implements UserService {
         }
     }
 
+    @Override
     public void deleteUserById(long idUser) {
         User getUserById = findUserById(idUser);
 
@@ -116,6 +120,7 @@ public class UserServiceIml implements UserService {
         }
     }
 
+    @Override
     public List<User> getAllUsers() {
         log.debug("Get all users {}", SERVICE_IN_DB);
         List<User> listUsers = userDao.getAllUsers();

@@ -11,6 +11,7 @@ public class UserControllerMapperIml implements UserControllerMapper {
     private UserControllerMapperIml() {
     }
 
+    @Override
     public User toUserFromUserRequestCreateDTO(UserRequestCreateDTO userRequestCreateDTO) {
         return User.builder()
                 .name(userRequestCreateDTO.getName())
@@ -18,6 +19,7 @@ public class UserControllerMapperIml implements UserControllerMapper {
                 .build();
     }
 
+    @Override
     public User toUserFromUserRequestCreateDTO(long userId, UserRequestUpdateDTO userRequestUpdateDTO) {
         return User.builder()
                 .id(userId)
@@ -26,6 +28,7 @@ public class UserControllerMapperIml implements UserControllerMapper {
                 .build();
     }
 
+    @Override
     public UserResponseDTO toUserResponseDTOFromUser(User user) {
         return UserResponseDTO.builder()
                 .id(user.getId())
