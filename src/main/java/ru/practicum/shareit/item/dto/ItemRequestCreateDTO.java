@@ -17,6 +17,5 @@ public class ItemRequestCreateDTO {
     private String description;
 
     @NotNull
-    @NonNull
     private Boolean available;
 }

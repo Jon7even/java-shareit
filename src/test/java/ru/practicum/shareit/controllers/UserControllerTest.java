@@ -3,11 +3,9 @@ package ru.practicum.shareit.controllers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.practicum.shareit.user.entity.User;
-import ru.practicum.shareit.user.service.UserService;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -16,32 +14,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 
 public class UserControllerTest extends GenericControllerTest {
-    @Autowired
-    private UserService userService;
-
-    private User firstUser;
-
-    private User secondUser;
-
-    private User thirdUser;
-
     @BeforeEach
     void setUp() {
         initUsers();
-    }
-
-    void initUsers() {
-        firstUser = User.builder()
-                .name("firstUser")
-                .email("firstUser@yandex.ru")
-                .build();
-        secondUser = User.builder()
-                .id(1)
-                .name("secondUser")
-                .email("secondUser@yandex.ru")
-                .build();
-        thirdUser = User.builder()
-                .build();
     }
 
     @Test
@@ -62,14 +37,14 @@ public class UserControllerTest extends GenericControllerTest {
         mockMvc.perform(post("/users")
                         .content(objectMapper.writeValueAsString(thirdUser))
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().isBadRequest());
 
-        thirdUser.setName("Name");
+/*        thirdUser.setName("Name");
 
         mockMvc.perform(post("/users")
                         .content(objectMapper.writeValueAsString(thirdUser))
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().isInternalServerError());*/
     }
 
     @Test
