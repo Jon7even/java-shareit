@@ -1,11 +1,15 @@
-package ru.practicum.shareit.item.model;
+package ru.practicum.shareit.item.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import ru.practicum.shareit.user.entity.User;
 
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Item {
     private long id;
 
@@ -16,6 +20,4 @@ public class Item {
     private boolean available;
 
     private User owner;
-
-    private String request;
 }

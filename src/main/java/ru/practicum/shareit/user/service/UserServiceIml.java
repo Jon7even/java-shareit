@@ -18,14 +18,14 @@ import static ru.practicum.shareit.constants.NamesLogsInService.SERVICE_IN_DB;
 @Service
 @RequiredArgsConstructor
 public class UserServiceIml implements UserService {
-    private final UserDao userDao;
+    private final UserDao repository;
 
     @Override
     public User createUser(User user) {
         checkEmail(user.getEmail());
 
         log.debug("Add new [user={}] {}", user, SERVICE_IN_DB);
-        Optional<User> createdUser = userDao.createUser(user);
+        Optional<User> createdUser = repository.createUser(user);
 
         if (createdUser.isPresent()) {
             log.debug("New user has returned [user={}] {}", createdUser.get(), SERVICE_FROM_DB);
@@ -39,7 +39,7 @@ public class UserServiceIml implements UserService {
     @Override
     public User findUserById(long idUser) {
         log.debug("Get user by [id={}] {}", idUser, SERVICE_IN_DB);
-        Optional<User> foundUser = userDao.findUserById(idUser);
+        Optional<User> foundUser = repository.findUserById(idUser);
 
         if (foundUser.isPresent()) {
             log.debug("Found [user={}] {}", foundUser.get(), SERVICE_FROM_DB);
@@ -60,7 +60,7 @@ public class UserServiceIml implements UserService {
         if (user.getEmail() == null) {
             updateUserInRepository.setEmail(getUserById.getEmail());
         } else {
-            Optional<User> checkedEmailUser = userDao.findUserByEmail(user.getEmail());
+            Optional<User> checkedEmailUser = repository.findUserByEmail(user.getEmail());
 
             if (checkedEmailUser.isPresent()) {
                 boolean isEqualsEmailThisUser = checkedEmailUser.get().getId() == userId;
@@ -93,7 +93,7 @@ public class UserServiceIml implements UserService {
             }
 
             log.debug("Update [user={}] {}", updateUserInRepository, SERVICE_IN_DB);
-            Optional<User> updatedUser = userDao.updateUser(updateUserInRepository);
+            Optional<User> updatedUser = repository.updateUser(updateUserInRepository);
 
             if (updatedUser.isPresent()) {
                 log.debug("Updated user has returned [user={}] {}", updatedUser.get(), SERVICE_FROM_DB);
@@ -110,7 +110,7 @@ public class UserServiceIml implements UserService {
         User getUserById = findUserById(idUser);
 
         log.debug("Remove [user={}] {}", getUserById, SERVICE_IN_DB);
-        boolean isRemoved = userDao.deleteUserById(idUser);
+        boolean isRemoved = repository.deleteUserById(idUser);
 
         if (isRemoved) {
             log.debug("User by [id={}] has removed {}", idUser, SERVICE_FROM_DB);
@@ -123,7 +123,7 @@ public class UserServiceIml implements UserService {
     @Override
     public List<User> getAllUsers() {
         log.debug("Get all users {}", SERVICE_IN_DB);
-        List<User> listUsers = userDao.getAllUsers();
+        List<User> listUsers = repository.getAllUsers();
 
         if (listUsers.isEmpty()) {
             log.info("Has returned empty list users {}", SERVICE_FROM_DB);
@@ -135,7 +135,7 @@ public class UserServiceIml implements UserService {
     }
 
     private void checkEmail(String email) {
-        if (userDao.findUserByEmail(email).isPresent()) {
+        if (repository.findUserByEmail(email).isPresent()) {
             throw new EntityAlreadyExistsException("This email");
         }
     }
