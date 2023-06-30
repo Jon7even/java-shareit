@@ -12,19 +12,19 @@ public class UserControllerMapperIml implements UserControllerMapper {
     }
 
     @Override
-    public User toUserFromUserRequestCreateDTO(UserRequestCreateDTO userRequestCreateDTO) {
+    public User toUserFromUserRequestCreateDTO(UserRequestCreateDTO userRequest) {
         return User.builder()
-                .name(userRequestCreateDTO.getName())
-                .email(userRequestCreateDTO.getEmail())
+                .name(userRequest.getName())
+                .email(userRequest.getEmail())
                 .build();
     }
 
     @Override
-    public User toUserFromUserRequestCreateDTO(long userId, UserRequestUpdateDTO userRequestUpdateDTO) {
+    public User toUserFromUserRequestUpdateDTO(UserRequestUpdateDTO userRequest, long userId) {
         return User.builder()
                 .id(userId)
-                .name(userRequestUpdateDTO.getName())
-                .email(userRequestUpdateDTO.getEmail())
+                .name(userRequest.getName())
+                .email(userRequest.getEmail())
                 .build();
     }
 

@@ -9,10 +9,13 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ItemCreateInServiceDTO {
+    @NotNull
     private String name;
 
+    @NotNull
     private String description;
 
+    @NotNull
     private boolean available;
 
     @NotNull

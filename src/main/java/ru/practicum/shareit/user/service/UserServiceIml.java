@@ -126,9 +126,9 @@ public class UserServiceIml implements UserService {
         List<User> listUsers = repository.getAllUsers();
 
         if (listUsers.isEmpty()) {
-            log.info("Has returned empty list users {}", SERVICE_FROM_DB);
+            log.debug("Has returned empty list users {}", SERVICE_FROM_DB);
         } else {
-            log.info("Found list users [count={}] {}", listUsers.size(), SERVICE_FROM_DB);
+            log.debug("Found list users [count={}] {}", listUsers.size(), SERVICE_FROM_DB);
         }
 
         return listUsers;

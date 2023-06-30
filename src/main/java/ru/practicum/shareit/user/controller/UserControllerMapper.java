@@ -6,9 +6,9 @@ import ru.practicum.shareit.user.dto.UserResponseDTO;
 import ru.practicum.shareit.user.entity.User;
 
 public interface UserControllerMapper {
-    User toUserFromUserRequestCreateDTO(UserRequestCreateDTO userRequestCreateDTO);
+    User toUserFromUserRequestCreateDTO(UserRequestCreateDTO userRequest);
 
-    User toUserFromUserRequestCreateDTO(long userId, UserRequestUpdateDTO userRequestUpdateDTO);
+    User toUserFromUserRequestUpdateDTO(UserRequestUpdateDTO userRequest, long userId);
 
     UserResponseDTO toUserResponseDTOFromUser(User user);
 }

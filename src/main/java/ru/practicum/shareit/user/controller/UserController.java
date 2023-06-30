@@ -29,10 +29,22 @@ public class UserController {
     @ResponseStatus(HttpStatus.CREATED)
     public UserResponseDTO createUser(@Valid @RequestBody UserRequestCreateDTO userRequestCreateDTO,
                                       HttpServletRequest request) {
+
         log.debug("On {} {} {}", request.getRequestURL(), IN_CONTROLLER_METHOD, request.getMethod());
         User userCreate = userService.createUser(mapper.toUserFromUserRequestCreateDTO(userRequestCreateDTO));
 
         return mapper.toUserResponseDTOFromUser(userCreate);
+    }
+
+    @GetMapping("/{userId}")
+    @ResponseStatus(HttpStatus.OK)
+    public UserResponseDTO getUserById(@PathVariable long userId,
+                                       HttpServletRequest request) {
+
+        log.debug("On {} {} {}", request.getRequestURL(), IN_CONTROLLER_METHOD, request.getMethod());
+        User getUserById = userService.findUserById(userId);
+
+        return mapper.toUserResponseDTOFromUser(getUserById);
     }
 
     @PatchMapping("/{userId}")
@@ -40,33 +52,27 @@ public class UserController {
     public UserResponseDTO updateUser(@PathVariable long userId,
                                       @Valid @RequestBody UserRequestUpdateDTO userRequestUpdateDTO,
                                       HttpServletRequest request) {
+
         log.debug("On {} {} {}", request.getRequestURL(), IN_CONTROLLER_METHOD, request.getMethod());
-        User userUpdate = userService.updateUser(mapper.toUserFromUserRequestCreateDTO(userId, userRequestUpdateDTO));
+        User userUpdate = userService.updateUser(mapper.toUserFromUserRequestUpdateDTO(userRequestUpdateDTO, userId));
 
         return mapper.toUserResponseDTOFromUser(userUpdate);
-    }
-
-    @GetMapping("/{userId}")
-    @ResponseStatus(HttpStatus.OK)
-    public UserResponseDTO getUserById(@PathVariable long userId,
-                                       HttpServletRequest request) {
-        log.debug("On {} {} {}", request.getRequestURL(), IN_CONTROLLER_METHOD, request.getMethod());
-        User getUserById = userService.findUserById(userId);
-
-        return mapper.toUserResponseDTOFromUser(getUserById);
     }
 
     @DeleteMapping("/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void removeUserById(@PathVariable long userId,
                                HttpServletRequest request) {
+
         log.debug("On {} {} {}", request.getRequestURL(), IN_CONTROLLER_METHOD, request.getMethod());
+
         userService.deleteUserById(userId);
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<User> getAllUsers(HttpServletRequest request) {
+
         log.debug("On {} {} {}", request.getRequestURL(), IN_CONTROLLER_METHOD, request.getMethod());
 
         return userService.getAllUsers();
