@@ -62,6 +62,8 @@ public class ItemServiceIml implements ItemService {
 
     @Override
     public List<Item> getAllItemsByUserId(long idUser) {
+        getUserById(idUser);
+
         log.debug("Get all items {} by [idUser={}]", SERVICE_IN_DB, idUser);
         List<Item> listItemsByIdUser = repositoryItem.getAllItemsByUserId(idUser);
 
@@ -91,6 +93,23 @@ public class ItemServiceIml implements ItemService {
         }
     }
 
+    @Override
+    public List<Item> getListSearchItem(long idUser, String text) {
+        getUserById(idUser);
+
+        log.debug("Get list items [searchText={}] {} by [idUser={}]", text, SERVICE_IN_DB, idUser);
+        List<Item> listFoundItemsByText = repositoryItem.getListSearchItem(text);
+
+        if (listFoundItemsByText.isEmpty()) {
+            log.debug("Has returned empty list items [searchText={}] {} by [idUser={}]", text, SERVICE_FROM_DB, idUser);
+        } else {
+            log.debug("Found list items [count={}] {} by [idUser={}]",
+                    listFoundItemsByText.size(), SERVICE_FROM_DB, idUser);
+        }
+
+        return listFoundItemsByText;
+    }
+
     private Item validItemForCreate(ItemCreateInServiceDTO itemCreateInServiceDTO) {
         User getUserById = getUserById(itemCreateInServiceDTO.getOwner());
 
@@ -103,28 +122,28 @@ public class ItemServiceIml implements ItemService {
     }
 
     private ItemUpdateInRepositoryDTO validItemForUpdate(ItemUpdateInServiceDTO itemUpdateInServiceDTO) {
-        Item checkedItem = findItemById(itemUpdateInServiceDTO.getOwner(), itemUpdateInServiceDTO.getId());
-        checkIsUserTheOwnerOfItem(itemUpdateInServiceDTO.getOwner(), checkedItem.getOwner().getId());
+        Item checkedItemFromDB = findItemById(itemUpdateInServiceDTO.getOwner(), itemUpdateInServiceDTO.getId());
+        checkIsUserTheOwnerOfItem(itemUpdateInServiceDTO.getOwner(), checkedItemFromDB.getOwner().getId());
 
         ItemUpdateInRepositoryDTO buildValidItem = ItemUpdateInRepositoryDTO.builder()
                 .id(itemUpdateInServiceDTO.getId())
-                .owner(checkedItem.getOwner())
+                .owner(checkedItemFromDB.getOwner())
                 .build();
 
         if (itemUpdateInServiceDTO.getName() == null) {
-            buildValidItem.setName(checkedItem.getName());
+            buildValidItem.setName(checkedItemFromDB.getName());
         } else {
             buildValidItem.setName(itemUpdateInServiceDTO.getName());
         }
 
         if (itemUpdateInServiceDTO.getDescription() == null) {
-            buildValidItem.setDescription(checkedItem.getDescription());
+            buildValidItem.setDescription(checkedItemFromDB.getDescription());
         } else {
             buildValidItem.setDescription(itemUpdateInServiceDTO.getDescription());
         }
 
         if (itemUpdateInServiceDTO.getAvailable() == null) {
-            buildValidItem.setAvailable(checkedItem.isAvailable());
+            buildValidItem.setAvailable(checkedItemFromDB.isAvailable());
         } else {
             buildValidItem.setAvailable(itemUpdateInServiceDTO.getAvailable());
         }
@@ -135,7 +154,7 @@ public class ItemServiceIml implements ItemService {
     private void checkIsUserTheOwnerOfItem(long idOwnerFromController, long idOwnerFromRepository) {
         if (idOwnerFromController != idOwnerFromRepository) {
             log.error("User [idOwnerFromController={}] was attempt to apply unauthorized method " +
-                            "to Owner [idOwnerFromRepository={}]",idOwnerFromController, idOwnerFromRepository);
+                    "to Owner [idOwnerFromRepository={}]", idOwnerFromController, idOwnerFromRepository);
             throw new AccessDeniedException("this item");
         }
     }

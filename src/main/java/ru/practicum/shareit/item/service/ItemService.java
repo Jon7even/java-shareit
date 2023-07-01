@@ -14,4 +14,6 @@ public interface ItemService {
     List<Item> getAllItemsByUserId(long idUser);
 
     Item updateItem(ItemUpdateInServiceDTO itemUpdateInServiceDTO);
+
+    List<Item> getListSearchItem(long idUser, String text);
 }

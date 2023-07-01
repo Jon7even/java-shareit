@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.item.dto.ItemUpdateInRepositoryDTO;
 import ru.practicum.shareit.item.entity.Item;
-import ru.practicum.shareit.user.entity.User;
 
 import java.util.List;
 import java.util.Map;
@@ -54,7 +53,14 @@ public class ItemDaoInMemoryIml implements ItemDao {
     }
 
     @Override
-    public boolean checkIsUserTheOwnerOfItem(long idItem, User user) {
-        return items.get(idItem).getOwner().getId() == user.getId();
+    public List<Item> getListSearchItem(String text) {
+        String textLowCase = text.toLowerCase();
+
+        return items.values().stream()
+                .filter(Item::isAvailable)
+                .filter(i -> i.getName().toLowerCase().contains(textLowCase)
+                        || i.getDescription().toLowerCase().contains(textLowCase))
+                .collect(Collectors.toList());
     }
+
 }

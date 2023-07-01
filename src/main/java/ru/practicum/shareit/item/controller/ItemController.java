@@ -10,9 +10,11 @@ import ru.practicum.shareit.item.dto.ItemRequestUpdateDTO;
 import ru.practicum.shareit.item.dto.ItemResponseDTO;
 import ru.practicum.shareit.item.entity.Item;
 import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.utils.HttpServletUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -35,10 +37,10 @@ public class ItemController {
                                       HttpServletRequest request) {
 
         log.debug("On {} {} {}", request.getRequestURL(), IN_CONTROLLER_METHOD, request.getMethod());
-        long getCheckedUserId = checkHeaderUserId(userId);
+        long checkedUserId = checkHeaderUserId(userId);
 
         Item itemCreate = itemService.createItem(
-                mapper.toItemInServiceFromItemRequestCreateDTO(itemRequestCreateDTO, getCheckedUserId));
+                mapper.toItemInServiceFromItemRequestCreateDTO(itemRequestCreateDTO, checkedUserId));
 
         return mapper.toItemResponseDTOFromItem(itemCreate);
 
@@ -51,9 +53,9 @@ public class ItemController {
                                        HttpServletRequest request) {
 
         log.debug("On {} {} {}", request.getRequestURL(), IN_CONTROLLER_METHOD, request.getMethod());
-        long getCheckedUserId = checkHeaderUserId(userId);
+        long checkedUserId = checkHeaderUserId(userId);
 
-        Item getItemById = itemService.findItemById(getCheckedUserId, itemId);
+        Item getItemById = itemService.findItemById(checkedUserId, itemId);
 
         return mapper.toItemResponseDTOFromItem(getItemById);
     }
@@ -64,9 +66,9 @@ public class ItemController {
                                                      HttpServletRequest request) {
 
         log.debug("On {} {} {}", request.getRequestURL(), IN_CONTROLLER_METHOD, request.getMethod());
-        long getCheckedUserId = checkHeaderUserId(userId);
+        long checkedUserId = checkHeaderUserId(userId);
 
-        List<Item> getAllItemsByUserId = itemService.getAllItemsByUserId(getCheckedUserId);
+        List<Item> getAllItemsByUserId = itemService.getAllItemsByUserId(checkedUserId);
 
         return getAllItemsByUserId.stream().map(mapper::toItemResponseDTOFromItem).collect(Collectors.toList());
     }
@@ -79,13 +81,32 @@ public class ItemController {
                                       HttpServletRequest request) {
 
         log.debug("On {} {} {}", request.getRequestURL(), IN_CONTROLLER_METHOD, request.getMethod());
-        long getCheckedUserId = checkHeaderUserId(userId);
+        long checkedUserId = checkHeaderUserId(userId);
 
         Item itemUpdate = itemService.updateItem(
-                mapper.toItemInServiceFromItemRequestUpdateDTO(itemRequestUpdateDTO, getCheckedUserId, itemId)
+                mapper.toItemInServiceFromItemRequestUpdateDTO(itemRequestUpdateDTO, checkedUserId, itemId)
         );
 
         return mapper.toItemResponseDTOFromItem(itemUpdate);
+
+    }
+
+    @GetMapping("/search")
+    @ResponseStatus(HttpStatus.OK)
+    public List<ItemResponseDTO> searchItem(@RequestHeader("X-Sharer-User-Id") Optional<Long> userId,
+                                            @RequestParam Optional<String> text,
+                                            HttpServletRequest request) {
+
+        log.debug("On {} {} {}", HttpServletUtils.getURLWithParam(request), IN_CONTROLLER_METHOD, request.getMethod());
+        long checkedUserId = checkHeaderUserId(userId);
+
+        if (text.isPresent() && !text.get().isBlank()) {
+            List<Item> listFoundItemsByText = itemService.getListSearchItem(checkedUserId, text.get());
+
+            return listFoundItemsByText.stream().map(mapper::toItemResponseDTOFromItem).collect(Collectors.toList());
+        } else {
+            return Collections.emptyList();
+        }
 
     }
 
