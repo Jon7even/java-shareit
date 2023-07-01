@@ -23,5 +23,4 @@ public class ItemCreateInServiceDTO {
 
     @NotNull
     private Long owner;
-
 }
