@@ -33,18 +33,18 @@ public class UserControllerTest extends GenericControllerTest {
 
     @Test
     @DisplayName("Пользователь не должен создаться")
-    void shouldNotCreateUser_thenStatus500() throws Exception {
+    void shouldNotCreateUser_thenStatus500And400() throws Exception {
+        mockMvc.perform(post("/users")
+                        .content(objectMapper.writeValueAsString(thirdUser))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isInternalServerError());
+
+        thirdUser.setName("Name");
+
         mockMvc.perform(post("/users")
                         .content(objectMapper.writeValueAsString(thirdUser))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
-
-/*        thirdUser.setName("Name");
-
-        mockMvc.perform(post("/users")
-                        .content(objectMapper.writeValueAsString(thirdUser))
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isInternalServerError());*/
     }
 
     @Test

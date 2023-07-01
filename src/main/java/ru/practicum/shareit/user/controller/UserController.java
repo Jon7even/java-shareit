@@ -8,6 +8,7 @@ import ru.practicum.shareit.user.dto.UserRequestCreateDTO;
 import ru.practicum.shareit.user.dto.UserRequestUpdateDTO;
 import ru.practicum.shareit.user.dto.UserResponseDTO;
 import ru.practicum.shareit.user.entity.User;
+import ru.practicum.shareit.user.mapper.MapperUserDTO;
 import ru.practicum.shareit.user.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -23,17 +24,15 @@ import static ru.practicum.shareit.constants.NamesLogsInController.IN_CONTROLLER
 public class UserController {
     private final UserService userService;
 
-    private final UserControllerMapper mapper;
-
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public UserResponseDTO createUser(@Valid @RequestBody UserRequestCreateDTO userRequestCreateDTO,
                                       HttpServletRequest request) {
 
         log.debug("On {} {} {}", request.getRequestURL(), IN_CONTROLLER_METHOD, request.getMethod());
-        User userCreate = userService.createUser(mapper.toUserFromUserRequestCreateDTO(userRequestCreateDTO));
+        User userCreate = userService.createUser(MapperUserDTO.toUserFromUserRequestCreateDTO(userRequestCreateDTO));
 
-        return mapper.toUserResponseDTOFromUser(userCreate);
+        return MapperUserDTO.toUserResponseDTOFromUser(userCreate);
     }
 
     @GetMapping("/{userId}")
@@ -44,7 +43,7 @@ public class UserController {
         log.debug("On {} {} {}", request.getRequestURL(), IN_CONTROLLER_METHOD, request.getMethod());
         User getUserById = userService.findUserById(userId);
 
-        return mapper.toUserResponseDTOFromUser(getUserById);
+        return MapperUserDTO.toUserResponseDTOFromUser(getUserById);
     }
 
     @PatchMapping("/{userId}")
@@ -54,9 +53,11 @@ public class UserController {
                                       HttpServletRequest request) {
 
         log.debug("On {} {} {}", request.getRequestURL(), IN_CONTROLLER_METHOD, request.getMethod());
-        User userUpdate = userService.updateUser(mapper.toUserFromUserRequestUpdateDTO(userRequestUpdateDTO, userId));
+        User userUpdate = userService.updateUser(
+                MapperUserDTO.toUserFromUserRequestUpdateDTO(userRequestUpdateDTO, userId)
+        );
 
-        return mapper.toUserResponseDTOFromUser(userUpdate);
+        return MapperUserDTO.toUserResponseDTOFromUser(userUpdate);
     }
 
     @DeleteMapping("/{userId}")

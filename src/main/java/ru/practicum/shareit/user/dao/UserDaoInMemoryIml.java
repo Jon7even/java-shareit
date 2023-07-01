@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.user.dto.UserUpdateInRepositoryDTO;
 import ru.practicum.shareit.user.entity.User;
+import ru.practicum.shareit.user.mapper.MapperUserDTO;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,12 +35,7 @@ public class UserDaoInMemoryIml implements UserDao {
     public Optional<User> updateUser(UserUpdateInRepositoryDTO userUpdateInRepositoryDTO) {
         long idUser = userUpdateInRepositoryDTO.getId();
 
-        User updateUser = User.builder()
-                .id(userUpdateInRepositoryDTO.getId())
-                .name(userUpdateInRepositoryDTO.getName())
-                .email(userUpdateInRepositoryDTO.getEmail())
-                .build();
-        users.put(idUser, updateUser);
+        users.put(idUser, MapperUserDTO.toUserFromUserUpdateInRepositoryDTO(userUpdateInRepositoryDTO));
 
         return Optional.of(users.get(idUser));
     }

@@ -9,6 +9,7 @@ import ru.practicum.shareit.item.dto.ItemRequestCreateDTO;
 import ru.practicum.shareit.item.dto.ItemRequestUpdateDTO;
 import ru.practicum.shareit.item.dto.ItemResponseDTO;
 import ru.practicum.shareit.item.entity.Item;
+import ru.practicum.shareit.item.mapper.MapperItemDTO;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.utils.HttpServletUtils;
 
@@ -28,8 +29,6 @@ import static ru.practicum.shareit.constants.NamesLogsInController.IN_CONTROLLER
 public class ItemController {
     private final ItemService itemService;
 
-    private final ItemControllerMapper mapper;
-
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ItemResponseDTO createItem(@RequestHeader("X-Sharer-User-Id") Optional<Long> userId,
@@ -40,10 +39,9 @@ public class ItemController {
         long checkedUserId = checkHeaderUserId(userId);
 
         Item itemCreate = itemService.createItem(
-                mapper.toItemInServiceFromItemRequestCreateDTO(itemRequestCreateDTO, checkedUserId));
+                MapperItemDTO.toItemInServiceFromItemRequestCreateDTO(itemRequestCreateDTO, checkedUserId));
 
-        return mapper.toItemResponseDTOFromItem(itemCreate);
-
+        return MapperItemDTO.toItemResponseDTOFromItem(itemCreate);
     }
 
     @GetMapping("/{itemId}")
@@ -57,7 +55,7 @@ public class ItemController {
 
         Item getItemById = itemService.findItemById(checkedUserId, itemId);
 
-        return mapper.toItemResponseDTOFromItem(getItemById);
+        return MapperItemDTO.toItemResponseDTOFromItem(getItemById);
     }
 
     @GetMapping
@@ -70,7 +68,7 @@ public class ItemController {
 
         List<Item> getAllItemsByUserId = itemService.getAllItemsByUserId(checkedUserId);
 
-        return getAllItemsByUserId.stream().map(mapper::toItemResponseDTOFromItem).collect(Collectors.toList());
+        return getAllItemsByUserId.stream().map(MapperItemDTO::toItemResponseDTOFromItem).collect(Collectors.toList());
     }
 
     @PatchMapping("/{itemId}")
@@ -84,10 +82,10 @@ public class ItemController {
         long checkedUserId = checkHeaderUserId(userId);
 
         Item itemUpdate = itemService.updateItem(
-                mapper.toItemInServiceFromItemRequestUpdateDTO(itemRequestUpdateDTO, checkedUserId, itemId)
+                MapperItemDTO.toItemInServiceFromItemRequestUpdateDTO(itemRequestUpdateDTO, checkedUserId, itemId)
         );
 
-        return mapper.toItemResponseDTOFromItem(itemUpdate);
+        return MapperItemDTO.toItemResponseDTOFromItem(itemUpdate);
 
     }
 
@@ -103,7 +101,7 @@ public class ItemController {
         if (text.isPresent() && !text.get().isBlank()) {
             List<Item> listFoundItemsByText = itemService.getListSearchItem(checkedUserId, text.get());
 
-            return listFoundItemsByText.stream().map(mapper::toItemResponseDTOFromItem).collect(Collectors.toList());
+            return listFoundItemsByText.stream().map(MapperItemDTO::toItemResponseDTOFromItem).collect(Collectors.toList());
         } else {
             return Collections.emptyList();
         }

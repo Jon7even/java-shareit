@@ -12,6 +12,7 @@ import ru.practicum.shareit.item.dto.ItemCreateInServiceDTO;
 import ru.practicum.shareit.item.dto.ItemUpdateInRepositoryDTO;
 import ru.practicum.shareit.item.dto.ItemUpdateInServiceDTO;
 import ru.practicum.shareit.item.entity.Item;
+import ru.practicum.shareit.item.mapper.MapperItemDTO;
 import ru.practicum.shareit.user.entity.User;
 import ru.practicum.shareit.user.service.UserService;
 
@@ -113,12 +114,7 @@ public class ItemServiceIml implements ItemService {
     private Item validItemForCreate(ItemCreateInServiceDTO itemCreateInServiceDTO) {
         User getUserById = getUserById(itemCreateInServiceDTO.getOwner());
 
-        return Item.builder()
-                .name(itemCreateInServiceDTO.getName())
-                .description(itemCreateInServiceDTO.getDescription())
-                .available(itemCreateInServiceDTO.isAvailable())
-                .owner(getUserById)
-                .build();
+        return MapperItemDTO.toItemFromItemCreateInServiceDTO(itemCreateInServiceDTO, getUserById);
     }
 
     private ItemUpdateInRepositoryDTO validItemForUpdate(ItemUpdateInServiceDTO itemUpdateInServiceDTO) {

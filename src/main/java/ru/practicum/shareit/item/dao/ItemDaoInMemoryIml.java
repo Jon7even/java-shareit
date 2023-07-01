@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.item.dto.ItemUpdateInRepositoryDTO;
 import ru.practicum.shareit.item.entity.Item;
+import ru.practicum.shareit.item.mapper.MapperItemDTO;
 
 import java.util.List;
 import java.util.Map;
@@ -39,15 +40,7 @@ public class ItemDaoInMemoryIml implements ItemDao {
     public Optional<Item> updateItem(ItemUpdateInRepositoryDTO itemUpdateInRepositoryDTO) {
         long idItem = itemUpdateInRepositoryDTO.getId();
 
-        Item updateItem = Item.builder()
-                .id(itemUpdateInRepositoryDTO.getId())
-                .name(itemUpdateInRepositoryDTO.getName())
-                .description(itemUpdateInRepositoryDTO.getDescription())
-                .available(itemUpdateInRepositoryDTO.isAvailable())
-                .owner(itemUpdateInRepositoryDTO.getOwner())
-                .build();
-
-        items.put(idItem, updateItem);
+        items.put(idItem, MapperItemDTO.toItemFromItemInRepositoryUpdateDTO(itemUpdateInRepositoryDTO));
 
         return Optional.of(items.get(idItem));
     }

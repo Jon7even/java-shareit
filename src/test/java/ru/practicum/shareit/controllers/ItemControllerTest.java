@@ -61,8 +61,8 @@ public class ItemControllerTest extends GenericControllerTest {
         Long idUser = userService.createUser(firstUser).getId();
 
         mockMvc.perform(post("/items")
-                .content(objectMapper.writeValueAsString(firstItem))
-                .contentType(MediaType.APPLICATION_JSON))
+                        .content(objectMapper.writeValueAsString(firstItem))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
 
         mockMvc.perform(post("/items")
