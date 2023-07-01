@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ItemDaoInMemoryIml implements ItemDao {
     private final Map<Long, Item> items;
-    private static long generatorId;
+    private static long generatorId = 0;
 
     @Override
     public Optional<Item> createItem(Item item) {

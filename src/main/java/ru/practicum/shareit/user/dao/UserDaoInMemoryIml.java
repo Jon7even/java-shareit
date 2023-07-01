@@ -15,7 +15,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserDaoInMemoryIml implements UserDao {
     private final Map<Long, User> users;
-    private static long generatorId;
+    private static long generatorId = 0;
 
     @Override
     public Optional<User> createUser(User user) {
