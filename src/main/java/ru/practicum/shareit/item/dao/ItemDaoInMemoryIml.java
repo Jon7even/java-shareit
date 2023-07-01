@@ -6,7 +6,6 @@ import ru.practicum.shareit.item.dto.ItemUpdateInRepositoryDTO;
 import ru.practicum.shareit.item.entity.Item;
 import ru.practicum.shareit.item.mapper.MapperItemDTO;
 import ru.practicum.shareit.item.utils.IdGeneratorItem;
-import ru.practicum.shareit.utils.IdGeneratorUser;
 
 import java.util.List;
 import java.util.Map;
