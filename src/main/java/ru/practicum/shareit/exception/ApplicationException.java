@@ -3,9 +3,9 @@ package ru.practicum.shareit.exception;
 import org.springframework.http.HttpStatus;
 
 public class ApplicationException extends RuntimeException {
-    String errorCode;
-    String errorMessage;
-    HttpStatus responseStatus;
+    private String errorCode;
+    private String errorMessage;
+    private HttpStatus responseStatus;
 
     public ApplicationException(String errorMessage, HttpStatus responseStatus) {
         super(errorMessage);
