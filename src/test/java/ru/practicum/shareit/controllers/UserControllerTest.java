@@ -26,7 +26,7 @@ public class UserControllerTest extends GenericControllerTest {
                         .content(objectMapper.writeValueAsString(firstUser))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
-                .andExpect(MockMvcResultMatchers.jsonPath("id").value(5))
+                .andExpect(MockMvcResultMatchers.jsonPath("id").value(7))
                 .andExpect(MockMvcResultMatchers.jsonPath("name").value("firstUser"))
                 .andExpect(MockMvcResultMatchers.jsonPath("email").value("firstUser@yandex.ru"));
     }
