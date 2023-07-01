@@ -5,6 +5,8 @@ import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.item.dto.ItemUpdateInRepositoryDTO;
 import ru.practicum.shareit.item.entity.Item;
 import ru.practicum.shareit.item.mapper.MapperItemDTO;
+import ru.practicum.shareit.item.utils.IdGeneratorItem;
+import ru.practicum.shareit.utils.IdGeneratorUser;
 
 import java.util.List;
 import java.util.Map;
@@ -15,11 +17,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ItemDaoInMemoryIml implements ItemDao {
     private final Map<Long, Item> items;
-    private static long generatorId = 0;
 
     @Override
     public Optional<Item> createItem(Item item) {
-        long idItem = ++generatorId;
+        long idItem = IdGeneratorItem.generateId();
         item.setId(idItem);
         items.put(idItem, item);
 
