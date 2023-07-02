@@ -10,7 +10,7 @@ public final class MapperItemDTO {
     }
 
     public static Item toItemFromItemRequestCreateDTO(ItemRequestCreateDTO itemRequestCreateDTO,
-                                                                          User user) {
+                                                      User user) {
 
         return Item.builder()
                 .name(itemRequestCreateDTO.getName())
