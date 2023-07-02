@@ -9,6 +9,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.user.entity.User;
 import ru.practicum.shareit.user.service.UserService;
 
+import static ru.practicum.shareit.constants.NamesParametersInController.X_HEADER_USER_ID;
+
 @SpringBootTest
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -21,6 +23,18 @@ public class GenericControllerTest {
 
     @Autowired
     protected UserService userService;
+
+    protected static long FIRST_ID = 1;
+
+    protected static String ERROR_NAME = "$.errorMessage";
+
+    protected static String ERROR_M_VALIDATION = "Validation error";
+
+    protected static String ERROR_M_USER_NOT_FOUND = "[User with [idUser=2]] not found";
+
+    protected static String ERROR_M_ITEM_NOT_FOUND = "[Item with [idItem=2]] not found";
+
+    protected static String ERROR_M_HEADER_USER_ID = "Parameter [" + X_HEADER_USER_ID + "] incorrect";
 
     protected User firstUser;
 

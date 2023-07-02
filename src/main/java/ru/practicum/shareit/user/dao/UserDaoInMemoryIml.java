@@ -5,7 +5,7 @@ import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.user.dto.UserUpdateInRepositoryDTO;
 import ru.practicum.shareit.user.entity.User;
 import ru.practicum.shareit.user.mapper.MapperUserDTO;
-import ru.practicum.shareit.utils.IdGeneratorUser;
+import ru.practicum.shareit.user.utils.IdGeneratorUser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,10 +16,11 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserDaoInMemoryIml implements UserDao {
     private final Map<Long, User> users;
+    private final IdGeneratorUser idGenerator;
 
     @Override
     public Optional<User> createUser(User user) {
-        long idUser = IdGeneratorUser.generateId();
+        long idUser = idGenerator.generateId();
         user.setId(idUser);
         users.put(idUser, user);
 

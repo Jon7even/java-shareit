@@ -1,12 +1,12 @@
-package ru.practicum.shareit.item.utils;
+package ru.practicum.shareit.user.utils;
 
 import org.springframework.stereotype.Component;
 
 @Component
-public class IdGeneratorItem {
+public class IdGeneratorUser {
     private long id;
 
-    public IdGeneratorItem() {
+    public IdGeneratorUser() {
         this.id = 0;
     }
 

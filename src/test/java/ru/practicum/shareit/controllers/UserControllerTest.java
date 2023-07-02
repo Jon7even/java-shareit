@@ -8,10 +8,12 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.practicum.shareit.user.entity.User;
 
 import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 
 public class UserControllerTest extends GenericControllerTest {
     @BeforeEach
@@ -26,68 +28,91 @@ public class UserControllerTest extends GenericControllerTest {
                         .content(objectMapper.writeValueAsString(firstUser))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
-                .andExpect(MockMvcResultMatchers.jsonPath("id").value(7))
+                .andExpect(MockMvcResultMatchers.jsonPath("id").value(FIRST_ID))
                 .andExpect(MockMvcResultMatchers.jsonPath("name").value("firstUser"))
                 .andExpect(MockMvcResultMatchers.jsonPath("email").value("firstUser@yandex.ru"));
     }
 
     @Test
     @DisplayName("Пользователь не должен создаться")
-    void shouldNotCreateUser_thenStatus500And400() throws Exception {
+    void shouldNotCreateUser_thenStatus400() throws Exception {
         mockMvc.perform(post("/users")
                         .content(objectMapper.writeValueAsString(thirdUser))
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath(ERROR_NAME).value(ERROR_M_VALIDATION));
 
         thirdUser.setName("Name");
 
         mockMvc.perform(post("/users")
                         .content(objectMapper.writeValueAsString(thirdUser))
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath(ERROR_NAME).value(ERROR_M_VALIDATION));
+
+        thirdUser.setEmail("12345");
+
+        mockMvc.perform(post("/users")
+                        .content(objectMapper.writeValueAsString(thirdUser))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath(ERROR_NAME).value(ERROR_M_VALIDATION));
+
+        thirdUser.setName(null);
+        thirdUser.setEmail("thirdUser@yandex.ru");
+
+        mockMvc.perform(post("/users")
+                        .content(objectMapper.writeValueAsString(thirdUser))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath(ERROR_NAME).value(ERROR_M_VALIDATION));
     }
 
     @Test
     @DisplayName("Пользователь должен обновить поля частично")
     void shouldUserUseMethodPatch_thenStatus200() throws Exception {
-        User addUser = userService.createUser(secondUser);
+       userService.createUser(secondUser);
 
-        mockMvc.perform(patch("/users/{userId}", addUser.getId())
+        mockMvc.perform(patch("/users/{userId}", FIRST_ID)
                         .content(objectMapper.writeValueAsString(secondUser))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
         thirdUser.setName("thirdUser");
 
-        mockMvc.perform(patch("/users/{userId}", addUser.getId())
+        mockMvc.perform(patch("/users/{userId}", FIRST_ID)
                         .content(objectMapper.writeValueAsString(thirdUser))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("id").value(addUser.getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("id").value(FIRST_ID))
                 .andExpect(MockMvcResultMatchers.jsonPath("name").value("thirdUser"))
                 .andExpect(MockMvcResultMatchers.jsonPath("email").value("secondUser@yandex.ru"));
 
         thirdUser.setEmail("thirdUser@yandex.ru");
 
-        mockMvc.perform(patch("/users/{userId}", addUser.getId())
+        mockMvc.perform(patch("/users/{userId}", FIRST_ID)
                         .content(objectMapper.writeValueAsString(thirdUser))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("id").value(addUser.getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("id").value(FIRST_ID))
                 .andExpect(MockMvcResultMatchers.jsonPath("name").value("thirdUser"))
                 .andExpect(MockMvcResultMatchers.jsonPath("email").value("thirdUser@yandex.ru"));
     }
 
     @Test
     @DisplayName("Поиск пользователя по [ID]")
-    void shouldGetUserById_thenStatus200() throws Exception {
+    void shouldGetUserById_thenStatus200AndStatus404() throws Exception {
         User addUser = userService.createUser(firstUser);
 
-        mockMvc.perform(get("/users/{id}", addUser.getId()))
+        mockMvc.perform(get("/users/{id}", FIRST_ID))
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("id").value(addUser.getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("id").value(FIRST_ID))
                 .andExpect(MockMvcResultMatchers.jsonPath("name").value(addUser.getName()))
                 .andExpect(MockMvcResultMatchers.jsonPath("email").value(addUser.getEmail()));
+
+        mockMvc.perform(get("/users/{id}", FIRST_ID + 1))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath(ERROR_NAME).value(ERROR_M_USER_NOT_FOUND));
     }
 
     @Test
@@ -106,12 +131,12 @@ public class UserControllerTest extends GenericControllerTest {
     @Test
     @DisplayName("Пользователь должен удалиться по [ID]")
     void shouldDeleteUserById_thenStatus204() throws Exception {
-        User removeUser = userService.createUser(secondUser);
+        userService.createUser(secondUser);
 
-        mockMvc.perform(delete("/users/{id}", removeUser.getId()))
+        mockMvc.perform(delete("/users/{id}", FIRST_ID))
                 .andExpect(status().isNoContent());
 
-        mockMvc.perform(delete("/users/{id}", removeUser.getId()))
+        mockMvc.perform(delete("/users/{id}", FIRST_ID))
                 .andExpect(status().isNotFound());
     }
 

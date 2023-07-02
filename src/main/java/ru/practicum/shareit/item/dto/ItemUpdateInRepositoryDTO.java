@@ -11,13 +11,13 @@ import ru.practicum.shareit.user.entity.User;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ItemUpdateInRepositoryDTO {
-    private long id;
+    private Long id;
 
     private String name;
 
     private String description;
 
-    private boolean available;
+    private Boolean available;
 
     private User owner;
 }

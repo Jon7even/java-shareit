@@ -16,7 +16,7 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 public class UserRequestCreateDTO {
     @NotBlank
-    @NonNull
+    @NotNull
     private String name;
 
     @Email

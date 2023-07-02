@@ -47,7 +47,7 @@ public final class MapperItemDTO {
                 .id(itemUpdateInRepositoryDTO.getId())
                 .name(itemUpdateInRepositoryDTO.getName())
                 .description(itemUpdateInRepositoryDTO.getDescription())
-                .available(itemUpdateInRepositoryDTO.isAvailable())
+                .available(itemUpdateInRepositoryDTO.getAvailable())
                 .owner(itemUpdateInRepositoryDTO.getOwner())
                 .build();
     }
@@ -56,7 +56,7 @@ public final class MapperItemDTO {
         return Item.builder()
                 .name(itemCreateInServiceDTO.getName())
                 .description(itemCreateInServiceDTO.getDescription())
-                .available(itemCreateInServiceDTO.isAvailable())
+                .available(itemCreateInServiceDTO.getAvailable())
                 .owner(user)
                 .build();
     }

@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static ru.practicum.shareit.constants.NamesParametersInController.X_HEADER_USER_ID;
 import static ru.practicum.shareit.constants.NamesLogsInController.IN_CONTROLLER_METHOD;
 
 @Slf4j
@@ -41,7 +42,7 @@ public class ItemController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ItemResponseDTO createItem(@RequestHeader("X-Sharer-User-Id") Optional<Long> userId,
+    public ItemResponseDTO createItem(@RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
                                       @Valid @RequestBody ItemRequestCreateDTO itemRequestCreateDTO,
                                       HttpServletRequest request) {
 
@@ -56,7 +57,7 @@ public class ItemController {
 
     @GetMapping("/{itemId}")
     @ResponseStatus(HttpStatus.OK)
-    public ItemResponseDTO getItemById(@RequestHeader("X-Sharer-User-Id") Optional<Long> userId,
+    public ItemResponseDTO getItemById(@RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
                                        @PathVariable long itemId,
                                        HttpServletRequest request) {
 
@@ -70,7 +71,7 @@ public class ItemController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<ItemResponseDTO> getAllItemsByUserId(@RequestHeader("X-Sharer-User-Id") Optional<Long> userId,
+    public List<ItemResponseDTO> getAllItemsByUserId(@RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
                                                      HttpServletRequest request) {
 
         log.debug("On {} {} {}", request.getRequestURL(), IN_CONTROLLER_METHOD, request.getMethod());
@@ -83,7 +84,7 @@ public class ItemController {
 
     @PatchMapping("/{itemId}")
     @ResponseStatus(HttpStatus.OK)
-    public ItemResponseDTO updateUser(@RequestHeader("X-Sharer-User-Id") Optional<Long> userId,
+    public ItemResponseDTO updateItemByUserId(@RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
                                       @PathVariable long itemId,
                                       @Valid @RequestBody ItemRequestUpdateDTO itemRequestUpdateDTO,
                                       HttpServletRequest request) {
@@ -101,7 +102,7 @@ public class ItemController {
 
     @GetMapping("/search")
     @ResponseStatus(HttpStatus.OK)
-    public List<ItemResponseDTO> searchItem(@RequestHeader("X-Sharer-User-Id") Optional<Long> userId,
+    public List<ItemResponseDTO> searchItem(@RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
                                             @RequestParam Optional<String> text,
                                             HttpServletRequest request) {
 
@@ -120,7 +121,7 @@ public class ItemController {
 
     private long checkHeaderUserId(Optional<Long> userId) {
         if (userId.isEmpty()) {
-            throw new IncorrectParameterException("X-Sharer-User-Id");
+            throw new IncorrectParameterException(X_HEADER_USER_ID);
         } else {
             return userId.get();
         }

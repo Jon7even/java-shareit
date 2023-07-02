@@ -7,6 +7,7 @@ import ru.practicum.shareit.item.entity.Item;
 import ru.practicum.shareit.item.mapper.MapperItemDTO;
 import ru.practicum.shareit.item.utils.IdGeneratorItem;
 
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -16,10 +17,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ItemDaoInMemoryIml implements ItemDao {
     private final Map<Long, Item> items;
+    private final IdGeneratorItem idGenerator;
 
     @Override
     public Optional<Item> createItem(Item item) {
-        long idItem = IdGeneratorItem.generateId();
+        long idItem = idGenerator.generateId();
         item.setId(idItem);
         items.put(idItem, item);
 

@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserUpdateInRepositoryDTO {
-    private long id;
+    private Long id;
 
     private String name;
 

@@ -13,6 +13,7 @@ import ru.practicum.shareit.item.dto.ItemUpdateInRepositoryDTO;
 import ru.practicum.shareit.item.dto.ItemUpdateInServiceDTO;
 import ru.practicum.shareit.item.entity.Item;
 import ru.practicum.shareit.item.mapper.MapperItemDTO;
+import ru.practicum.shareit.user.dao.UserDao;
 import ru.practicum.shareit.user.entity.User;
 import ru.practicum.shareit.user.service.UserService;
 
@@ -27,7 +28,7 @@ import static ru.practicum.shareit.constants.NamesLogsInService.SERVICE_IN_DB;
 @RequiredArgsConstructor
 public class ItemServiceIml implements ItemService {
     private final ItemDao repositoryItem;
-    private final UserService userService;
+    private final UserDao repositoryUser;
 
     @Override
     public Item createItem(ItemCreateInServiceDTO itemCreateInServiceDTO) {
@@ -156,7 +157,16 @@ public class ItemServiceIml implements ItemService {
     }
 
     private User getUserById(long idUser) {
-        return userService.findUserById(idUser);
+        log.debug("Get user by [id={}] to check {}", idUser, SERVICE_IN_DB);
+        Optional<User> foundCheckUser = repositoryUser.findUserById(idUser);
+
+        if (foundCheckUser.isPresent()) {
+            log.debug("Check was successful found [user={}] {}", foundCheckUser.get(), SERVICE_FROM_DB);
+            return foundCheckUser.get();
+        } else {
+            log.warn("User by [id={}] was not found", idUser);
+            throw new EntityNotFoundException(String.format("User with [idUser=%d]", idUser));
+        }
     }
 
 }

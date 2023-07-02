@@ -13,7 +13,7 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 public class ItemUpdateInServiceDTO {
     @NotNull
-    private long id;
+    private Long id;
 
     private String name;
 

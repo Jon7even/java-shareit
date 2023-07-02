@@ -19,7 +19,7 @@ public class ItemCreateInServiceDTO {
     private String description;
 
     @NotNull
-    private boolean available;
+    private Boolean available;
 
     @NotNull
     private Long owner;
