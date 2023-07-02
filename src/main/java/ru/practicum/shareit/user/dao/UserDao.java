@@ -1,6 +1,5 @@
 package ru.practicum.shareit.user.dao;
 
-import ru.practicum.shareit.user.dto.UserUpdateInRepositoryDTO;
 import ru.practicum.shareit.user.entity.User;
 
 import java.util.List;
@@ -11,7 +10,7 @@ public interface UserDao {
 
     Optional<User> findUserById(long idUser);
 
-    Optional<User> updateUser(UserUpdateInRepositoryDTO userUpdateInRepositoryDTO);
+    Optional<User> updateUser(User user);
 
     boolean deleteUserById(long idUser);
 

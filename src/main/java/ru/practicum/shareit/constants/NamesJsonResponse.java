@@ -6,6 +6,6 @@ public class NamesJsonResponse {
 
     public static final String ERROR_MESSAGE = "errorMessage";
 
-    public static String ERROR_M_VALIDATION = "Validation error";
+    public static final String ERROR_M_VALIDATION = "Validation error";
 }
 

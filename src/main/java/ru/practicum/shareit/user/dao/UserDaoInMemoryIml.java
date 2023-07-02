@@ -2,9 +2,7 @@ package ru.practicum.shareit.user.dao;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import ru.practicum.shareit.user.dto.UserUpdateInRepositoryDTO;
 import ru.practicum.shareit.user.entity.User;
-import ru.practicum.shareit.user.mapper.MapperUserDTO;
 import ru.practicum.shareit.user.utils.IdGeneratorUser;
 
 import java.util.ArrayList;
@@ -33,10 +31,10 @@ public class UserDaoInMemoryIml implements UserDao {
     }
 
     @Override
-    public Optional<User> updateUser(UserUpdateInRepositoryDTO userUpdateInRepositoryDTO) {
-        long idUser = userUpdateInRepositoryDTO.getId();
+    public Optional<User> updateUser(User user) {
+        long idUser = user.getId();
 
-        users.put(idUser, MapperUserDTO.toUserFromUserUpdateInRepositoryDTO(userUpdateInRepositoryDTO));
+        users.put(idUser, user);
 
         return Optional.of(users.get(idUser));
     }

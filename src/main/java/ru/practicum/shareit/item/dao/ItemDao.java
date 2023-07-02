@@ -1,6 +1,5 @@
 package ru.practicum.shareit.item.dao;
 
-import ru.practicum.shareit.item.dto.ItemUpdateInRepositoryDTO;
 import ru.practicum.shareit.item.entity.Item;
 
 import java.util.List;
@@ -13,7 +12,7 @@ public interface ItemDao {
 
     Optional<Item> findItemById(long idItem);
 
-    Optional<Item> updateItem(ItemUpdateInRepositoryDTO itemUpdateInRepositoryDTO);
+    Optional<Item> updateItem(Item item);
 
     List<Item> getListSearchItem(String text);
 }

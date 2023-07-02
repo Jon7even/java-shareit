@@ -5,11 +5,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.*;
 import ru.practicum.shareit.user.dao.UserDao;
-import ru.practicum.shareit.user.dto.UserUpdateInRepositoryDTO;
+import ru.practicum.shareit.user.dto.UserRequestCreateDTO;
+import ru.practicum.shareit.user.dto.UserRequestUpdateDTO;
+import ru.practicum.shareit.user.dto.UserResponseDTO;
 import ru.practicum.shareit.user.entity.User;
+import ru.practicum.shareit.user.mapper.MapperUserDTO;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static ru.practicum.shareit.constants.NamesLogsInService.SERVICE_FROM_DB;
 import static ru.practicum.shareit.constants.NamesLogsInService.SERVICE_IN_DB;
@@ -21,7 +25,8 @@ public class UserServiceIml implements UserService {
     private final UserDao repositoryUser;
 
     @Override
-    public User createUser(User user) {
+    public UserResponseDTO createUser(UserRequestCreateDTO userRequestCreateDTO) {
+        User user = MapperUserDTO.toUserFromUserRequestCreateDTO(userRequestCreateDTO);
         checkEmail(user.getEmail());
 
         log.debug("Add new [user={}] {}", user, SERVICE_IN_DB);
@@ -29,7 +34,7 @@ public class UserServiceIml implements UserService {
 
         if (createdUser.isPresent()) {
             log.debug("New user has returned [user={}] {}", createdUser.get(), SERVICE_FROM_DB);
-            return createdUser.get();
+            return MapperUserDTO.toUserResponseDTOFromUser(createdUser.get());
         } else {
             log.error("[user={}] was not created", user);
             throw new EntityNotCreatedException("New user");
@@ -37,38 +42,41 @@ public class UserServiceIml implements UserService {
     }
 
     @Override
-    public User findUserById(long idUser) {
+    public UserResponseDTO findUserById(Optional<Long> idUser) {
+        long checkedUserId = checkParameterUserId(idUser);
+
         log.debug("Get user by [id={}] {}", idUser, SERVICE_IN_DB);
-        Optional<User> foundUser = repositoryUser.findUserById(idUser);
+        Optional<User> foundUser = repositoryUser.findUserById(checkedUserId);
 
         if (foundUser.isPresent()) {
             log.debug("Found [user={}] {}", foundUser.get(), SERVICE_FROM_DB);
-            return foundUser.get();
+            return MapperUserDTO.toUserResponseDTOFromUser(foundUser.get());
         } else {
-            log.warn("User by [id={}] was not found", idUser);
-            throw new EntityNotFoundException(String.format("User with [idUser=%d]", idUser));
+            log.warn("User by [id={}] was not found", checkedUserId);
+            throw new EntityNotFoundException(String.format("User with [idUser=%d]", checkedUserId));
         }
     }
 
     @Override
-    public User updateUser(User user) {
-        long userId = user.getId();
+    public UserResponseDTO updateUser(UserRequestUpdateDTO userRequestUpdateDTO, Optional<Long> idUser) {
+        long checkedUserId = checkParameterUserId(idUser);
+        User user = MapperUserDTO.toUserFromUserRequestUpdateDTO(userRequestUpdateDTO, checkedUserId);
 
-        User getUserById = findUserById(userId);
-        UserUpdateInRepositoryDTO updateUserInRepository = UserUpdateInRepositoryDTO.builder().id(userId).build();
+        User checkedUserFromRepository = findUserEntityById(checkedUserId);
+        User updateUserInRepository = User.builder().id(checkedUserId).build();
 
         if (user.getEmail() == null) {
-            updateUserInRepository.setEmail(getUserById.getEmail());
+            updateUserInRepository.setEmail(checkedUserFromRepository.getEmail());
         } else {
             Optional<User> checkedEmailUser = repositoryUser.findUserByEmail(user.getEmail());
 
             if (checkedEmailUser.isPresent()) {
-                boolean isEqualsEmailThisUser = checkedEmailUser.get().getId() == userId;
+                boolean isEqualsEmailThisUser = checkedEmailUser.get().getId() == checkedUserId;
 
                 if (isEqualsEmailThisUser) {
                     updateUserInRepository.setEmail(checkedEmailUser.get().getEmail());
                 } else {
-                    log.error("User with [email={}] already exist [idUser={}]", user.getEmail(), userId);
+                    log.error("User with [email={}] already exist [idUser={}]", user.getEmail(), checkedUserId);
                     throw new EntityAlreadyExistsException("This email");
                 }
 
@@ -77,17 +85,16 @@ public class UserServiceIml implements UserService {
             }
         }
 
-        boolean isEqualsEmail = getUserById.getEmail().equals(user.getEmail());
-        boolean isEqualsName = getUserById.getName().equals(user.getName());
+        boolean isEqualsEmail = checkedUserFromRepository.getEmail().equals(user.getEmail());
+        boolean isEqualsName = checkedUserFromRepository.getName().equals(user.getName());
 
         if (isEqualsEmail && isEqualsName) {
-            log.warn("No need to update user data \n[userUpdate={}]\n[userResult={}]", user, getUserById);
-            return getUserById;
-
+            log.warn("No need to update user data \n[userUpdate={}]\n[userResult={}]", user, checkedUserFromRepository);
+            return MapperUserDTO.toUserResponseDTOFromUser(checkedUserFromRepository);
         } else {
 
             if (isEqualsName || user.getName() == null) {
-                updateUserInRepository.setName(getUserById.getName());
+                updateUserInRepository.setName(checkedUserFromRepository.getName());
             } else {
                 updateUserInRepository.setName(user.getName());
             }
@@ -97,31 +104,32 @@ public class UserServiceIml implements UserService {
 
             if (updatedUser.isPresent()) {
                 log.debug("Updated user has returned [user={}] {}", updatedUser.get(), SERVICE_FROM_DB);
-                return updatedUser.get();
+                return MapperUserDTO.toUserResponseDTOFromUser(updatedUser.get());
             } else {
                 log.error("[user={}] was not updated", user);
-                throw new EntityNotUpdatedException(String.format("User with [idUser=%d]", userId));
+                throw new EntityNotUpdatedException(String.format("User with [idUser=%d]", checkedUserId));
             }
         }
     }
 
     @Override
-    public void deleteUserById(long idUser) {
-        User getUserById = findUserById(idUser);
+    public void deleteUserById(Optional<Long> idUser) {
+        long checkedUserId = checkParameterUserId(idUser);
+        User checkedUserFromRepository = findUserEntityById(checkedUserId);
 
-        log.debug("Remove [user={}] {}", getUserById, SERVICE_IN_DB);
-        boolean isRemoved = repositoryUser.deleteUserById(idUser);
+        log.debug("Remove [user={}] {}", checkedUserFromRepository, SERVICE_IN_DB);
+        boolean isRemoved = repositoryUser.deleteUserById(checkedUserId);
 
         if (isRemoved) {
-            log.debug("User by [id={}] has removed {}", idUser, SERVICE_FROM_DB);
+            log.debug("User by [id={}] has removed {}", checkedUserId, SERVICE_FROM_DB);
         } else {
-            log.error("User by [id={}] was not removed", idUser);
-            throw new EntityNotDeletedException(String.format("User with [idUser=%d]", idUser));
+            log.error("User by [id={}] was not removed", checkedUserId);
+            throw new EntityNotDeletedException(String.format("User with [idUser=%d]", checkedUserId));
         }
     }
 
     @Override
-    public List<User> getAllUsers() {
+    public List<UserResponseDTO> getAllUsers() {
         log.debug("Get all users {}", SERVICE_IN_DB);
         List<User> listUsers = repositoryUser.getAllUsers();
 
@@ -131,13 +139,38 @@ public class UserServiceIml implements UserService {
             log.debug("Found list users [count={}] {}", listUsers.size(), SERVICE_FROM_DB);
         }
 
-        return listUsers;
+        return listUsers.stream().map(MapperUserDTO::toUserResponseDTOFromUser).collect(Collectors.toList());
+    }
+
+    private User findUserEntityById(long checkedUserId) {
+        log.debug("Get user entity for checking by [idUser={}] {}", checkedUserId, SERVICE_IN_DB);
+        Optional<User> foundCheckUser = repositoryUser.findUserById(checkedUserId);
+
+        if (foundCheckUser.isPresent()) {
+            log.debug("Check was successful found [user={}] {}", foundCheckUser.get(), SERVICE_FROM_DB);
+            return foundCheckUser.get();
+        } else {
+            log.warn("User by [id={}] was not found", checkedUserId);
+            throw new EntityNotFoundException(String.format("User with [idUser=%d]", checkedUserId));
+        }
     }
 
     private void checkEmail(String email) {
         if (repositoryUser.findUserByEmail(email).isPresent()) {
             throw new EntityAlreadyExistsException("This email");
         }
+    }
+
+    private long checkParameterUserId(Optional<Long> idUser) {
+        if (idUser.isPresent()) {
+            if (idUser.get() > 0) {
+                log.debug("Checking [idUser={}] is ok", idUser.get());
+            }
+        } else {
+            throw new EntityNotFoundException(String.format("User with [idUser=%d]", idUser.get()));
+        }
+
+        return idUser.get();
     }
 
 }

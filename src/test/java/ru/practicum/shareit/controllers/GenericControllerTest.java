@@ -6,7 +6,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.practicum.shareit.user.entity.User;
+import ru.practicum.shareit.user.dto.UserRequestCreateDTO;
 import ru.practicum.shareit.user.service.UserService;
 
 import static ru.practicum.shareit.constants.NamesParametersInController.X_HEADER_USER_ID;
@@ -34,23 +34,22 @@ public class GenericControllerTest {
 
     protected static String ERROR_M_HEADER_USER_ID = "Parameter [" + X_HEADER_USER_ID + "] incorrect";
 
-    protected User firstUser;
+    protected UserRequestCreateDTO firstUser;
 
-    protected User secondUser;
+    protected UserRequestCreateDTO secondUser;
 
-    protected User thirdUser;
+    protected UserRequestCreateDTO thirdUser;
 
     void initUsers() {
-        firstUser = User.builder()
+        firstUser = UserRequestCreateDTO.builder()
                 .name("firstUser")
                 .email("firstUser@yandex.ru")
                 .build();
-        secondUser = User.builder()
-                .id(1)
+        secondUser = UserRequestCreateDTO.builder()
                 .name("secondUser")
                 .email("secondUser@yandex.ru")
                 .build();
-        thirdUser = User.builder()
+        thirdUser = UserRequestCreateDTO.builder()
                 .build();
     }
 }

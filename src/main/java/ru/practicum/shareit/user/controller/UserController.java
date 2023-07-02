@@ -6,7 +6,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,13 +15,12 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import ru.practicum.shareit.user.dto.UserRequestCreateDTO;
 import ru.practicum.shareit.user.dto.UserRequestUpdateDTO;
 import ru.practicum.shareit.user.dto.UserResponseDTO;
-import ru.practicum.shareit.user.entity.User;
-import ru.practicum.shareit.user.mapper.MapperUserDTO;
 import ru.practicum.shareit.user.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Optional;
 
 import static ru.practicum.shareit.constants.NamesLogsInController.IN_CONTROLLER_METHOD;
 import static ru.practicum.shareit.constants.NamesParametersInController.X_COUNT_ITEMS;
@@ -39,36 +37,31 @@ public class UserController {
                                                       HttpServletRequest request) {
 
         log.debug("On {} {} {}", request.getRequestURL(), IN_CONTROLLER_METHOD, request.getMethod());
-        User userCreate = userService.createUser(MapperUserDTO.toUserFromUserRequestCreateDTO(userRequestCreateDTO));
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(MapperUserDTO.toUserResponseDTOFromUser(userCreate));
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(userRequestCreateDTO));
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<UserResponseDTO> getUserById(@PathVariable long userId,
+    public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Optional<Long> userId,
                                                        HttpServletRequest request) {
 
         log.debug("On {} {} {}", request.getRequestURL(), IN_CONTROLLER_METHOD, request.getMethod());
-        User getUserById = userService.findUserById(userId);
 
-        return ResponseEntity.ok().body(MapperUserDTO.toUserResponseDTOFromUser(getUserById));
+        return ResponseEntity.ok().body(userService.findUserById(userId));
     }
 
     @PatchMapping("/{userId}")
-    public ResponseEntity<UserResponseDTO> updateUserById(@PathVariable long userId,
+    public ResponseEntity<UserResponseDTO> updateUserById(@PathVariable Optional<Long> userId,
                                                           @Valid @RequestBody UserRequestUpdateDTO userRequestUpdateDTO,
                                                           HttpServletRequest request) {
 
         log.debug("On {} {} {}", request.getRequestURL(), IN_CONTROLLER_METHOD, request.getMethod());
-        User userUpdate = userService.updateUser(
-                MapperUserDTO.toUserFromUserRequestUpdateDTO(userRequestUpdateDTO, userId)
-        );
 
-        return ResponseEntity.ok().body(MapperUserDTO.toUserResponseDTOFromUser(userUpdate));
+        return ResponseEntity.ok().body(userService.updateUser(userRequestUpdateDTO, userId));
     }
 
     @DeleteMapping("/{userId}")
-    public ResponseEntity<Void> removeUserById(@PathVariable long userId,
+    public ResponseEntity<Void> removeUserById(@PathVariable Optional<Long> userId,
                                                HttpServletRequest request) {
 
         log.debug("On {} {} {}", request.getRequestURL(), IN_CONTROLLER_METHOD, request.getMethod());
@@ -79,16 +72,13 @@ public class UserController {
     }
 
     @GetMapping
-    @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<List<User>> getAllUsers(HttpServletRequest request) {
+    public ResponseEntity<List<UserResponseDTO>> getAllUsers(HttpServletRequest request) {
 
         log.debug("On {} {} {}", request.getRequestURL(), IN_CONTROLLER_METHOD, request.getMethod());
 
-        List<User> listAllUsers = userService.getAllUsers();
+        List<UserResponseDTO> listAllUsers = userService.getAllUsers();
 
-        return ResponseEntity.ok()
-                .header(X_COUNT_ITEMS, String.valueOf(listAllUsers.size()))
-                .body(listAllUsers);
+        return ResponseEntity.ok().header(X_COUNT_ITEMS, String.valueOf(listAllUsers.size())).body(listAllUsers);
     }
 
 }

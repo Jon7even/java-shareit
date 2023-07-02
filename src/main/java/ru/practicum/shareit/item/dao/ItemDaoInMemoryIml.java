@@ -2,9 +2,7 @@ package ru.practicum.shareit.item.dao;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import ru.practicum.shareit.item.dto.ItemUpdateInRepositoryDTO;
 import ru.practicum.shareit.item.entity.Item;
-import ru.practicum.shareit.item.mapper.MapperItemDTO;
 import ru.practicum.shareit.item.utils.IdGeneratorItem;
 
 
@@ -39,10 +37,10 @@ public class ItemDaoInMemoryIml implements ItemDao {
     }
 
     @Override
-    public Optional<Item> updateItem(ItemUpdateInRepositoryDTO itemUpdateInRepositoryDTO) {
-        long idItem = itemUpdateInRepositoryDTO.getId();
+    public Optional<Item> updateItem(Item item) {
+        long idItem = item.getId();
 
-        items.put(idItem, MapperItemDTO.toItemFromItemInRepositoryUpdateDTO(itemUpdateInRepositoryDTO));
+        items.put(idItem, item);
 
         return Optional.of(items.get(idItem));
     }

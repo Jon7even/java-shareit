@@ -5,7 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import ru.practicum.shareit.user.entity.User;
+import ru.practicum.shareit.user.dto.UserResponseDTO;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -69,7 +69,7 @@ public class UserControllerTest extends GenericControllerTest {
     @Test
     @DisplayName("Пользователь должен обновить поля частично")
     void shouldUserUseMethodPatch_thenStatus200() throws Exception {
-       userService.createUser(secondUser);
+        userService.createUser(secondUser);
 
         mockMvc.perform(patch("/users/{userId}", FIRST_ID)
                         .content(objectMapper.writeValueAsString(secondUser))
@@ -100,13 +100,13 @@ public class UserControllerTest extends GenericControllerTest {
     @Test
     @DisplayName("Поиск пользователя по [ID]")
     void shouldGetUserById_thenStatus200AndStatus404() throws Exception {
-        User addUser = userService.createUser(firstUser);
+        userService.createUser(firstUser);
 
         mockMvc.perform(get("/users/{id}", FIRST_ID))
                 .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("id").value(FIRST_ID))
-                .andExpect(MockMvcResultMatchers.jsonPath("name").value(addUser.getName()))
-                .andExpect(MockMvcResultMatchers.jsonPath("email").value(addUser.getEmail()));
+                .andExpect(MockMvcResultMatchers.jsonPath("name").value(firstUser.getName()))
+                .andExpect(MockMvcResultMatchers.jsonPath("email").value(firstUser.getEmail()));
 
         mockMvc.perform(get("/users/{id}", FIRST_ID + 1))
                 .andExpect(status().isNotFound())
@@ -141,8 +141,8 @@ public class UserControllerTest extends GenericControllerTest {
     @Test
     @DisplayName("Получить всех пользователей")
     void shouldGetAllUsers_thenStatus200AndResultTwoUsers() throws Exception {
-        User user1 = userService.createUser(firstUser);
-        User user2 = userService.createUser(secondUser);
+        UserResponseDTO user1 = userService.createUser(firstUser);
+        UserResponseDTO user2 = userService.createUser(secondUser);
 
         mockMvc.perform(get("/users"))
                 .andExpect(status().isOk())
