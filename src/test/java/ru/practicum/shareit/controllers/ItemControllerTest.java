@@ -12,8 +12,9 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static ru.practicum.shareit.constants.NamesJsonResponse.ERROR_M_VALIDATION;
+import static ru.practicum.shareit.constants.NamesParametersInController.X_COUNT_ITEMS;
 import static ru.practicum.shareit.constants.NamesParametersInController.X_HEADER_USER_ID;
 
 public class ItemControllerTest extends GenericControllerTest {
@@ -235,6 +236,7 @@ public class ItemControllerTest extends GenericControllerTest {
         mockMvc.perform(get("/items")
                         .header(X_HEADER_USER_ID, FIRST_ID))
                 .andExpect(status().isOk())
+                .andExpect(header().stringValues(X_COUNT_ITEMS, String.valueOf(1)))
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].id").value(FIRST_ID));
 
@@ -247,6 +249,7 @@ public class ItemControllerTest extends GenericControllerTest {
         mockMvc.perform(get("/items")
                         .header(X_HEADER_USER_ID, FIRST_ID))
                 .andExpect(status().isOk())
+                .andExpect(header().stringValues(X_COUNT_ITEMS, String.valueOf(2)))
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].id").value(FIRST_ID))
                 .andExpect(jsonPath("$[0].name").value(firstItem.getName()))
@@ -266,6 +269,7 @@ public class ItemControllerTest extends GenericControllerTest {
         mockMvc.perform(get("/items")
                         .header(X_HEADER_USER_ID, FIRST_ID))
                 .andExpect(status().isOk())
+                .andExpect(header().stringValues(X_COUNT_ITEMS, String.valueOf(3)))
                 .andExpect(jsonPath("$", hasSize(3)))
                 .andExpect(jsonPath("$[0].id").value(FIRST_ID))
                 .andExpect(jsonPath("$[0].name").value(firstItem.getName()))
@@ -318,6 +322,7 @@ public class ItemControllerTest extends GenericControllerTest {
         mockMvc.perform(get("/items/search?text={text}", "thirdItem")
                         .header(X_HEADER_USER_ID, FIRST_ID))
                 .andExpect(status().isOk())
+                .andExpect(header().stringValues(X_COUNT_ITEMS, String.valueOf(1)))
                 .andExpect(jsonPath("$", hasSize(1)));
 
         mockMvc.perform(get("/items/search?text={text}", "Item")
@@ -335,11 +340,13 @@ public class ItemControllerTest extends GenericControllerTest {
         mockMvc.perform(get("/items/search?text={text}", "Item")
                         .header(X_HEADER_USER_ID, FIRST_ID))
                 .andExpect(status().isOk())
+                .andExpect(header().stringValues(X_COUNT_ITEMS, String.valueOf(3)))
                 .andExpect(jsonPath("$", hasSize(3)));
 
         mockMvc.perform(get("/items/search?text={text}", "description_1")
                         .header(X_HEADER_USER_ID, FIRST_ID))
                 .andExpect(status().isOk())
+                .andExpect(header().stringValues(X_COUNT_ITEMS, String.valueOf(1)))
                 .andExpect(jsonPath("$", hasSize(1)));
     }
 

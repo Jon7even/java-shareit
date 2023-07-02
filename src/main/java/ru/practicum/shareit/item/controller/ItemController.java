@@ -2,11 +2,11 @@ package ru.practicum.shareit.item.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static ru.practicum.shareit.constants.NamesParametersInController.X_COUNT_ITEMS;
 import static ru.practicum.shareit.constants.NamesParametersInController.X_HEADER_USER_ID;
 import static ru.practicum.shareit.constants.NamesLogsInController.IN_CONTROLLER_METHOD;
 
@@ -41,10 +42,9 @@ public class ItemController {
     private final ItemService itemService;
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public ItemResponseDTO createItem(@RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
-                                      @Valid @RequestBody ItemRequestCreateDTO itemRequestCreateDTO,
-                                      HttpServletRequest request) {
+    public ResponseEntity<ItemResponseDTO> createItem(@RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
+                                                      @Valid @RequestBody ItemRequestCreateDTO itemRequestCreateDTO,
+                                                      HttpServletRequest request) {
 
         log.debug("On {} {} {}", request.getRequestURL(), IN_CONTROLLER_METHOD, request.getMethod());
         long checkedUserId = checkHeaderUserId(userId);
@@ -52,42 +52,43 @@ public class ItemController {
         Item itemCreate = itemService.createItem(
                 MapperItemDTO.toItemInServiceFromItemRequestCreateDTO(itemRequestCreateDTO, checkedUserId));
 
-        return MapperItemDTO.toItemResponseDTOFromItem(itemCreate);
+        return ResponseEntity.status(HttpStatus.CREATED).body(MapperItemDTO.toItemResponseDTOFromItem(itemCreate));
     }
 
     @GetMapping("/{itemId}")
-    @ResponseStatus(HttpStatus.OK)
-    public ItemResponseDTO getItemById(@RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
-                                       @PathVariable long itemId,
-                                       HttpServletRequest request) {
+    public ResponseEntity<ItemResponseDTO> getItemById(@RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
+                                                       @PathVariable long itemId,
+                                                       HttpServletRequest request) {
 
         log.debug("On {} {} {}", request.getRequestURL(), IN_CONTROLLER_METHOD, request.getMethod());
         long checkedUserId = checkHeaderUserId(userId);
 
         Item getItemById = itemService.findItemById(checkedUserId, itemId);
 
-        return MapperItemDTO.toItemResponseDTOFromItem(getItemById);
+        return ResponseEntity.ok().body(MapperItemDTO.toItemResponseDTOFromItem(getItemById));
     }
 
     @GetMapping
-    @ResponseStatus(HttpStatus.OK)
-    public List<ItemResponseDTO> getAllItemsByUserId(@RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
-                                                     HttpServletRequest request) {
+    public ResponseEntity<List<ItemResponseDTO>> getAllItemsByUserId(
+            @RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
+            HttpServletRequest request) {
 
         log.debug("On {} {} {}", request.getRequestURL(), IN_CONTROLLER_METHOD, request.getMethod());
         long checkedUserId = checkHeaderUserId(userId);
 
         List<Item> getAllItemsByUserId = itemService.getAllItemsByUserId(checkedUserId);
 
-        return getAllItemsByUserId.stream().map(MapperItemDTO::toItemResponseDTOFromItem).collect(Collectors.toList());
+        return ResponseEntity.ok()
+                .header(X_COUNT_ITEMS, String.valueOf(getAllItemsByUserId.size()))
+                .body(getAllItemsByUserId.stream().map(MapperItemDTO::toItemResponseDTOFromItem)
+                        .collect(Collectors.toList()));
     }
 
     @PatchMapping("/{itemId}")
-    @ResponseStatus(HttpStatus.OK)
-    public ItemResponseDTO updateItemByUserId(@RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
-                                      @PathVariable long itemId,
-                                      @Valid @RequestBody ItemRequestUpdateDTO itemRequestUpdateDTO,
-                                      HttpServletRequest request) {
+    public ResponseEntity<ItemResponseDTO> updateItemById(@RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
+                                                          @PathVariable long itemId,
+                                                          @Valid @RequestBody ItemRequestUpdateDTO itemRequestUpdateDTO,
+                                                          HttpServletRequest request) {
 
         log.debug("On {} {} {}", request.getRequestURL(), IN_CONTROLLER_METHOD, request.getMethod());
         long checkedUserId = checkHeaderUserId(userId);
@@ -96,15 +97,14 @@ public class ItemController {
                 MapperItemDTO.toItemInServiceFromItemRequestUpdateDTO(itemRequestUpdateDTO, checkedUserId, itemId)
         );
 
-        return MapperItemDTO.toItemResponseDTOFromItem(itemUpdate);
-
+        return ResponseEntity.ok().body(MapperItemDTO.toItemResponseDTOFromItem(itemUpdate));
     }
 
     @GetMapping("/search")
-    @ResponseStatus(HttpStatus.OK)
-    public List<ItemResponseDTO> searchItem(@RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
-                                            @RequestParam Optional<String> text,
-                                            HttpServletRequest request) {
+    public ResponseEntity<List<ItemResponseDTO>> searchItemBySearchBar(
+            @RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
+            @RequestParam Optional<String> text,
+            HttpServletRequest request) {
 
         log.debug("On {} {} {}", HttpServletUtils.getURLWithParam(request), IN_CONTROLLER_METHOD, request.getMethod());
         long checkedUserId = checkHeaderUserId(userId);
@@ -112,9 +112,14 @@ public class ItemController {
         if (text.isPresent() && !text.get().isBlank()) {
             List<Item> listFoundItemsByText = itemService.getListSearchItem(checkedUserId, text.get());
 
-            return listFoundItemsByText.stream().map(MapperItemDTO::toItemResponseDTOFromItem).collect(Collectors.toList());
+            return ResponseEntity.ok()
+                    .header(X_COUNT_ITEMS, String.valueOf(listFoundItemsByText.size()))
+                    .body(listFoundItemsByText.stream()
+                            .map(MapperItemDTO::toItemResponseDTOFromItem)
+                            .collect(Collectors.toList()));
         } else {
-            return Collections.emptyList();
+            return ResponseEntity.ok()
+                    .header(X_COUNT_ITEMS, String.valueOf(0)).body(Collections.emptyList());
         }
 
     }

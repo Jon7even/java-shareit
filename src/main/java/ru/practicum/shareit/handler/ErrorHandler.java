@@ -5,11 +5,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.practicum.shareit.exception.ApplicationException;
 
 import java.util.Map;
+
+import static ru.practicum.shareit.constants.NamesJsonResponse.ERROR_MESSAGE;
+import static ru.practicum.shareit.constants.NamesJsonResponse.ERROR_M_VALIDATION;
 
 @Slf4j
 @RestControllerAdvice
@@ -28,28 +30,27 @@ public class ErrorHandler {
             log.debug(message);
         }
 
-        return ResponseEntity
-                .status(e.getResponseStatus())
-                .body(Map.of("errorMessage", message));
+        return ResponseEntity.status(e.getResponseStatus())
+                .body(Map.of(ERROR_MESSAGE, message));
     }
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({MethodArgumentNotValidException.class})
-    protected Map<String, String> handleValidationException(MethodArgumentNotValidException e) {
+    protected ResponseEntity<Map<String, String>> handleValidationException(MethodArgumentNotValidException e) {
         log.debug(e.getMessage());
 
-        return Map.of(
-                "errorMessage", "Validation error"
-        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of(
+                        ERROR_MESSAGE, ERROR_M_VALIDATION
+                ));
     }
 
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Throwable.class)
-    protected Map<String, String> handleThrowable(final Throwable e) {
+    protected ResponseEntity<Map<String, String>> handleThrowable(final Throwable e) {
         log.warn(e.getMessage());
 
-        return Map.of(
-                "errorMessage", "Unknown"
-        );
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of(
+                        ERROR_MESSAGE, "Unknown"
+                ));
     }
 }

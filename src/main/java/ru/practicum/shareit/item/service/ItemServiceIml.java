@@ -15,7 +15,6 @@ import ru.practicum.shareit.item.entity.Item;
 import ru.practicum.shareit.item.mapper.MapperItemDTO;
 import ru.practicum.shareit.user.dao.UserDao;
 import ru.practicum.shareit.user.entity.User;
-import ru.practicum.shareit.user.service.UserService;
 
 import java.util.List;
 import java.util.Optional;

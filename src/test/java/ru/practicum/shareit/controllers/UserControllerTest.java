@@ -8,12 +8,10 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.practicum.shareit.user.entity.User;
 
 import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static ru.practicum.shareit.constants.NamesJsonResponse.ERROR_M_VALIDATION;
+import static ru.practicum.shareit.constants.NamesParametersInController.X_COUNT_ITEMS;
 
 public class UserControllerTest extends GenericControllerTest {
     @BeforeEach
@@ -148,6 +146,7 @@ public class UserControllerTest extends GenericControllerTest {
 
         mockMvc.perform(get("/users"))
                 .andExpect(status().isOk())
+                .andExpect(header().stringValues(X_COUNT_ITEMS, String.valueOf(2)))
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].id").value(user1.getId()))
                 .andExpect(jsonPath("$[1].id").value(user2.getId()));

@@ -28,8 +28,6 @@ public class GenericControllerTest {
 
     protected static String ERROR_NAME = "$.errorMessage";
 
-    protected static String ERROR_M_VALIDATION = "Validation error";
-
     protected static String ERROR_M_USER_NOT_FOUND = "[User with [idUser=2]] not found";
 
     protected static String ERROR_M_ITEM_NOT_FOUND = "[Item with [idItem=2]] not found";
