@@ -56,4 +56,11 @@ public class ItemDaoInMemoryIml implements ItemDao {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public boolean deleteItemById(long idItem) {
+        items.remove(idItem);
+
+        return findItemById(idItem).isEmpty();
+    }
+
 }

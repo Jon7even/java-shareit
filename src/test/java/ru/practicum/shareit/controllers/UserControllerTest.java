@@ -7,11 +7,19 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.practicum.shareit.user.dto.UserResponseDTO;
 
+import java.util.Optional;
+
 import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static ru.practicum.shareit.constants.NamesJsonResponse.ERROR_M_VALIDATION;
 import static ru.practicum.shareit.constants.NamesParametersInController.X_COUNT_ITEMS;
+import static ru.practicum.shareit.constants.NamesParametersInController.X_HEADER_USER_ID;
 
 public class UserControllerTest extends GenericControllerTest {
     @BeforeEach
@@ -128,13 +136,55 @@ public class UserControllerTest extends GenericControllerTest {
 
     @Test
     @DisplayName("Пользователь должен удалиться по [ID]")
-    void shouldDeleteUserById_thenStatus204() throws Exception {
+    void shouldDeleteUserById_thenStatus204And404() throws Exception {
         userService.createUser(secondUser);
+
+        mockMvc.perform(delete("/users/{id}", FIRST_ID + 1))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath(ERROR_NAME).value(ERROR_M_USER_NOT_FOUND));
 
         mockMvc.perform(delete("/users/{id}", FIRST_ID))
                 .andExpect(status().isNoContent());
 
         mockMvc.perform(delete("/users/{id}", FIRST_ID))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Удалить пользователя по [ID] и все его итемы")
+    void shouldDeleteUserByIdAndShouldDeleteItem_thenStatus204And404() throws Exception {
+        initItems();
+        Long idUser = 1L;
+        userService.createUser(firstUser);
+        itemService.createItem(firstItem, Optional.of(idUser));
+        itemService.createItem(secondItem, Optional.of(idUser));
+
+        mockMvc.perform(get("/items")
+                        .header(X_HEADER_USER_ID, FIRST_ID))
+                .andExpect(status().isOk())
+                .andExpect(header().stringValues(X_COUNT_ITEMS, String.valueOf(2)))
+                .andExpect(jsonPath("$", hasSize(2)));
+
+        mockMvc.perform(delete("/users/{id}", FIRST_ID + 1))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath(ERROR_NAME).value(ERROR_M_USER_NOT_FOUND));
+
+        mockMvc.perform(delete("/users/{id}", FIRST_ID))
+                .andExpect(status().isNoContent());
+
+        mockMvc.perform(delete("/users/{id}", FIRST_ID))
+                .andExpect(status().isNotFound());
+
+        mockMvc.perform(get("/items/{itemId}", FIRST_ID)
+                        .header(X_HEADER_USER_ID, FIRST_ID))
+                .andExpect(status().isNotFound());
+
+        mockMvc.perform(get("/items")
+                        .header(X_HEADER_USER_ID, FIRST_ID))
+                .andExpect(status().isNotFound());
+
+        mockMvc.perform(get("/items/search?text={text}", "Item")
+                        .header(X_HEADER_USER_ID, FIRST_ID))
                 .andExpect(status().isNotFound());
     }
 

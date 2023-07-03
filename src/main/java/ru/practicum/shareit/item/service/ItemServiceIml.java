@@ -3,7 +3,13 @@ package ru.practicum.shareit.item.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exception.*;
+import ru.practicum.shareit.exception.EntityNotCreatedException;
+import ru.practicum.shareit.exception.EntityNotDeletedException;
+import ru.practicum.shareit.exception.AccessDeniedException;
+import ru.practicum.shareit.exception.EntityNotFoundException;
+import ru.practicum.shareit.exception.IncorrectParameterException;
+import ru.practicum.shareit.exception.EntityNotUpdatedException;
+
 import ru.practicum.shareit.item.dao.ItemDao;
 import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.entity.Item;
@@ -130,6 +136,27 @@ public class ItemServiceIml implements ItemService {
         return listFoundItemsByText.stream()
                 .map(ItemMapper.INSTANCE::toDTOResponseFromEntity)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public void deleteItemById(Optional<Long> idUser, Optional<Long> idItem) {
+        long checkedUserId = checkParameterUserId(idUser);
+        long checkedItemId = checkParameterItemId(idItem);
+
+        Item checkedItemFromDB = findItemEntityById(checkedItemId);
+        User checkedUserFromDB = findUserEntityById(checkedUserId);
+        checkIsUserTheOwnerOfItem(checkedItemFromDB.getOwner().getId(), checkedUserFromDB.getId());
+
+        log.debug("Remove [item={}] by [userId={}] {}", checkedItemFromDB, checkedUserFromDB.getId(), SERVICE_IN_DB);
+        boolean isRemoved = repositoryItem.deleteItemById(checkedItemId);
+
+        if (isRemoved) {
+            log.debug("Item by [id={}] [ownerName{}] has removed {}",
+                    checkedItemId, checkedUserFromDB.getName(), SERVICE_FROM_DB);
+        } else {
+            log.error("Item by [id={}] [ownerName{}] was not removed", checkedItemId, checkedUserFromDB.getName());
+            throw new EntityNotDeletedException(String.format("Item with [idItem=%d]", checkedItemId));
+        }
     }
 
     private Item validItemForCreate(ItemRequestCreateDTO itemRequestCreateDTO, long checkedUserId) {

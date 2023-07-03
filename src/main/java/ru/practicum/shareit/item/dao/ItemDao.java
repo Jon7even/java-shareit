@@ -15,4 +15,6 @@ public interface ItemDao {
     Optional<Item> updateItem(Item item);
 
     List<Item> getListSearchItem(String text);
+
+    boolean deleteItemById(long idItem);
 }

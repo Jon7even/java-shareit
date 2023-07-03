@@ -15,4 +15,6 @@ public interface ItemService {
     List<ItemResponseDTO> getAllItemsByUserId(Optional<Long> idUser);
 
     List<ItemResponseDTO> getListSearchItem(Optional<Long> idUser, Optional<String> searchText);
+
+    void deleteItemById(Optional<Long> idUser, Optional<Long> idItem);
 }

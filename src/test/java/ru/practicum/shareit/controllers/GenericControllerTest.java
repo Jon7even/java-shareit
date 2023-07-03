@@ -6,6 +6,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.practicum.shareit.item.dto.ItemRequestCreateDTO;
+import ru.practicum.shareit.item.entity.Item;
+import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.dto.UserRequestCreateDTO;
 import ru.practicum.shareit.user.service.UserService;
 
@@ -24,6 +27,9 @@ public class GenericControllerTest {
     @Autowired
     protected UserService userService;
 
+    @Autowired
+    protected ItemService itemService;
+
     protected static long FIRST_ID = 1;
 
     protected static String ERROR_NAME = "$.errorMessage";
@@ -40,6 +46,12 @@ public class GenericControllerTest {
 
     protected UserRequestCreateDTO thirdUser;
 
+    protected ItemRequestCreateDTO firstItem;
+
+    protected ItemRequestCreateDTO secondItem;
+
+    protected Item thirdItem;
+
     void initUsers() {
         firstUser = UserRequestCreateDTO.builder()
                 .name("firstUser")
@@ -50,6 +62,21 @@ public class GenericControllerTest {
                 .email("secondUser@yandex.ru")
                 .build();
         thirdUser = UserRequestCreateDTO.builder()
+                .build();
+    }
+
+    void initItems() {
+        firstItem = ItemRequestCreateDTO.builder()
+                .name("firstItem")
+                .description("description_1")
+                .available(true)
+                .build();
+        secondItem = ItemRequestCreateDTO.builder()
+                .name("secondItem")
+                .description("description_2")
+                .available(false)
+                .build();
+        thirdItem = Item.builder()
                 .build();
     }
 }
