@@ -7,7 +7,7 @@ import ru.practicum.shareit.exception.*;
 import ru.practicum.shareit.item.dao.ItemDao;
 import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.entity.Item;
-import ru.practicum.shareit.item.mapper.MapperItemDTO;
+import ru.practicum.shareit.mappers.ItemMapper;
 import ru.practicum.shareit.user.dao.UserDao;
 import ru.practicum.shareit.user.entity.User;
 
@@ -37,7 +37,7 @@ public class ItemServiceIml implements ItemService {
 
         if (createdItem.isPresent()) {
             log.debug("New item has returned [item={}] {}", createdItem.get(), SERVICE_FROM_DB);
-            return MapperItemDTO.toItemResponseDTOFromItem(createdItem.get());
+            return ItemMapper.INSTANCE.toDTOResponseFromEntity(createdItem.get());
         } else {
             log.error("[item={}] was not created", createdItem);
             throw new EntityNotCreatedException("New item");
@@ -55,7 +55,7 @@ public class ItemServiceIml implements ItemService {
 
         if (foundItemById.isPresent()) {
             log.debug("Found [item={}] {}", foundItemById.get(), SERVICE_FROM_DB);
-            return MapperItemDTO.toItemResponseDTOFromItem(foundItemById.get());
+            return ItemMapper.INSTANCE.toDTOResponseFromEntity(foundItemById.get());
         } else {
             log.warn("Item by [idItem={}] owner [idUser={}] was not found", checkedItemId, checkedUserId);
             throw new EntityNotFoundException(String.format("Item with [idItem=%d]", checkedItemId));
@@ -76,7 +76,7 @@ public class ItemServiceIml implements ItemService {
 
         if (updatedItem.isPresent()) {
             log.debug("Updated item has returned [item={}] {}", updatedItem.get(), SERVICE_FROM_DB);
-            return MapperItemDTO.toItemResponseDTOFromItem(updatedItem.get());
+            return ItemMapper.INSTANCE.toDTOResponseFromEntity(updatedItem.get());
         } else {
             log.error("[item={}] was not updated", itemUpdateInRepository);
             throw new EntityNotUpdatedException(String.format("Item with [idItem=%d]", checkedItemId));
@@ -98,7 +98,9 @@ public class ItemServiceIml implements ItemService {
                     listItemsByIdUser.size(), SERVICE_FROM_DB, idUser);
         }
 
-        return listItemsByIdUser.stream().map(MapperItemDTO::toItemResponseDTOFromItem).collect(Collectors.toList());
+        return listItemsByIdUser.stream()
+                .map(ItemMapper.INSTANCE::toDTOResponseFromEntity)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -125,13 +127,15 @@ public class ItemServiceIml implements ItemService {
                     listFoundItemsByText.size(), SERVICE_FROM_DB, idUser);
         }
 
-        return listFoundItemsByText.stream().map(MapperItemDTO::toItemResponseDTOFromItem).collect(Collectors.toList());
+        return listFoundItemsByText.stream()
+                .map(ItemMapper.INSTANCE::toDTOResponseFromEntity)
+                .collect(Collectors.toList());
     }
 
     private Item validItemForCreate(ItemRequestCreateDTO itemRequestCreateDTO, long checkedUserId) {
         User checkedUserFromDB = findUserEntityById(checkedUserId);
 
-        return MapperItemDTO.toItemFromItemRequestCreateDTO(itemRequestCreateDTO, checkedUserFromDB);
+        return ItemMapper.INSTANCE.toEntityFromDTOCreate(itemRequestCreateDTO, checkedUserFromDB);
     }
 
     private Item validItemForUpdate(ItemRequestUpdateDTO itemRequestUpdateDTO,

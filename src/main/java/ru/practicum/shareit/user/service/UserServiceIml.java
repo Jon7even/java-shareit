@@ -4,12 +4,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.*;
+import ru.practicum.shareit.mappers.UserMapper;
 import ru.practicum.shareit.user.dao.UserDao;
 import ru.practicum.shareit.user.dto.UserRequestCreateDTO;
 import ru.practicum.shareit.user.dto.UserRequestUpdateDTO;
 import ru.practicum.shareit.user.dto.UserResponseDTO;
 import ru.practicum.shareit.user.entity.User;
-import ru.practicum.shareit.user.mapper.MapperUserDTO;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,7 +26,7 @@ public class UserServiceIml implements UserService {
 
     @Override
     public UserResponseDTO createUser(UserRequestCreateDTO userRequestCreateDTO) {
-        User user = MapperUserDTO.toUserFromUserRequestCreateDTO(userRequestCreateDTO);
+        User user = UserMapper.INSTANCE.toEntityFromDTOCreate(userRequestCreateDTO);
         checkEmail(user.getEmail());
 
         log.debug("Add new [user={}] {}", user, SERVICE_IN_DB);
@@ -34,7 +34,7 @@ public class UserServiceIml implements UserService {
 
         if (createdUser.isPresent()) {
             log.debug("New user has returned [user={}] {}", createdUser.get(), SERVICE_FROM_DB);
-            return MapperUserDTO.toUserResponseDTOFromUser(createdUser.get());
+            return UserMapper.INSTANCE.toDTOResponseFromEntity(createdUser.get());
         } else {
             log.error("[user={}] was not created", user);
             throw new EntityNotCreatedException("New user");
@@ -50,7 +50,7 @@ public class UserServiceIml implements UserService {
 
         if (foundUser.isPresent()) {
             log.debug("Found [user={}] {}", foundUser.get(), SERVICE_FROM_DB);
-            return MapperUserDTO.toUserResponseDTOFromUser(foundUser.get());
+            return UserMapper.INSTANCE.toDTOResponseFromEntity(foundUser.get());
         } else {
             log.warn("User by [id={}] was not found", checkedUserId);
             throw new EntityNotFoundException(String.format("User with [idUser=%d]", checkedUserId));
@@ -59,8 +59,8 @@ public class UserServiceIml implements UserService {
 
     @Override
     public UserResponseDTO updateUser(UserRequestUpdateDTO userRequestUpdateDTO, Optional<Long> idUser) {
-        long checkedUserId = checkParameterUserId(idUser);
-        User user = MapperUserDTO.toUserFromUserRequestUpdateDTO(userRequestUpdateDTO, checkedUserId);
+        Long checkedUserId = checkParameterUserId(idUser);
+        User user = UserMapper.INSTANCE.toEntityFromDTOUpdate(userRequestUpdateDTO, checkedUserId);
 
         User checkedUserFromRepository = findUserEntityById(checkedUserId);
         User updateUserInRepository = User.builder().id(checkedUserId).build();
@@ -90,7 +90,7 @@ public class UserServiceIml implements UserService {
 
         if (isEqualsEmail && isEqualsName) {
             log.warn("No need to update user data \n[userUpdate={}]\n[userResult={}]", user, checkedUserFromRepository);
-            return MapperUserDTO.toUserResponseDTOFromUser(checkedUserFromRepository);
+            return UserMapper.INSTANCE.toDTOResponseFromEntity(checkedUserFromRepository);
         } else {
 
             if (isEqualsName || user.getName() == null) {
@@ -104,7 +104,7 @@ public class UserServiceIml implements UserService {
 
             if (updatedUser.isPresent()) {
                 log.debug("Updated user has returned [user={}] {}", updatedUser.get(), SERVICE_FROM_DB);
-                return MapperUserDTO.toUserResponseDTOFromUser(updatedUser.get());
+                return UserMapper.INSTANCE.toDTOResponseFromEntity(updatedUser.get());
             } else {
                 log.error("[user={}] was not updated", user);
                 throw new EntityNotUpdatedException(String.format("User with [idUser=%d]", checkedUserId));
@@ -139,7 +139,7 @@ public class UserServiceIml implements UserService {
             log.debug("Found list users [count={}] {}", listUsers.size(), SERVICE_FROM_DB);
         }
 
-        return listUsers.stream().map(MapperUserDTO::toUserResponseDTOFromUser).collect(Collectors.toList());
+        return listUsers.stream().map(UserMapper.INSTANCE::toDTOResponseFromEntity).collect(Collectors.toList());
     }
 
     private User findUserEntityById(long checkedUserId) {
@@ -161,13 +161,13 @@ public class UserServiceIml implements UserService {
         }
     }
 
-    private long checkParameterUserId(Optional<Long> idUser) {
+    private Long checkParameterUserId(Optional<Long> idUser) {
         if (idUser.isPresent()) {
             if (idUser.get() > 0) {
                 log.debug("Checking [idUser={}] is ok", idUser.get());
             }
         } else {
-            throw new EntityNotFoundException(String.format("User with [idUser=%d]", idUser.get()));
+            throw new EntityNotFoundException("User with [idUser=null]");
         }
 
         return idUser.get();
