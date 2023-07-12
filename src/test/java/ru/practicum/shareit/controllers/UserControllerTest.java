@@ -3,6 +3,7 @@ package ru.practicum.shareit.controllers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.practicum.shareit.user.dto.UserResponseDTO;
@@ -21,6 +22,7 @@ import static ru.practicum.shareit.constants.NamesJsonResponse.ERROR_M_VALIDATIO
 import static ru.practicum.shareit.constants.NamesParametersInController.X_COUNT_ITEMS;
 import static ru.practicum.shareit.constants.NamesParametersInController.X_HEADER_USER_ID;
 
+@AutoConfigureTestDatabase
 public class UserControllerTest extends GenericControllerTest {
     @BeforeEach
     void setUp() {

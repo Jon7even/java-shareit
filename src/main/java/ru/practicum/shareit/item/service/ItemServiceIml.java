@@ -209,7 +209,7 @@ public class ItemServiceIml implements ItemService {
 
     private User findUserEntityById(long checkedUserId) {
         log.debug("Get user entity for checking by [idUser={}] {}", checkedUserId, SERVICE_IN_DB);
-        Optional<User> foundCheckUser = repositoryUser.findUserById(checkedUserId);
+        Optional<User> foundCheckUser = repositoryUser.findById(checkedUserId);
 
         if (foundCheckUser.isPresent()) {
             log.debug("Check was successful found [user={}] {}", foundCheckUser.get(), SERVICE_FROM_DB);

@@ -10,13 +10,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-@Repository
 @RequiredArgsConstructor
-public class UserDaoInMemoryIml implements UserDao {
+public class UserDaoInMemoryIml {
     private final Map<Long, User> users;
     private final IdGeneratorUser idGenerator;
 
-    @Override
     public Optional<User> createUser(User user) {
         long idUser = idGenerator.generateId();
         user.setId(idUser);
@@ -25,12 +23,12 @@ public class UserDaoInMemoryIml implements UserDao {
         return Optional.of(users.get(idUser));
     }
 
-    @Override
+
     public Optional<User> findUserById(long idUser) {
         return Optional.ofNullable(users.get(idUser));
     }
 
-    @Override
+
     public Optional<User> updateUser(User user) {
         long idUser = user.getId();
 
@@ -39,19 +37,19 @@ public class UserDaoInMemoryIml implements UserDao {
         return Optional.of(users.get(idUser));
     }
 
-    @Override
+
     public boolean deleteUserById(long idUser) {
         users.remove(idUser);
 
         return findUserById(idUser).isEmpty();
     }
 
-    @Override
+
     public List<User> getAllUsers() {
         return new ArrayList<>(users.values());
     }
 
-    @Override
+
     public Optional<User> findUserByEmail(String email) {
         return users.values().stream().filter(user -> user.getEmail().equalsIgnoreCase(email)).findFirst();
     }

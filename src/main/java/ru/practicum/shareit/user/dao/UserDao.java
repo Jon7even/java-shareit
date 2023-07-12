@@ -1,14 +1,20 @@
 package ru.practicum.shareit.user.dao;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Component;
 import ru.practicum.shareit.user.entity.User;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface UserDao {
-    Optional<User> createUser(User user);
+@Component
+public interface UserDao extends JpaRepository<User, Long> {
 
-    Optional<User> findUserById(long idUser);
+    Optional<User> findUserByEmailContainingIgnoreCase(String emailSearch);
+
+/*    Optional<User> createUser(User user); +
+
+    Optional<User> findUserById(long idUser); +
 
     Optional<User> updateUser(User user);
 
@@ -16,5 +22,5 @@ public interface UserDao {
 
     List<User> getAllUsers();
 
-    Optional<User> findUserByEmail(String email);
+    Optional<User> findUserByEmail(String email);*/
 }
