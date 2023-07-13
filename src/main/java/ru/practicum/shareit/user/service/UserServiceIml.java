@@ -21,17 +21,18 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static ru.practicum.shareit.constants.NamesLogsInService.SERVICE_FROM_DB;
-import static ru.practicum.shareit.constants.NamesLogsInService.SERVICE_IN_DB;
+import static ru.practicum.shareit.constants.NamesLogsInService.*;
 
 @Slf4j
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class UserServiceIml implements UserService {
     private final UserDao repositoryUser;
 
     @Override
     public UserResponseDTO createUser(UserRequestCreateDTO userRequestCreateDTO) {
+        log.debug("New user came {} [UserRequestCreateDTO={}]", SERVICE_FROM_CONTROLLER, userRequestCreateDTO);
         User user = UserMapper.INSTANCE.toEntityFromDTOCreate(userRequestCreateDTO);
 
         try {
@@ -54,7 +55,7 @@ public class UserServiceIml implements UserService {
 
     @Override
     public UserResponseDTO findUserById(Optional<Long> idUser) {
-        long checkedUserId = checkParameterUserId(idUser);
+        Long checkedUserId = checkParameterUserId(idUser);
 
         log.debug("Get user by [id={}] {}", idUser, SERVICE_IN_DB);
         Optional<User> foundUser = repositoryUser.findById(checkedUserId);
@@ -68,9 +69,9 @@ public class UserServiceIml implements UserService {
         }
     }
 
-    @Transactional
     @Override
     public UserResponseDTO updateUser(UserRequestUpdateDTO userRequestUpdateDTO, Optional<Long> idUser) {
+        log.debug("User for update came {} [UserRequestUpdateDTO={}]", SERVICE_FROM_CONTROLLER, userRequestUpdateDTO);
         Long checkedUserId = checkParameterUserId(idUser);
         User user = UserMapper.INSTANCE.toEntityFromDTOUpdate(userRequestUpdateDTO, checkedUserId);
 
@@ -103,6 +104,7 @@ public class UserServiceIml implements UserService {
         if (isEqualsEmail && isEqualsName) {
             log.warn("No need to update user data \n[userUpdate={}]\n[userResult={}]", user, checkedUserFromRepository);
             return UserMapper.INSTANCE.toDTOResponseFromEntity(checkedUserFromRepository);
+
         } else {
 
             if (isEqualsName || user.getName() == null) {
@@ -125,10 +127,9 @@ public class UserServiceIml implements UserService {
         }
     }
 
-    @Transactional
     @Override
     public void deleteUserById(Optional<Long> idUser) {
-        long checkedUserId = checkParameterUserId(idUser);
+        Long checkedUserId = checkParameterUserId(idUser);
         User checkedUserFromRepository = findUserEntityById(checkedUserId);
 
         log.debug("Remove [user={}] {}", checkedUserFromRepository, SERVICE_IN_DB);
@@ -157,7 +158,7 @@ public class UserServiceIml implements UserService {
         return listUsers.stream().map(UserMapper.INSTANCE::toDTOResponseFromEntity).collect(Collectors.toList());
     }
 
-    private User findUserEntityById(long checkedUserId) {
+    private User findUserEntityById(Long checkedUserId) {
         log.debug("Get user entity for checking by [idUser={}] {}", checkedUserId, SERVICE_IN_DB);
         Optional<User> foundCheckUser = repositoryUser.findById(checkedUserId);
 

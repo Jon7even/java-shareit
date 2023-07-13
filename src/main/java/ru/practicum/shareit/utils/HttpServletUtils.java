@@ -1,15 +1,14 @@
 package ru.practicum.shareit.utils;
 
+import lombok.experimental.UtilityClass;
+
 import javax.servlet.http.HttpServletRequest;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 
-public final class HttpServletUtils {
-
-    private HttpServletUtils() {
-    }
-
-    public static String getURLWithParam(HttpServletRequest request) {
+@UtilityClass
+public class HttpServletUtils {
+    public String getURLWithParam(HttpServletRequest request) {
         StringBuilder requestURL = new StringBuilder(request.getRequestURL().toString());
         String queryString = request.getQueryString();
 

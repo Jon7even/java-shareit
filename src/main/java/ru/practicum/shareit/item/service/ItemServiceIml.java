@@ -22,8 +22,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static ru.practicum.shareit.constants.NamesLogsInService.SERVICE_FROM_DB;
-import static ru.practicum.shareit.constants.NamesLogsInService.SERVICE_IN_DB;
+import static ru.practicum.shareit.constants.NamesLogsInService.*;
 import static ru.practicum.shareit.constants.NamesParametersInController.X_HEADER_USER_ID;
 
 @Slf4j
@@ -35,6 +34,7 @@ public class ItemServiceIml implements ItemService {
 
     @Override
     public ItemResponseDTO createItem(ItemRequestCreateDTO itemRequestCreateDTO, Optional<Long> idUser) {
+        log.debug("New item came {} [ItemRequestCreateDTO={}]", SERVICE_FROM_CONTROLLER, itemRequestCreateDTO);
         long checkedUserId = checkParameterUserId(idUser);
         Item itemCreateInRepository = validItemForCreate(itemRequestCreateDTO, checkedUserId);
 
@@ -72,6 +72,7 @@ public class ItemServiceIml implements ItemService {
     public ItemResponseDTO updateItem(Optional<Long> idUser,
                                       Optional<Long> idItem,
                                       ItemRequestUpdateDTO itemRequestUpdateDTO) {
+        log.debug("Item for update came {} [ItemRequestUpdateDTO={}]", SERVICE_FROM_CONTROLLER, itemRequestUpdateDTO);
         long checkedUserId = checkParameterUserId(idUser);
         long checkedItemId = checkParameterItemId(idItem);
 
