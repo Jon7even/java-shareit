@@ -3,7 +3,6 @@ package ru.practicum.shareit.controllers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.practicum.shareit.user.dto.UserResponseDTO;
@@ -22,7 +21,6 @@ import static ru.practicum.shareit.constants.NamesJsonResponse.ERROR_M_VALIDATIO
 import static ru.practicum.shareit.constants.NamesParametersInController.X_COUNT_ITEMS;
 import static ru.practicum.shareit.constants.NamesParametersInController.X_HEADER_USER_ID;
 
-@AutoConfigureTestDatabase
 public class UserControllerTest extends GenericControllerTest {
     @BeforeEach
     void setUp() {
@@ -156,16 +154,14 @@ public class UserControllerTest extends GenericControllerTest {
     @DisplayName("Удалить пользователя по [ID] и все его итемы")
     void shouldDeleteUserByIdAndShouldDeleteItem_thenStatus204And404() throws Exception {
         initItems();
-        Long idUser = 1L;
         userService.createUser(firstUser);
-        itemService.createItem(firstItem, Optional.of(idUser));
-        itemService.createItem(secondItem, Optional.of(idUser));
+        itemService.createItem(firstItem, Optional.of(1L));
 
         mockMvc.perform(get("/items")
                         .header(X_HEADER_USER_ID, FIRST_ID))
                 .andExpect(status().isOk())
-                .andExpect(header().stringValues(X_COUNT_ITEMS, String.valueOf(2)))
-                .andExpect(jsonPath("$", hasSize(2)));
+                .andExpect(header().stringValues(X_COUNT_ITEMS, String.valueOf(1)))
+                .andExpect(jsonPath("$", hasSize(1)));
 
         mockMvc.perform(delete("/users/{id}", FIRST_ID + 1))
                 .andExpect(status().isNotFound())

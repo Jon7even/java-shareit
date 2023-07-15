@@ -1,4 +1,4 @@
-package ru.practicum.shareit.mappers;
+package ru.practicum.shareit.item.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -15,7 +15,7 @@ public interface ItemMapper {
     @Mapping(source = "itemRequestCreateDTO.name", target = "name")
     @Mapping(source = "itemRequestCreateDTO.description", target = "description")
     @Mapping(source = "itemRequestCreateDTO.available", target = "available")
-    @Mapping(source = "user", target = "owner")
+    @Mapping(source = "user", target = "user")
     Item toEntityFromDTOCreate(ItemRequestCreateDTO itemRequestCreateDTO, User user);
 
     @Mapping(source = "item.id", target = "id")

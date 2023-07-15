@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import ru.practicum.shareit.item.dto.ItemRequestCreateDTO;
 import ru.practicum.shareit.item.dto.ItemRequestUpdateDTO;
 import ru.practicum.shareit.item.dto.ItemResponseDTO;
+import ru.practicum.shareit.item.projections.ItemShort;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.utils.HttpServletUtils;
 
@@ -83,14 +84,14 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<ItemResponseDTO>> searchItemBySearchBar(
+    public ResponseEntity<List<ItemShort>> searchItemBySearchBar(
             @RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
             @RequestParam Optional<String> text,
             HttpServletRequest request) {
 
         log.debug("On {} {} {}", HttpServletUtils.getURLWithParam(request), IN_CONTROLLER_METHOD, request.getMethod());
 
-        List<ItemResponseDTO> listFoundItemsBySearchBar = itemService.getListSearchItem(userId, text);
+        List<ItemShort> listFoundItemsBySearchBar = itemService.getListSearchItem(userId, text);
 
         return ResponseEntity.ok()
                 .header(X_COUNT_ITEMS, String.valueOf(listFoundItemsBySearchBar.size()))

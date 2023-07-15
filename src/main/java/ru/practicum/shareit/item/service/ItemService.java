@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.service;
 
 import ru.practicum.shareit.item.dto.*;
+import ru.practicum.shareit.item.projections.ItemShort;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,7 +15,7 @@ public interface ItemService {
 
     List<ItemResponseDTO> getAllItemsByUserId(Optional<Long> idUser);
 
-    List<ItemResponseDTO> getListSearchItem(Optional<Long> idUser, Optional<String> searchText);
+    List<ItemShort> getListSearchItem(Optional<Long> idUser, Optional<String> searchText);
 
     void deleteItemById(Optional<Long> idUser, Optional<Long> idItem);
 }
