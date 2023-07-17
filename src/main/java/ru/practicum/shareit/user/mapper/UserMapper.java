@@ -12,6 +12,7 @@ import ru.practicum.shareit.user.entity.User;
 public interface UserMapper {
     UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
 
+    @Mapping(target = "id", ignore = true)
     @Mapping(source = "userRequestCreateDTO.name", target = "name")
     @Mapping(source = "userRequestCreateDTO.email", target = "email")
     User toEntityFromDTOCreate(UserRequestCreateDTO userRequestCreateDTO);

@@ -39,10 +39,10 @@ public class ItemServiceIml implements ItemService {
     public ItemResponseDTO createItem(ItemRequestCreateDTO itemRequestCreateDTO, Optional<Long> idUser) {
         log.debug("New item came {} [ItemRequestCreateDTO={}]", SERVICE_FROM_CONTROLLER, itemRequestCreateDTO);
         Long checkedUserId = checkParameterUserId(idUser);
-        Item itemCreateInRepository = validItemForCreate(itemRequestCreateDTO, checkedUserId);
+        Item itemForCreateInRepository = validItemForCreate(itemRequestCreateDTO, checkedUserId);
 
-        log.debug("Add new [item={}] {}", itemRequestCreateDTO, SERVICE_IN_DB);
-        Item createdItem = repositoryItem.save(itemCreateInRepository);
+        log.debug("Add new [item={}] {}", itemForCreateInRepository, SERVICE_IN_DB);
+        Item createdItem = repositoryItem.save(itemForCreateInRepository);
         Optional<Item> foundItemAfterCreation = repositoryItem.findById(createdItem.getId());
 
         if (foundItemAfterCreation.isPresent() && createdItem.equals(foundItemAfterCreation.get())) {
@@ -234,7 +234,7 @@ public class ItemServiceIml implements ItemService {
             return foundCheckItem.get();
         } else {
             log.warn("Item by [idItem={}] was not found", checkedItemId);
-            throw new EntityNotFoundException(String.format("Item with [idUser=%d]", checkedItemId));
+            throw new EntityNotFoundException(String.format("Item with [idItem=%d]", checkedItemId));
         }
     }
 

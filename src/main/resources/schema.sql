@@ -15,3 +15,15 @@ CREATE TABLE IF NOT EXISTS items (
     CONSTRAINT        PK_ITEM PRIMARY KEY(id),
     CONSTRAINT        FK_ITEM_TO_USER FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS bookings (
+    id                BIGINT       NOT NULL GENERATED ALWAYS AS IDENTITY,
+    start_date        TIMESTAMP    WITHOUT TIME ZONE     NOT NULL,
+    end_date          TIMESTAMP    WITHOUT TIME ZONE     NOT NULL,
+    item_id           BIGINT       NOT NULL,
+    booker_id         BIGINT       NOT NULL,
+    status            VARCHAR(24)  NOT NULL,
+    CONSTRAINT        PK_BOOKING PRIMARY KEY(id),
+    CONSTRAINT        FK_BOOKING_TO_ITEM FOREIGN KEY(item_id) REFERENCES items(id) ON DELETE CASCADE,
+    CONSTRAINT        FK_BOOKING_TO_USER FOREIGN KEY(booker_id) REFERENCES users(id) ON DELETE CASCADE
+);
