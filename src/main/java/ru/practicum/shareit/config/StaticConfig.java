@@ -4,10 +4,17 @@
  * DangerZone!!!
  *
  * DEFAULT_STATUS_AFTER_CREATED
- * Статус Booking.status после создания значение - "По умолчанию"
+ * Статус BookingStatus после создания значение - "По умолчанию"
  * Используется в сервисном методе createBooking
  * При изменении настройки приложение не будет работать корректно
  * Изменять при перестроении модели статусов
+ *
+ * DEFAULT_STATE_IN_CONTROLLER
+ * Статус BookingState используется в контроллере BookingController
+ * Если пользователь не присылает нужный параметр state в методах getListBooking
+ * Используется вариант "По умолчанию" - отобразить все бронирования
+ * При высокой нагрузки на сервер и тестах параметр можно менять на необходимый
+ * Статус пишется в строке String
  *
  */
 
@@ -19,4 +26,6 @@ import ru.practicum.shareit.booking.entity.BookingStatus;
 @UtilityClass
 public class StaticConfig {
     public static final BookingStatus DEFAULT_STATUS_AFTER_CREATED = BookingStatus.WAITING;
+
+    public static final String DEFAULT_STATE_IN_CONTROLLER = "ALL";
 }

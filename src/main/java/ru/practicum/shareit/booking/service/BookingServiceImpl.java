@@ -8,6 +8,7 @@ import ru.practicum.shareit.booking.dao.BookingDao;
 import ru.practicum.shareit.booking.dto.BookingRequestCreateDTO;
 import ru.practicum.shareit.booking.dto.BookingResponseDTO;
 import ru.practicum.shareit.booking.entity.Booking;
+import ru.practicum.shareit.booking.entity.BookingState;
 import ru.practicum.shareit.booking.entity.BookingStatus;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.exception.*;
@@ -18,8 +19,10 @@ import ru.practicum.shareit.user.entity.User;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static ru.practicum.shareit.config.StaticConfig.DEFAULT_STATUS_AFTER_CREATED;
 import static ru.practicum.shareit.constants.NamesLogsInService.*;
@@ -59,17 +62,27 @@ public class BookingServiceImpl implements BookingService {
     public BookingResponseDTO findBookingById(Optional<Long> idUser, Optional<Long> idBooking) {
         Long checkedUserId = checkParameterUserId(idUser);
         Long checkedBookingId = checkParameterBookingId(idBooking);
-        findUserEntityById(checkedUserId);
+        User user = findUserEntityById(checkedUserId);
 
-        log.debug("Get booking by [idBooking={}] by User [idUser={}] {}", idBooking, checkedUserId, SERVICE_IN_DB);
+        log.debug("Get booking by [idBooking={}] by User [idUser={}] {}", checkedBookingId, checkedUserId, SERVICE_IN_DB);
         Optional<Booking> foundBookingById = repositoryBooking.findById(checkedBookingId);
 
         if (foundBookingById.isPresent()) {
-            log.debug("Found [booking={}] {}", foundBookingById.get(), SERVICE_FROM_DB);
-            return BookingMapper.INSTANCE.toDTOResponseFromEntity(foundBookingById.get());
+            boolean userEqualsOwnerItem = foundBookingById.get().getItem().getUser().equals(user);
+            boolean userEqualsOwnerBooking = foundBookingById.get().getUser().equals(user);
+
+            if (userEqualsOwnerItem || userEqualsOwnerBooking) {
+                log.debug("Found [booking={}] {}", foundBookingById.get(), SERVICE_FROM_DB);
+                return BookingMapper.INSTANCE.toDTOResponseFromEntity(foundBookingById.get());
+            } else {
+                log.warn("User [idUser={}] not is owner booking [idBooking={}] or owner item [idItem={}]",
+                        checkedUserId, checkedBookingId, foundBookingById.get().getItem().getId());
+                throw new EntityNotFoundException(String.format("Booking with [idBooking=%d]", checkedBookingId));
+            }
+
         } else {
-            log.warn("Booking by [idBooking={}] by User [idUser={}] was not found", idBooking, checkedUserId);
-            throw new EntityNotFoundException(String.format("Booking with [idBooking=%d]", idBooking));
+            log.warn("Booking by [idBooking={}] by User [idUser={}] was not found", checkedBookingId, checkedUserId);
+            throw new EntityNotFoundException(String.format("Booking with [idBooking=%d]", checkedBookingId));
         }
     }
 
@@ -94,7 +107,86 @@ public class BookingServiceImpl implements BookingService {
                     updatedBooking.getItem().getId(), checkedBookingId, SERVICE_FROM_DB);
             throw new EntityNotUpdatedException("Status booking");
         }
+    }
 
+    @Override
+    public List<BookingResponseDTO> getListBookingByIdUser(Optional<Long> idUser, BookingState state) {
+        Long checkedUserId = checkParameterUserId(idUser);
+        User checkedUserFromDB = findUserEntityById(checkedUserId);
+        LocalDateTime currentTime = LocalDateTime.now();
+
+        List<Booking> bookings = Collections.emptyList();
+        log.debug("Get list booking by user [userId={}] [BookingState={}], [currentTime={}] {}", checkedUserId,
+                state.toString(), currentTime, SERVICE_FROM_DB);
+
+        switch (state) {
+            case ALL:
+                bookings = repositoryBooking.findByUserIdOrderByIdDesc(checkedUserId);
+                break;
+            case CURRENT:
+                bookings = repositoryBooking.findCurrentByUserId(checkedUserFromDB, currentTime);
+                break;
+            case PAST:
+                bookings = repositoryBooking.findAllPastByUserId(checkedUserFromDB, currentTime);
+                break;
+            case FUTURE:
+                bookings = repositoryBooking.findFutureByUserId(checkedUserFromDB, currentTime);
+                break;
+            case WAITING:
+                bookings = repositoryBooking.findAllByUserIdAndStatus(checkedUserFromDB, BookingStatus.WAITING);
+                break;
+            case REJECTED:
+                bookings = repositoryBooking.findAllByUserIdAndStatus(checkedUserFromDB, BookingStatus.REJECTED);
+                break;
+            default:
+                log.error("Unknown detection error of [BookingState={}]", state);
+                break;
+        }
+
+        return bookings.stream()
+                .map(BookingMapper.INSTANCE::toDTOResponseFromEntity)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<BookingResponseDTO> getAllItemBookingByIdOwner(Optional<Long> idUser, BookingState state) {
+        Long checkedUserId = checkParameterUserId(idUser);
+        User checkedUserFromDB = findUserEntityById(checkedUserId);
+        LocalDateTime currentTime = LocalDateTime.now();
+
+        List<Booking> bookings = Collections.emptyList();
+        log.debug("Get list booking by owner [ownerId={}] [BookingState={}], [currentTime={}] {}", checkedUserId,
+                state.toString(), currentTime, SERVICE_FROM_DB);
+
+        switch (state) {
+            case ALL:
+                bookings = repositoryBooking.findAllItemsBookingByOwnerId(checkedUserFromDB);
+                break;
+            case CURRENT:
+                bookings = repositoryBooking.findCurrentItemsBookingByOwnerId(checkedUserFromDB, currentTime);
+                break;
+            case PAST:
+                bookings = repositoryBooking.findPastItemsBookingByOwnerId(checkedUserFromDB, currentTime);
+                break;
+            case FUTURE:
+                bookings = repositoryBooking.findFutureItemsBookingByOwnerId(checkedUserFromDB, currentTime);
+                break;
+            case WAITING:
+                bookings = repositoryBooking.findItemsBookingByOwnerIdAndStatus(checkedUserFromDB,
+                        BookingStatus.WAITING);
+                break;
+            case REJECTED:
+                bookings = repositoryBooking.findItemsBookingByOwnerIdAndStatus(checkedUserFromDB,
+                        BookingStatus.REJECTED);
+                break;
+            default:
+                log.error("Unknown detection error of [BookingState={}]", state);
+                break;
+        }
+
+        return bookings.stream()
+                .map(BookingMapper.INSTANCE::toDTOResponseFromEntity)
+                .collect(Collectors.toList());
     }
 
     private Booking validBookingForCreate(BookingRequestCreateDTO bookingRequestCreateDTO, Long checkedUserId) {
@@ -104,6 +196,11 @@ public class BookingServiceImpl implements BookingService {
         if (!checkedItemFromDB.isAvailable()) {
             log.debug("Booking item [item{}] by [booker_id={}] was suspended", checkedItemFromDB, checkedUserFromDB);
             throw new EntityAlreadyBookedException(String.format("Item with [idItem=%d]", checkedItemFromDB.getId()));
+        }
+
+        if (checkedItemFromDB.getUser().getId().equals(checkedUserId)) {
+            log.debug("User [userId={}] is owner item, booking rejected", checkedUserId);
+            throw new EntityNotFoundException("Item where you are not the owner");
         }
 
         return BookingMapper.INSTANCE.toEntityFromDTOCreate(bookingRequestCreateDTO,
@@ -230,4 +327,5 @@ public class BookingServiceImpl implements BookingService {
             return BookingStatus.REJECTED;
         }
     }
+
 }

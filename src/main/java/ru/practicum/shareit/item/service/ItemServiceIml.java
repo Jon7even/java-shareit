@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.dao.BookingDao;
 import ru.practicum.shareit.exception.EntityNotCreatedException;
 import ru.practicum.shareit.exception.EntityNotDeletedException;
 import ru.practicum.shareit.exception.AccessDeniedException;
@@ -34,6 +35,7 @@ import static ru.practicum.shareit.constants.NamesParametersInController.X_HEADE
 public class ItemServiceIml implements ItemService {
     private final ItemDao repositoryItem;
     private final UserDao repositoryUser;
+    private final BookingDao repositoryBooking;
 
     @Override
     public ItemResponseDTO createItem(ItemRequestCreateDTO itemRequestCreateDTO, Optional<Long> idUser) {

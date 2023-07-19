@@ -8,6 +8,6 @@ public class UnknownException extends ApplicationException {
     }
 
     private static String getErrorMessage(String resource) {
-        return String.format("[%s] unknown error", resource);
+        return String.format("Unknown [%s]", resource);
     }
 }
