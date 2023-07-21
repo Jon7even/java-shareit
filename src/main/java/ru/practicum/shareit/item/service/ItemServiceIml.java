@@ -35,7 +35,7 @@ import static ru.practicum.shareit.constants.NamesParametersInController.X_HEADE
 
 @Slf4j
 @Service
-@Transactional
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ItemServiceIml implements ItemService {
     private final ItemRepository repositoryItem;
@@ -43,6 +43,7 @@ public class ItemServiceIml implements ItemService {
     private final BookingRepository repositoryBooking;
     private final CommentRepository repositoryComment;
 
+    @Transactional
     @Override
     public ItemResponseDTO createItem(ItemRequestCreateDTO itemRequestCreateDTO, Optional<Long> idUser) {
         log.debug("New item came {} [ItemRequestCreateDTO={}]", SERVICE_FROM_CONTROLLER, itemRequestCreateDTO);
@@ -78,10 +79,11 @@ public class ItemServiceIml implements ItemService {
             log.debug("Found [countListComments={}] {}", listCommentsDTO.size(), SERVICE_FROM_DB);
 
             if (foundItemById.get().getUser().equals(checkedUserFromDB)) {
-                ItemResponseBookingAndCommentDTO ItemResponseDTO = getItemWithBookingAndComment(foundItemById.get(),
-                        listCommentsDTO);
+                ItemResponseBookingAndCommentDTO itemResponseDTO = getItemWithBookingAndComment(
+                        foundItemById.get(), listCommentsDTO);
                 log.debug("Return item with booking queue");
-                return ItemResponseDTO;
+
+                return itemResponseDTO;
             } else {
                 log.debug("Return item without booking queue");
                 return ItemMapper.INSTANCE.toDTOResponseWithCommentsFromEntity(foundItemById.get(), listCommentsDTO);
@@ -93,6 +95,7 @@ public class ItemServiceIml implements ItemService {
         }
     }
 
+    @Transactional
     @Override
     public ItemResponseDTO updateItem(Optional<Long> idUser,
                                       Optional<Long> idItem,
@@ -169,6 +172,7 @@ public class ItemServiceIml implements ItemService {
         return listFoundItemsByText;
     }
 
+    @Transactional
     @Override
     public void deleteItemById(Optional<Long> idUser, Optional<Long> idItem) {
         Long checkedUserId = checkParameterUserId(idUser);
@@ -191,26 +195,7 @@ public class ItemServiceIml implements ItemService {
         }
     }
 
-    private Comment validCommentForCreate(Long userId, Long itemId, CommentRequestCreateDTO comment) {
-        User checkedUserFromDB = findUserEntityById(userId);
-        Item checkedItemFromDB = findItemEntityById(itemId);
-        LocalDateTime currentTime = LocalDateTime.now();
-
-        List<Booking> pastBookingItem = repositoryBooking.getBookingByOwnerBeforeCurrentTime(checkedUserFromDB,
-                checkedItemFromDB, currentTime);
-
-        if (pastBookingItem.size() > 0) {
-            return CommentMapper.INSTANCE.toEntityFromDTOCreate(
-                    comment, checkedItemFromDB, checkedUserFromDB, currentTime
-            );
-        } else {
-            throw new NoCompletedBookingsException(
-                    String.format("User with [idUser=%d] not have completed bookings for this item[idItem=%d]",
-                            userId, itemId)
-            );
-        }
-    }
-
+    @Transactional
     @Override
     public CommentResponseDTO createComment(Optional<Long> idUser, Optional<Long> idItem,
                                             CommentRequestCreateDTO comment) {
@@ -230,6 +215,26 @@ public class ItemServiceIml implements ItemService {
         } else {
             log.error("[comment={}] was not created", createdComment);
             throw new EntityNotCreatedException("New comment");
+        }
+    }
+
+    private Comment validCommentForCreate(Long userId, Long itemId, CommentRequestCreateDTO comment) {
+        User checkedUserFromDB = findUserEntityById(userId);
+        Item checkedItemFromDB = findItemEntityById(itemId);
+        LocalDateTime currentTime = LocalDateTime.now();
+
+        List<Booking> pastBookingItem = repositoryBooking.getBookingByOwnerBeforeCurrentTime(checkedUserFromDB,
+                checkedItemFromDB, currentTime);
+
+        if (pastBookingItem.size() > 0) {
+            return CommentMapper.INSTANCE.toEntityFromDTOCreate(
+                    comment, checkedItemFromDB, checkedUserFromDB, currentTime
+            );
+        } else {
+            throw new NoCompletedBookingsException(
+                    String.format("User with [idUser=%d] not have completed bookings for this item[idItem=%d]",
+                            userId, itemId)
+            );
         }
     }
 

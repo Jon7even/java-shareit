@@ -30,23 +30,24 @@ import static ru.practicum.shareit.constants.NamesParametersInController.X_HEADE
 
 @Slf4j
 @Service
-@Transactional
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class BookingServiceImpl implements BookingService {
     private final BookingRepository repositoryBooking;
     private final ItemRepository repositoryItem;
     private final UserRepository repositoryUser;
 
+    @Transactional
     @Override
     public BookingResponseDTO createBooking(BookingRequestCreateDTO bookingRequestCreateDTO, Optional<Long> idUser) {
         log.debug("New booking came {} [BookingRequestCreateDTO={}]", SERVICE_FROM_CONTROLLER, bookingRequestCreateDTO);
         Long checkedUserId = checkParameterUserId(idUser);
         checkStartAndEndTime(bookingRequestCreateDTO, checkedUserId);
 
-        Booking BookingForCreateInRepository = validBookingForCreate(bookingRequestCreateDTO, checkedUserId);
+        Booking bookingForCreateInRepository = validBookingForCreate(bookingRequestCreateDTO, checkedUserId);
 
-        log.debug("Add new [booking={}] {}", BookingForCreateInRepository, SERVICE_IN_DB);
-        Booking createdBooking = repositoryBooking.save(BookingForCreateInRepository);
+        log.debug("Add new [booking={}] {}", bookingForCreateInRepository, SERVICE_IN_DB);
+        Booking createdBooking = repositoryBooking.save(bookingForCreateInRepository);
         Optional<Booking> foundBookingAfterCreation = repositoryBooking.findById(createdBooking.getId());
 
         if (foundBookingAfterCreation.isPresent() && createdBooking.equals(foundBookingAfterCreation.get())) {
@@ -86,17 +87,18 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
+    @Transactional
     @Override
     public BookingResponseDTO confirmBooking(Optional<Long> idUser, Optional<Long> idBooking, Optional<Boolean> approved) {
         Long checkedUserId = checkParameterUserId(idUser);
         Long checkedBookingId = checkParameterBookingId(idBooking);
         BookingStatus statusForUpdate = getStatusForUpdate(approved);
 
-        Booking BookingForUpdateStatus = validBookingForUpdateStatus(checkedUserId, checkedBookingId, statusForUpdate);
+        Booking bookingForUpdateStatus = validBookingForUpdateStatus(checkedUserId, checkedBookingId, statusForUpdate);
 
         log.debug("Update Booking status[status={}] for [bookingId={}] by [bookerId={}] {}", statusForUpdate,
                 checkedBookingId, checkedUserId, SERVICE_IN_DB);
-        Booking updatedBooking = repositoryBooking.save(BookingForUpdateStatus);
+        Booking updatedBooking = repositoryBooking.save(bookingForUpdateStatus);
 
         if (updatedBooking.getStatus().equals(statusForUpdate)) {
             log.debug("Owner [IdUser={}] by Item[IdItem={}] success updated status [bookingId={}] {}", checkedUserId,

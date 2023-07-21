@@ -26,11 +26,12 @@ import static ru.practicum.shareit.constants.NamesLogsInService.*;
 
 @Slf4j
 @Service
-@Transactional
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class UserServiceIml implements UserService {
     private final UserRepository repositoryUser;
 
+    @Transactional
     @Override
     public UserResponseDTO createUser(UserRequestCreateDTO userRequestCreateDTO) {
         log.debug("New user came {} [UserRequestCreateDTO={}]", SERVICE_FROM_CONTROLLER, userRequestCreateDTO);
@@ -70,6 +71,7 @@ public class UserServiceIml implements UserService {
         }
     }
 
+    @Transactional
     @Override
     public UserResponseDTO updateUser(UserRequestUpdateDTO userRequestUpdateDTO, Optional<Long> idUser) {
         log.debug("User for update came {} [UserRequestUpdateDTO={}]", SERVICE_FROM_CONTROLLER, userRequestUpdateDTO);
@@ -128,6 +130,7 @@ public class UserServiceIml implements UserService {
         }
     }
 
+    @Transactional
     @Override
     public void deleteUserById(Optional<Long> idUser) {
         Long checkedUserId = checkParameterUserId(idUser);
