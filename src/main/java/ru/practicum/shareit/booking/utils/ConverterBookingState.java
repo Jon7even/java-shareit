@@ -3,7 +3,7 @@ package ru.practicum.shareit.booking.utils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.booking.entity.BookingState;
+import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.exception.UnknownException;
 
 @Component

@@ -10,11 +10,11 @@ import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.exception.EntityAlreadyExistsException;
 import ru.practicum.shareit.exception.EntityNotUpdatedException;
 import ru.practicum.shareit.user.mapper.UserMapper;
-import ru.practicum.shareit.user.dao.UserDao;
+import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.dto.UserRequestCreateDTO;
 import ru.practicum.shareit.user.dto.UserRequestUpdateDTO;
 import ru.practicum.shareit.user.dto.UserResponseDTO;
-import ru.practicum.shareit.user.entity.User;
+import ru.practicum.shareit.user.model.User;
 
 import javax.validation.ConstraintViolationException;
 import java.util.List;
@@ -29,7 +29,7 @@ import static ru.practicum.shareit.constants.NamesLogsInService.*;
 @Transactional
 @RequiredArgsConstructor
 public class UserServiceIml implements UserService {
-    private final UserDao repositoryUser;
+    private final UserRepository repositoryUser;
 
     @Override
     public UserResponseDTO createUser(UserRequestCreateDTO userRequestCreateDTO) {

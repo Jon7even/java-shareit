@@ -8,8 +8,8 @@ import ru.practicum.shareit.item.dto.CommentResponseDTO;
 import ru.practicum.shareit.item.dto.ItemRequestCreateDTO;
 import ru.practicum.shareit.item.dto.ItemResponseBookingAndCommentDTO;
 import ru.practicum.shareit.item.dto.ItemResponseDTO;
-import ru.practicum.shareit.item.entity.Item;
-import ru.practicum.shareit.user.entity.User;
+import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.model.User;
 
 import java.util.List;
 

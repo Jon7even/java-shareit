@@ -1,15 +1,15 @@
-package ru.practicum.shareit.item.dao;
+package ru.practicum.shareit.item.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.item.entity.Item;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.projections.ItemShort;
 
 import java.util.List;
 
 @Component
-public interface ItemDao extends JpaRepository<Item, Long> {
+public interface ItemRepository extends JpaRepository<Item, Long> {
 
     List<Item> findByUserId(Long userId);
 

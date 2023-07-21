@@ -1,18 +1,18 @@
-package ru.practicum.shareit.booking.dao;
+package ru.practicum.shareit.booking.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.booking.entity.Booking;
-import ru.practicum.shareit.booking.entity.BookingStatus;
-import ru.practicum.shareit.item.entity.Item;
-import ru.practicum.shareit.user.entity.User;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.BookingStatus;
+import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Component
-public interface BookingDao extends JpaRepository<Booking, Long> {
+public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findByUserIdOrderByIdDesc(Long userId);
 
     @Query("SELECT bk " +

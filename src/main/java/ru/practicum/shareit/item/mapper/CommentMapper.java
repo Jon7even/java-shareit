@@ -5,9 +5,9 @@ import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 import ru.practicum.shareit.item.dto.CommentRequestCreateDTO;
 import ru.practicum.shareit.item.dto.CommentResponseDTO;
-import ru.practicum.shareit.item.entity.Comment;
-import ru.practicum.shareit.item.entity.Item;
-import ru.practicum.shareit.user.entity.User;
+import ru.practicum.shareit.item.model.Comment;
+import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 

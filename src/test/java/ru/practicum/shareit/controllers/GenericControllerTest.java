@@ -10,12 +10,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.booking.dto.BookingRequestCreateDTO;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.item.dto.ItemRequestCreateDTO;
-import ru.practicum.shareit.item.entity.Item;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.dto.UserRequestCreateDTO;
 import ru.practicum.shareit.user.service.UserService;
-
-import java.time.LocalDateTime;
 
 import static ru.practicum.shareit.constants.NamesParametersInController.X_HEADER_USER_ID;
 

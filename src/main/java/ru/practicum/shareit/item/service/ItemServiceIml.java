@@ -4,26 +4,30 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.booking.dao.BookingDao;
-import ru.practicum.shareit.booking.entity.Booking;
-import ru.practicum.shareit.booking.entity.BookingStatus;
+import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.dto.BookingQueueDTO;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.exception.*;
 
-import ru.practicum.shareit.item.dao.CommentDao;
-import ru.practicum.shareit.item.dao.ItemDao;
+import ru.practicum.shareit.item.repository.CommentRepository;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.dto.*;
-import ru.practicum.shareit.item.entity.Comment;
-import ru.practicum.shareit.item.entity.Item;
+import ru.practicum.shareit.item.model.Comment;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.mapper.CommentMapper;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.projections.ItemShort;
-import ru.practicum.shareit.user.dao.UserDao;
-import ru.practicum.shareit.user.entity.User;
+import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Optional;
+import java.util.List;
+import java.util.Collections;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.stream.Collectors;
 
 import static ru.practicum.shareit.constants.NamesLogsInService.*;
@@ -34,10 +38,10 @@ import static ru.practicum.shareit.constants.NamesParametersInController.X_HEADE
 @Transactional
 @RequiredArgsConstructor
 public class ItemServiceIml implements ItemService {
-    private final ItemDao repositoryItem;
-    private final UserDao repositoryUser;
-    private final BookingDao repositoryBooking;
-    private final CommentDao repositoryComment;
+    private final ItemRepository repositoryItem;
+    private final UserRepository repositoryUser;
+    private final BookingRepository repositoryBooking;
+    private final CommentRepository repositoryComment;
 
     @Override
     public ItemResponseDTO createItem(ItemRequestCreateDTO itemRequestCreateDTO, Optional<Long> idUser) {

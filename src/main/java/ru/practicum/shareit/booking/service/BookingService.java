@@ -2,7 +2,7 @@ package ru.practicum.shareit.booking.service;
 
 import ru.practicum.shareit.booking.dto.BookingRequestCreateDTO;
 import ru.practicum.shareit.booking.dto.BookingResponseDTO;
-import ru.practicum.shareit.booking.entity.BookingState;
+import ru.practicum.shareit.booking.model.BookingState;
 
 import java.util.List;
 import java.util.Optional;

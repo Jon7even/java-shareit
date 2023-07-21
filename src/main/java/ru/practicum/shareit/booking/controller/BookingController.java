@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingRequestCreateDTO;
 import ru.practicum.shareit.booking.dto.BookingResponseDTO;
-import ru.practicum.shareit.booking.entity.BookingState;
+import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.service.BookingService;
 
 import javax.servlet.http.HttpServletRequest;

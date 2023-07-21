@@ -21,7 +21,7 @@
 package ru.practicum.shareit.config;
 
 import lombok.experimental.UtilityClass;
-import ru.practicum.shareit.booking.entity.BookingStatus;
+import ru.practicum.shareit.booking.model.BookingStatus;
 
 @UtilityClass
 public class StaticConfig {

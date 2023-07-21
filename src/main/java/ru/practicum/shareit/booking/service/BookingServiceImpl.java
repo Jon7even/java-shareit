@@ -4,18 +4,18 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.booking.dao.BookingDao;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.dto.BookingRequestCreateDTO;
 import ru.practicum.shareit.booking.dto.BookingResponseDTO;
-import ru.practicum.shareit.booking.entity.Booking;
-import ru.practicum.shareit.booking.entity.BookingState;
-import ru.practicum.shareit.booking.entity.BookingStatus;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.BookingState;
+import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.exception.*;
-import ru.practicum.shareit.item.dao.ItemDao;
-import ru.practicum.shareit.item.entity.Item;
-import ru.practicum.shareit.user.dao.UserDao;
-import ru.practicum.shareit.user.entity.User;
+import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -33,9 +33,9 @@ import static ru.practicum.shareit.constants.NamesParametersInController.X_HEADE
 @Transactional
 @RequiredArgsConstructor
 public class BookingServiceImpl implements BookingService {
-    private final BookingDao repositoryBooking;
-    private final ItemDao repositoryItem;
-    private final UserDao repositoryUser;
+    private final BookingRepository repositoryBooking;
+    private final ItemRepository repositoryItem;
+    private final UserRepository repositoryUser;
 
     @Override
     public BookingResponseDTO createBooking(BookingRequestCreateDTO bookingRequestCreateDTO, Optional<Long> idUser) {

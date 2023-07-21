@@ -6,10 +6,10 @@ import org.mapstruct.factory.Mappers;
 import ru.practicum.shareit.booking.dto.BookingQueueDTO;
 import ru.practicum.shareit.booking.dto.BookingRequestCreateDTO;
 import ru.practicum.shareit.booking.dto.BookingResponseDTO;
-import ru.practicum.shareit.booking.entity.Booking;
-import ru.practicum.shareit.booking.entity.BookingStatus;
-import ru.practicum.shareit.item.entity.Item;
-import ru.practicum.shareit.user.entity.User;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.BookingStatus;
+import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.model.User;
 
 @Mapper(componentModel = "spring")
 public interface BookingMapper {
