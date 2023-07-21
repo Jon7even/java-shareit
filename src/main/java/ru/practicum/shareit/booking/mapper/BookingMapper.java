@@ -3,6 +3,7 @@ package ru.practicum.shareit.booking.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import ru.practicum.shareit.booking.dto.BookingQueueDTO;
 import ru.practicum.shareit.booking.dto.BookingRequestCreateDTO;
 import ru.practicum.shareit.booking.dto.BookingResponseDTO;
 import ru.practicum.shareit.booking.entity.Booking;
@@ -31,4 +32,8 @@ public interface BookingMapper {
     @Mapping(source = "booking.item.name", target = "item.name")
     @Mapping(source = "booking.status", target = "status")
     BookingResponseDTO toDTOResponseFromEntity(Booking booking);
+
+    @Mapping(source = "booking.id", target = "id")
+    @Mapping(source = "booking.user.id", target = "bookerId")
+    BookingQueueDTO toDTOResponseShortFromEntity(Booking booking);
 }

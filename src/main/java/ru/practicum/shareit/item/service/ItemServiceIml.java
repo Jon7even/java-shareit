@@ -5,24 +5,25 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dao.BookingDao;
-import ru.practicum.shareit.exception.EntityNotCreatedException;
-import ru.practicum.shareit.exception.EntityNotDeletedException;
-import ru.practicum.shareit.exception.AccessDeniedException;
-import ru.practicum.shareit.exception.EntityNotFoundException;
-import ru.practicum.shareit.exception.IncorrectParameterException;
-import ru.practicum.shareit.exception.EntityNotUpdatedException;
+import ru.practicum.shareit.booking.entity.Booking;
+import ru.practicum.shareit.booking.entity.BookingStatus;
+import ru.practicum.shareit.booking.dto.BookingQueueDTO;
+import ru.practicum.shareit.booking.mapper.BookingMapper;
+import ru.practicum.shareit.exception.*;
 
+import ru.practicum.shareit.item.dao.CommentDao;
 import ru.practicum.shareit.item.dao.ItemDao;
 import ru.practicum.shareit.item.dto.*;
+import ru.practicum.shareit.item.entity.Comment;
 import ru.practicum.shareit.item.entity.Item;
+import ru.practicum.shareit.item.mapper.CommentMapper;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.projections.ItemShort;
 import ru.practicum.shareit.user.dao.UserDao;
 import ru.practicum.shareit.user.entity.User;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static ru.practicum.shareit.constants.NamesLogsInService.*;
@@ -36,6 +37,7 @@ public class ItemServiceIml implements ItemService {
     private final ItemDao repositoryItem;
     private final UserDao repositoryUser;
     private final BookingDao repositoryBooking;
+    private final CommentDao repositoryComment;
 
     @Override
     public ItemResponseDTO createItem(ItemRequestCreateDTO itemRequestCreateDTO, Optional<Long> idUser) {
@@ -57,17 +59,30 @@ public class ItemServiceIml implements ItemService {
     }
 
     @Override
-    public ItemResponseDTO findItemById(Optional<Long> idUser, Optional<Long> idItem) {
+    public ItemResponseBookingAndCommentDTO findItemById(Optional<Long> idUser, Optional<Long> idItem) {
         Long checkedUserId = checkParameterUserId(idUser);
         Long checkedItemId = checkParameterItemId(idItem);
-        findUserEntityById(checkedUserId);
+        User checkedUserFromDB = findUserEntityById(checkedUserId);
 
         log.debug("Get item by [id={}] owner [user={}] {}", checkedItemId, checkedUserId, SERVICE_IN_DB);
         Optional<Item> foundItemById = repositoryItem.findById(checkedItemId);
 
         if (foundItemById.isPresent()) {
             log.debug("Found [item={}] {}", foundItemById.get(), SERVICE_FROM_DB);
-            return ItemMapper.INSTANCE.toDTOResponseFromEntity(foundItemById.get());
+
+            List<CommentResponseDTO> listCommentsDTO = getListCommentsByItemFromDb(foundItemById.get());
+            log.debug("Found [countListComments={}] {}", listCommentsDTO.size(), SERVICE_FROM_DB);
+
+            if (foundItemById.get().getUser().equals(checkedUserFromDB)) {
+                ItemResponseBookingAndCommentDTO ItemResponseDTO = getItemWithBookingAndComment(foundItemById.get(),
+                        listCommentsDTO);
+                log.debug("Return item with booking queue");
+                return ItemResponseDTO;
+            } else {
+                log.debug("Return item without booking queue");
+                return ItemMapper.INSTANCE.toDTOResponseWithCommentsFromEntity(foundItemById.get(), listCommentsDTO);
+            }
+
         } else {
             log.warn("Item by [idItem={}] owner [idUser={}] was not found", checkedItemId, checkedUserId);
             throw new EntityNotFoundException(String.format("Item with [idItem=%d]", checkedItemId));
@@ -98,23 +113,29 @@ public class ItemServiceIml implements ItemService {
     }
 
     @Override
-    public List<ItemResponseDTO> getAllItemsByUserId(Optional<Long> idUser) {
-        long checkedUserId = checkParameterUserId(idUser);
+    public List<ItemResponseBookingAndCommentDTO> getAllItemsByUserId(Optional<Long> idUser) {
+        Long checkedUserId = checkParameterUserId(idUser);
         findUserEntityById(checkedUserId);
 
         log.debug("Get all items {} by [idUser={}]", SERVICE_IN_DB, checkedUserId);
-        List<Item> listItemsByIdUser = repositoryItem.findByUserId(checkedUserId);
+        List<Item> itemsByIdUser = repositoryItem.findByUserId(checkedUserId);
 
-        if (listItemsByIdUser.isEmpty()) {
+        if (itemsByIdUser.isEmpty()) {
             log.debug("Has returned empty list items {} by [idUser={}]", SERVICE_FROM_DB, idUser);
+            return Collections.emptyList();
         } else {
-            log.debug("Found list items [count={}] {} by [idUser={}]",
-                    listItemsByIdUser.size(), SERVICE_FROM_DB, idUser);
-        }
+            List<ItemResponseBookingAndCommentDTO> listForResponseDTO = new ArrayList<>();
 
-        return listItemsByIdUser.stream()
-                .map(ItemMapper.INSTANCE::toDTOResponseFromEntity)
-                .collect(Collectors.toList());
+            for (Item item : itemsByIdUser) {
+                List<CommentResponseDTO> comments = getListCommentsByItemFromDb(item);
+                listForResponseDTO.add(getItemWithBookingAndComment(item, comments));
+            }
+
+            log.debug("Found list items [count={}] {} by [idUser={}]",
+                    listForResponseDTO.size(), SERVICE_FROM_DB, idUser);
+
+            return listForResponseDTO;
+        }
     }
 
     @Override
@@ -164,6 +185,82 @@ public class ItemServiceIml implements ItemService {
             log.error("Item by [id={}] [ownerName{}] was not removed", checkedItemId, checkedUserFromDB.getName());
             throw new EntityNotDeletedException(String.format("Item with [idItem=%d]", checkedItemId));
         }
+    }
+
+    private Comment validCommentForCreate(Long userId, Long itemId, CommentRequestCreateDTO comment) {
+        User checkedUserFromDB = findUserEntityById(userId);
+        Item checkedItemFromDB = findItemEntityById(itemId);
+        LocalDateTime currentTime = LocalDateTime.now();
+
+        List<Booking> pastBookingItem = repositoryBooking.getBookingByOwnerBeforeCurrentTime(checkedUserFromDB,
+                checkedItemFromDB, currentTime);
+
+        if (pastBookingItem.size() > 0) {
+            return CommentMapper.INSTANCE.toEntityFromDTOCreate(
+                    comment, checkedItemFromDB, checkedUserFromDB, currentTime
+            );
+        } else {
+            throw new NoCompletedBookingsException(
+                    String.format("User with [idUser=%d] not have completed bookings for this item[idItem=%d]",
+                            userId, itemId)
+            );
+        }
+    }
+
+    @Override
+    public CommentResponseDTO createComment(Optional<Long> idUser, Optional<Long> idItem,
+                                            CommentRequestCreateDTO comment) {
+        Long checkedUserId = checkParameterUserId(idUser);
+        Long checkedItemId = checkParameterItemId(idItem);
+
+        Comment commentForCreateInRepository = validCommentForCreate(checkedUserId, checkedItemId, comment);
+
+        log.debug("Add new [comment={}] {}", commentForCreateInRepository, SERVICE_IN_DB);
+
+        Comment createdComment = repositoryComment.save(commentForCreateInRepository);
+        Optional<Comment> foundCommentAfterCreation = repositoryComment.findById(createdComment.getId());
+
+        if (foundCommentAfterCreation.isPresent() && createdComment.equals(foundCommentAfterCreation.get())) {
+            log.debug("New comment has returned [comment={}] {}", createdComment, SERVICE_FROM_DB);
+            return CommentMapper.INSTANCE.toDTOResponseFromEntity(createdComment);
+        } else {
+            log.error("[comment={}] was not created", createdComment);
+            throw new EntityNotCreatedException("New comment");
+        }
+    }
+
+    private List<CommentResponseDTO> getListCommentsByItemFromDb(Item item) {
+        List<Comment> listCommentsByItem = repositoryComment.findAllCommentsByItem(item);
+        log.debug("Found [countListComments={}] {}", listCommentsByItem.size(), SERVICE_FROM_DB);
+
+        return listCommentsByItem.stream()
+                .map(CommentMapper.INSTANCE::toDTOResponseFromEntity)
+                .collect(Collectors.toList());
+    }
+
+    private ItemResponseBookingAndCommentDTO getItemWithBookingAndComment(Item item,
+                                                                          List<CommentResponseDTO> listCommentsDTO) {
+        List<Booking> listBookingByItem = repositoryBooking.findByItemOrderByStart(item);
+        LocalDateTime currentTime = LocalDateTime.now();
+
+        BookingQueueDTO lastBooking = listBookingByItem.stream()
+                .sorted(Comparator.comparing(Booking::getStart).reversed())
+                .filter(booking -> booking.getStart().isBefore(currentTime)
+                        && booking.getStatus().equals(BookingStatus.APPROVED))
+                .map(BookingMapper.INSTANCE::toDTOResponseShortFromEntity)
+                .findFirst().orElse(null);
+
+        BookingQueueDTO nextBooking = listBookingByItem.stream()
+                .filter(booking -> booking.getStart().isAfter(currentTime)
+                        && booking.getStatus().equals(BookingStatus.APPROVED))
+                .map(BookingMapper.INSTANCE::toDTOResponseShortFromEntity)
+                .findFirst().orElse(null);
+
+        log.debug("Found [lastBooking={}] and [nextBooking={}] {}", lastBooking, nextBooking, SERVICE_FROM_DB);
+
+        return ItemMapper.INSTANCE.toDTOResponseWithCommentsByOwnerFromEntity(
+                item, lastBooking, nextBooking, listCommentsDTO
+        );
     }
 
     private Item validItemForCreate(ItemRequestCreateDTO itemRequestCreateDTO, Long checkedUserId) {

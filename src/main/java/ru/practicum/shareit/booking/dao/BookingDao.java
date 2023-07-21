@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.booking.entity.Booking;
 import ru.practicum.shareit.booking.entity.BookingStatus;
+import ru.practicum.shareit.item.entity.Item;
 import ru.practicum.shareit.user.entity.User;
 
 import java.time.LocalDateTime;
@@ -16,8 +17,8 @@ public interface BookingDao extends JpaRepository<Booking, Long> {
 
     @Query("SELECT bk " +
             " FROM Booking AS bk " +
-            " JOIN bk.item " +
-            " JOIN bk.user " +
+            " JOIN FETCH bk.item " +
+            " JOIN FETCH bk.user " +
             "WHERE bk.user = ?1 " +
             "  AND bk.status = ?2 " +
             "ORDER BY bk.start " +
@@ -26,8 +27,8 @@ public interface BookingDao extends JpaRepository<Booking, Long> {
 
     @Query("SELECT bk " +
             " FROM Booking AS bk " +
-            " JOIN bk.item " +
-            " JOIN bk.user " +
+            " JOIN FETCH bk.item " +
+            " JOIN FETCH bk.user " +
             "WHERE bk.user = ?1 " +
             "  AND bk.start <= ?2 " +
             "  AND bk.end >= ?2 " +
@@ -37,8 +38,8 @@ public interface BookingDao extends JpaRepository<Booking, Long> {
 
     @Query("SELECT bk " +
             " FROM Booking AS bk " +
-            " JOIN bk.item " +
-            " JOIN bk.user " +
+            " JOIN FETCH bk.item " +
+            " JOIN FETCH bk.user " +
             "WHERE bk.user = ?1 " +
             "  AND bk.end < ?2 " +
             "ORDER BY bk.start " +
@@ -47,8 +48,8 @@ public interface BookingDao extends JpaRepository<Booking, Long> {
 
     @Query("SELECT bk " +
             " FROM Booking AS bk " +
-            " JOIN bk.item " +
-            " JOIN bk.user " +
+            " JOIN FETCH bk.item " +
+            " JOIN FETCH bk.user " +
             "WHERE bk.user = ?1 " +
             "  AND bk.start > ?2 " +
             "ORDER BY bk.start " +
@@ -57,8 +58,8 @@ public interface BookingDao extends JpaRepository<Booking, Long> {
 
     @Query("SELECT bk " +
             " FROM Booking AS bk " +
-            " JOIN bk.item AS it" +
-            " JOIN bk.user " +
+            " JOIN FETCH bk.item AS it " +
+            " JOIN FETCH bk.user " +
             "WHERE it.user = ?1 " +
             "ORDER BY bk.start " +
             " DESC")
@@ -66,8 +67,8 @@ public interface BookingDao extends JpaRepository<Booking, Long> {
 
     @Query("SELECT bk " +
             " FROM Booking AS bk " +
-            " JOIN bk.item AS it" +
-            " JOIN bk.user " +
+            " JOIN FETCH bk.item AS it " +
+            " JOIN FETCH bk.user " +
             "WHERE it.user = ?1 " +
             "  AND bk.status = ?2 " +
             "ORDER BY bk.start " +
@@ -76,8 +77,8 @@ public interface BookingDao extends JpaRepository<Booking, Long> {
 
     @Query("SELECT bk " +
             " FROM Booking AS bk " +
-            " JOIN bk.item AS it" +
-            " JOIN bk.user " +
+            " JOIN FETCH bk.item AS it " +
+            " JOIN FETCH bk.user " +
             "WHERE it.user = ?1 " +
             "  AND bk.start <= ?2 " +
             "  AND bk.end >= ?2 " +
@@ -87,8 +88,8 @@ public interface BookingDao extends JpaRepository<Booking, Long> {
 
     @Query("SELECT bk " +
             " FROM Booking AS bk " +
-            " JOIN bk.item AS it" +
-            " JOIN bk.user " +
+            " JOIN FETCH bk.item AS it " +
+            " JOIN FETCH bk.user " +
             "WHERE it.user = ?1 " +
             "  AND bk.end < ?2 " +
             "ORDER BY bk.start " +
@@ -97,12 +98,24 @@ public interface BookingDao extends JpaRepository<Booking, Long> {
 
     @Query("SELECT bk " +
             " FROM Booking AS bk " +
-            " JOIN bk.item AS it" +
-            " JOIN bk.user " +
+            " JOIN FETCH bk.item AS it " +
+            " JOIN FETCH bk.user " +
             "WHERE it.user = ?1 " +
             "  AND bk.start > ?2 " +
             "ORDER BY bk.start " +
             " DESC")
     List<Booking> findFutureItemsBookingByOwnerId(User user, LocalDateTime currentTime);
 
+    @Query("SELECT bk " +
+            " FROM Booking AS bk " +
+            " JOIN FETCH bk.item it" +
+            " JOIN FETCH bk.user " +
+            "WHERE bk.user = ?1 " +
+            "  AND it = ?2 " +
+            "  AND bk.end < ?3 " +
+            "ORDER BY bk.start " +
+            " DESC ")
+    List<Booking> getBookingByOwnerBeforeCurrentTime(User user, Item item, LocalDateTime currentTime);
+
+    List<Booking> findByItemOrderByStart(Item item);
 }

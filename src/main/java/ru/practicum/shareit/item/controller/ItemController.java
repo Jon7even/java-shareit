@@ -15,9 +15,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
-import ru.practicum.shareit.item.dto.ItemRequestCreateDTO;
-import ru.practicum.shareit.item.dto.ItemRequestUpdateDTO;
-import ru.practicum.shareit.item.dto.ItemResponseDTO;
+import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.projections.ItemShort;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.utils.HttpServletUtils;
@@ -49,9 +47,10 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ResponseEntity<ItemResponseDTO> getItemById(@RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
-                                                       @PathVariable Optional<Long> itemId,
-                                                       HttpServletRequest request) {
+    public ResponseEntity<ItemResponseBookingAndCommentDTO> getItemById(
+            @RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
+            @PathVariable Optional<Long> itemId,
+            HttpServletRequest request) {
 
         log.debug("On {} {} {}", request.getRequestURL(), IN_CONTROLLER_METHOD, request.getMethod());
 
@@ -70,13 +69,13 @@ public class ItemController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ItemResponseDTO>> getAllItemsByUserId(
+    public ResponseEntity<List<ItemResponseBookingAndCommentDTO>> getAllItemsByUserId(
             @RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
             HttpServletRequest request) {
 
         log.debug("On {} {} {}", request.getRequestURL(), IN_CONTROLLER_METHOD, request.getMethod());
 
-        List<ItemResponseDTO> getAllItemsByUserId = itemService.getAllItemsByUserId(userId);
+        List<ItemResponseBookingAndCommentDTO> getAllItemsByUserId = itemService.getAllItemsByUserId(userId);
 
         return ResponseEntity.ok()
                 .header(X_COUNT_ITEMS, String.valueOf(getAllItemsByUserId.size()))
@@ -108,6 +107,19 @@ public class ItemController {
         itemService.deleteItemById(userId, itemId);
 
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public ResponseEntity<CommentResponseDTO> createComment(@RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
+                                                            @PathVariable Optional<Long> itemId,
+                                                            @Valid @RequestBody CommentRequestCreateDTO comment,
+                                                            HttpServletRequest request) {
+
+        log.debug("On {} {} {}", request.getRequestURL(), IN_CONTROLLER_METHOD, request.getMethod());
+
+        return ResponseEntity.status(HttpStatus.OK).body(
+                itemService.createComment(userId, itemId, comment)
+        );
     }
 
 }

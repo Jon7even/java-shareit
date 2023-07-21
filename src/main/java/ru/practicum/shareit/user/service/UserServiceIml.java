@@ -18,6 +18,7 @@ import ru.practicum.shareit.user.entity.User;
 
 import javax.validation.ConstraintViolationException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -84,7 +85,7 @@ public class UserServiceIml implements UserService {
             Optional<User> checkedEmailUser = repositoryUser.findUserByEmailContainingIgnoreCase(user.getEmail());
 
             if (checkedEmailUser.isPresent()) {
-                boolean isEqualsEmailThisUser = checkedEmailUser.get().getId() == checkedUserId;
+                boolean isEqualsEmailThisUser = Objects.equals(checkedEmailUser.get().getId(), checkedUserId);
 
                 if (isEqualsEmailThisUser) {
                     updateUserInRepository.setEmail(checkedEmailUser.get().getEmail());
