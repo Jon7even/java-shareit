@@ -27,6 +27,7 @@ public class BookingControllerTest extends GenericControllerTest {
     @DisplayName("Бронирование должно создаться с релевантными полями")
     void shouldCreateBooking_thenStatus201() throws Exception {
         userService.createUser(firstUser);
+        userService.createUser(secondUser);
         itemService.createItem(firstItem, Optional.of(FIRST_ID));
 
         LocalDateTime start = LocalDateTime.now().plusMinutes(5).withNano(0);
@@ -35,7 +36,7 @@ public class BookingControllerTest extends GenericControllerTest {
         firstBooking.setEnd(end);
 
         mockMvc.perform(post("/bookings")
-                        .header(X_HEADER_USER_ID, FIRST_ID)
+                        .header(X_HEADER_USER_ID, FIRST_ID + 1)
                         .content(objectMapper.writeValueAsString(firstBooking))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
@@ -44,7 +45,7 @@ public class BookingControllerTest extends GenericControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("end").value(end.toString()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.item.id").value(FIRST_ID))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.item.name").value(firstItem.getName()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.booker.id").value(FIRST_ID))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.booker.id").value(FIRST_ID + 1))
                 .andExpect(MockMvcResultMatchers.jsonPath("status").value(BookingStatus.WAITING.toString()));
     }
 }
