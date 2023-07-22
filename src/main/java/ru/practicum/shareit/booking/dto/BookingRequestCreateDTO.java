@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class BookingRequestCreateDTO {
     @NotNull
-    Long itemId;
+    private Long itemId;
 
     @NotNull
     @FutureOrPresent

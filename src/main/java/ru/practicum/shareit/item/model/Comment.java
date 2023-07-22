@@ -2,9 +2,10 @@ package ru.practicum.shareit.item.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.ToString;
+import lombok.Setter;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.Id;
@@ -18,11 +19,13 @@ import javax.persistence.JoinColumn;
 import javax.persistence.FetchType;
 import java.time.LocalDateTime;
 
-@Data
+@Entity
 @Builder
+@Setter
+@Getter
+@ToString
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
 @Table(name = "comments", schema = "public")
 public class Comment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,4 +48,16 @@ public class Comment {
 
     @Column(name = "created")
     private LocalDateTime created;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Comment)) return false;
+        return id != null && id.equals(((Comment) o).getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }
