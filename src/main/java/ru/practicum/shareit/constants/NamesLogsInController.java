@@ -1,8 +1,8 @@
 package ru.practicum.shareit.constants;
 
-public class NamesLogsInController {
-    private NamesLogsInController() {
-    }
+import lombok.experimental.UtilityClass;
 
+@UtilityClass
+public class NamesLogsInController {
     public static final String IN_CONTROLLER_METHOD = "was used method";
 }

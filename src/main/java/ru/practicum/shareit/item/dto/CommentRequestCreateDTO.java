@@ -1,18 +1,17 @@
-package ru.practicum.shareit.user.entity;
+package ru.practicum.shareit.item.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotBlank;
+
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class User {
-    private long id;
-
-    private String name;
-
-    private String email;
+public class CommentRequestCreateDTO {
+    @NotBlank
+    private String text;
 }

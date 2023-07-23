@@ -3,54 +3,64 @@ package ru.practicum.shareit.user.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.EntityNotCreatedException;
 import ru.practicum.shareit.exception.EntityNotDeletedException;
 import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.exception.EntityAlreadyExistsException;
 import ru.practicum.shareit.exception.EntityNotUpdatedException;
-import ru.practicum.shareit.mappers.UserMapper;
-import ru.practicum.shareit.user.dao.UserDao;
+import ru.practicum.shareit.user.mapper.UserMapper;
+import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.dto.UserRequestCreateDTO;
 import ru.practicum.shareit.user.dto.UserRequestUpdateDTO;
 import ru.practicum.shareit.user.dto.UserResponseDTO;
-import ru.practicum.shareit.user.entity.User;
+import ru.practicum.shareit.user.model.User;
 
+import javax.validation.ConstraintViolationException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static ru.practicum.shareit.constants.NamesLogsInService.SERVICE_FROM_DB;
-import static ru.practicum.shareit.constants.NamesLogsInService.SERVICE_IN_DB;
+import static ru.practicum.shareit.constants.NamesLogsInService.*;
 
 @Slf4j
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class UserServiceIml implements UserService {
-    private final UserDao repositoryUser;
+    private final UserRepository repositoryUser;
 
+    @Transactional
     @Override
     public UserResponseDTO createUser(UserRequestCreateDTO userRequestCreateDTO) {
+        log.debug("New user came {} [UserRequestCreateDTO={}]", SERVICE_FROM_CONTROLLER, userRequestCreateDTO);
         User user = UserMapper.INSTANCE.toEntityFromDTOCreate(userRequestCreateDTO);
-        checkEmail(user.getEmail());
 
-        log.debug("Add new [user={}] {}", user, SERVICE_IN_DB);
-        Optional<User> createdUser = repositoryUser.createUser(user);
+        try {
+            log.debug("Add new [user={}] {}", user, SERVICE_IN_DB);
+            User createdUser = repositoryUser.save(user);
+            Optional<User> foundUserAfterCreation = repositoryUser.findById(createdUser.getId());
 
-        if (createdUser.isPresent()) {
-            log.debug("New user has returned [user={}] {}", createdUser.get(), SERVICE_FROM_DB);
-            return UserMapper.INSTANCE.toDTOResponseFromEntity(createdUser.get());
-        } else {
-            log.error("[user={}] was not created", user);
-            throw new EntityNotCreatedException("New user");
+            if (foundUserAfterCreation.isPresent() && createdUser.equals(foundUserAfterCreation.get())) {
+                log.debug("New user has returned [user={}] {}", createdUser, SERVICE_FROM_DB);
+                return UserMapper.INSTANCE.toDTOResponseFromEntity(createdUser);
+            } else {
+                log.error("[user={}] was not created", user);
+                throw new EntityNotCreatedException("New user");
+            }
+        } catch (ConstraintViolationException e) {
+            throw new EntityAlreadyExistsException("This email");
         }
+
     }
 
     @Override
     public UserResponseDTO findUserById(Optional<Long> idUser) {
-        long checkedUserId = checkParameterUserId(idUser);
+        Long checkedUserId = checkParameterUserId(idUser);
 
         log.debug("Get user by [id={}] {}", idUser, SERVICE_IN_DB);
-        Optional<User> foundUser = repositoryUser.findUserById(checkedUserId);
+        Optional<User> foundUser = repositoryUser.findById(checkedUserId);
 
         if (foundUser.isPresent()) {
             log.debug("Found [user={}] {}", foundUser.get(), SERVICE_FROM_DB);
@@ -61,8 +71,10 @@ public class UserServiceIml implements UserService {
         }
     }
 
+    @Transactional
     @Override
     public UserResponseDTO updateUser(UserRequestUpdateDTO userRequestUpdateDTO, Optional<Long> idUser) {
+        log.debug("User for update came {} [UserRequestUpdateDTO={}]", SERVICE_FROM_CONTROLLER, userRequestUpdateDTO);
         Long checkedUserId = checkParameterUserId(idUser);
         User user = UserMapper.INSTANCE.toEntityFromDTOUpdate(userRequestUpdateDTO, checkedUserId);
 
@@ -72,10 +84,10 @@ public class UserServiceIml implements UserService {
         if (user.getEmail() == null) {
             updateUserInRepository.setEmail(checkedUserFromRepository.getEmail());
         } else {
-            Optional<User> checkedEmailUser = repositoryUser.findUserByEmail(user.getEmail());
+            Optional<User> checkedEmailUser = repositoryUser.findUserByEmailContainingIgnoreCase(user.getEmail());
 
             if (checkedEmailUser.isPresent()) {
-                boolean isEqualsEmailThisUser = checkedEmailUser.get().getId() == checkedUserId;
+                boolean isEqualsEmailThisUser = Objects.equals(checkedEmailUser.get().getId(), checkedUserId);
 
                 if (isEqualsEmailThisUser) {
                     updateUserInRepository.setEmail(checkedEmailUser.get().getEmail());
@@ -95,6 +107,7 @@ public class UserServiceIml implements UserService {
         if (isEqualsEmail && isEqualsName) {
             log.warn("No need to update user data \n[userUpdate={}]\n[userResult={}]", user, checkedUserFromRepository);
             return UserMapper.INSTANCE.toDTOResponseFromEntity(checkedUserFromRepository);
+
         } else {
 
             if (isEqualsName || user.getName() == null) {
@@ -104,11 +117,12 @@ public class UserServiceIml implements UserService {
             }
 
             log.debug("Update [user={}] {}", updateUserInRepository, SERVICE_IN_DB);
-            Optional<User> updatedUser = repositoryUser.updateUser(updateUserInRepository);
+            User updatedUser = repositoryUser.save(updateUserInRepository);
+            Optional<User> foundUserAfterUpdate = repositoryUser.findById(checkedUserId);
 
-            if (updatedUser.isPresent()) {
-                log.debug("Updated user has returned [user={}] {}", updatedUser.get(), SERVICE_FROM_DB);
-                return UserMapper.INSTANCE.toDTOResponseFromEntity(updatedUser.get());
+            if (foundUserAfterUpdate.isPresent() && updatedUser.equals(foundUserAfterUpdate.get())) {
+                log.debug("Updated user has returned [user={}] {}", updatedUser, SERVICE_FROM_DB);
+                return UserMapper.INSTANCE.toDTOResponseFromEntity(updatedUser);
             } else {
                 log.error("[user={}] was not updated", user);
                 throw new EntityNotUpdatedException(String.format("User with [idUser=%d]", checkedUserId));
@@ -116,15 +130,17 @@ public class UserServiceIml implements UserService {
         }
     }
 
+    @Transactional
     @Override
     public void deleteUserById(Optional<Long> idUser) {
-        long checkedUserId = checkParameterUserId(idUser);
+        Long checkedUserId = checkParameterUserId(idUser);
         User checkedUserFromRepository = findUserEntityById(checkedUserId);
 
         log.debug("Remove [user={}] {}", checkedUserFromRepository, SERVICE_IN_DB);
-        boolean isRemoved = repositoryUser.deleteUserById(checkedUserId);
+        repositoryUser.deleteById(checkedUserId);
+        boolean isRemoved = repositoryUser.existsById(checkedUserId);
 
-        if (isRemoved) {
+        if (!isRemoved) {
             log.debug("User by [id={}] has removed {}", checkedUserId, SERVICE_FROM_DB);
         } else {
             log.error("User by [id={}] was not removed", checkedUserId);
@@ -135,7 +151,7 @@ public class UserServiceIml implements UserService {
     @Override
     public List<UserResponseDTO> getAllUsers() {
         log.debug("Get all users {}", SERVICE_IN_DB);
-        List<User> listUsers = repositoryUser.getAllUsers();
+        List<User> listUsers = repositoryUser.findAll();
 
         if (listUsers.isEmpty()) {
             log.debug("Has returned empty list users {}", SERVICE_FROM_DB);
@@ -146,9 +162,9 @@ public class UserServiceIml implements UserService {
         return listUsers.stream().map(UserMapper.INSTANCE::toDTOResponseFromEntity).collect(Collectors.toList());
     }
 
-    private User findUserEntityById(long checkedUserId) {
+    private User findUserEntityById(Long checkedUserId) {
         log.debug("Get user entity for checking by [idUser={}] {}", checkedUserId, SERVICE_IN_DB);
-        Optional<User> foundCheckUser = repositoryUser.findUserById(checkedUserId);
+        Optional<User> foundCheckUser = repositoryUser.findById(checkedUserId);
 
         if (foundCheckUser.isPresent()) {
             log.debug("Check was successful found [user={}] {}", foundCheckUser.get(), SERVICE_FROM_DB);
@@ -156,12 +172,6 @@ public class UserServiceIml implements UserService {
         } else {
             log.warn("User by [id={}] was not found", checkedUserId);
             throw new EntityNotFoundException(String.format("User with [idUser=%d]", checkedUserId));
-        }
-    }
-
-    private void checkEmail(String email) {
-        if (repositoryUser.findUserByEmail(email).isPresent()) {
-            throw new EntityAlreadyExistsException("This email");
         }
     }
 

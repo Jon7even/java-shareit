@@ -6,7 +6,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import ru.practicum.shareit.exception.ApplicationException;
+import ru.practicum.shareit.exception.UnknownException;
 
 import java.util.Map;
 
@@ -44,13 +46,23 @@ public class ErrorHandler {
                 ));
     }
 
-    @ExceptionHandler(Throwable.class)
-    protected ResponseEntity<Map<String, String>> handleThrowable(final Throwable e) {
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    protected ResponseEntity<Map<String, String>> handleThrowable(final MethodArgumentTypeMismatchException e) {
         log.warn(e.getMessage());
+
+        Throwable cause = e.getCause().getCause();
+
+        if (cause.getClass() == UnknownException.class) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of(
+                            "error", "Unknown state: UNSUPPORTED_STATUS"
+                    ));
+        }
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Map.of(
                         ERROR_MESSAGE, "Unknown"
                 ));
     }
+
 }

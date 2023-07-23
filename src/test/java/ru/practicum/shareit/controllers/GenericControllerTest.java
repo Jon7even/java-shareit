@@ -2,12 +2,15 @@ package ru.practicum.shareit.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.practicum.shareit.booking.dto.BookingRequestCreateDTO;
+import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.item.dto.ItemRequestCreateDTO;
-import ru.practicum.shareit.item.entity.Item;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.dto.UserRequestCreateDTO;
 import ru.practicum.shareit.user.service.UserService;
@@ -16,6 +19,7 @@ import static ru.practicum.shareit.constants.NamesParametersInController.X_HEADE
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@AutoConfigureTestDatabase
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class GenericControllerTest {
     @Autowired
@@ -29,6 +33,9 @@ public class GenericControllerTest {
 
     @Autowired
     protected ItemService itemService;
+
+    @Autowired
+    protected BookingService bookingService;
 
     protected static long FIRST_ID = 1;
 
@@ -50,6 +57,12 @@ public class GenericControllerTest {
 
     protected ItemRequestCreateDTO secondItem;
 
+    protected BookingRequestCreateDTO firstBooking;
+
+    protected BookingRequestCreateDTO secondBooking;
+
+    protected BookingRequestCreateDTO thirdBooking;
+
     protected Item thirdItem;
 
     void initUsers() {
@@ -62,6 +75,18 @@ public class GenericControllerTest {
                 .email("secondUser@yandex.ru")
                 .build();
         thirdUser = UserRequestCreateDTO.builder()
+                .build();
+    }
+
+    void initBookings() {
+        firstBooking = BookingRequestCreateDTO.builder()
+                .itemId(FIRST_ID)
+                .build();
+        secondBooking = BookingRequestCreateDTO.builder()
+                .itemId(FIRST_ID)
+                .build();
+        thirdBooking = BookingRequestCreateDTO.builder()
+                .itemId(FIRST_ID)
                 .build();
     }
 

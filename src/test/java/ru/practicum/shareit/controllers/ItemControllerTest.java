@@ -197,55 +197,27 @@ public class ItemControllerTest extends GenericControllerTest {
     @Test
     @DisplayName("Получить все итемы пользователя по [" + X_HEADER_USER_ID + "]")
     void shouldGetAllItemsByIdUser_thenStatus200() throws Exception {
-        Long idUser = 1L;
         userService.createUser(firstUser);
-        itemService.createItem(firstItem, Optional.of(idUser));
+        userService.createUser(secondUser);
+
+        itemService.createItem(firstItem, Optional.of(1L));
+        itemService.createItem(secondItem, Optional.of(2L));
 
         mockMvc.perform(get("/items")
                         .header(X_HEADER_USER_ID, FIRST_ID))
                 .andExpect(status().isOk())
                 .andExpect(header().stringValues(X_COUNT_ITEMS, String.valueOf(1)))
                 .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].id").value(FIRST_ID));
-
-        mockMvc.perform(post("/items")
-                        .header(X_HEADER_USER_ID, FIRST_ID)
-                        .content(objectMapper.writeValueAsString(secondItem))
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isCreated());
+                .andExpect(jsonPath("$[0].id").value(FIRST_ID))
+                .andExpect(jsonPath("$[0].name").value(firstItem.getName()));
 
         mockMvc.perform(get("/items")
-                        .header(X_HEADER_USER_ID, FIRST_ID))
+                        .header(X_HEADER_USER_ID, FIRST_ID + 1))
                 .andExpect(status().isOk())
-                .andExpect(header().stringValues(X_COUNT_ITEMS, String.valueOf(2)))
-                .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[0].id").value(FIRST_ID))
-                .andExpect(jsonPath("$[0].name").value(firstItem.getName()))
-                .andExpect(jsonPath("$[1].id").value(FIRST_ID + 1))
-                .andExpect(jsonPath("$[1].name").value(secondItem.getName()));
-
-        thirdItem.setName("thirdItem");
-        thirdItem.setDescription("description_3");
-        thirdItem.setAvailable(true);
-
-        mockMvc.perform(post("/items")
-                        .header(X_HEADER_USER_ID, FIRST_ID)
-                        .content(objectMapper.writeValueAsString(thirdItem))
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isCreated());
-
-        mockMvc.perform(get("/items")
-                        .header(X_HEADER_USER_ID, FIRST_ID))
-                .andExpect(status().isOk())
-                .andExpect(header().stringValues(X_COUNT_ITEMS, String.valueOf(3)))
-                .andExpect(jsonPath("$", hasSize(3)))
-                .andExpect(jsonPath("$[0].id").value(FIRST_ID))
-                .andExpect(jsonPath("$[0].name").value(firstItem.getName()))
-                .andExpect(jsonPath("$[1].id").value(FIRST_ID + 1))
-                .andExpect(jsonPath("$[1].name").value(secondItem.getName()))
-                .andExpect(jsonPath("$[2].id").value(FIRST_ID + 2))
-                .andExpect(jsonPath("$[2].name").value("thirdItem"))
-                .andExpect(jsonPath("$[2].description").value("description_3"));
+                .andExpect(header().stringValues(X_COUNT_ITEMS, String.valueOf(1)))
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].id").value(FIRST_ID + 1))
+                .andExpect(jsonPath("$[0].name").value(secondItem.getName()));
     }
 
     @Test
@@ -253,18 +225,46 @@ public class ItemControllerTest extends GenericControllerTest {
     void shouldGetSearchItemsByRequest_thenStatus200() throws Exception {
         Long idUser = 1L;
         userService.createUser(firstUser);
+
         itemService.createItem(firstItem, Optional.of(idUser));
+        mockMvc.perform(get("/items/search?text={text}", "Item")
+                        .header(X_HEADER_USER_ID, FIRST_ID))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].name").value(firstItem.getName()));
+
         itemService.createItem(secondItem, Optional.of(idUser));
+        mockMvc.perform(get("/items/search?text={text}", "description_2")
+                        .header(X_HEADER_USER_ID, FIRST_ID))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(0)));
+
+        secondItem.setAvailable(true);
+        mockMvc.perform(patch("/items/{itemId}", FIRST_ID)
+                        .header(X_HEADER_USER_ID, FIRST_ID)
+                        .content(objectMapper.writeValueAsString(secondItem))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/items/search?text={text}", "description_2")
+                        .header(X_HEADER_USER_ID, FIRST_ID))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].name").value(secondItem.getName()));
 
         thirdItem.setName("thirdItem");
-        thirdItem.setDescription("description_3");
+        thirdItem.setDescription("thirdItem");
         thirdItem.setAvailable(true);
-
         mockMvc.perform(post("/items")
                         .header(X_HEADER_USER_ID, FIRST_ID)
                         .content(objectMapper.writeValueAsString(thirdItem))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
+        mockMvc.perform(get("/items/search?text={text}", "rdIt")
+                        .header(X_HEADER_USER_ID, FIRST_ID))
+                .andExpect(status().isOk())
+                .andExpect(header().stringValues(X_COUNT_ITEMS, String.valueOf(1)))
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].name").value("thirdItem"));
 
         mockMvc.perform(get("/items/search?text={text}", "")
                         .header(X_HEADER_USER_ID, FIRST_ID))
@@ -277,36 +277,6 @@ public class ItemControllerTest extends GenericControllerTest {
         mockMvc.perform(get("/items/search?text={text}", "thirdItem"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath(ERROR_NAME).value(ERROR_M_HEADER_USER_ID));
-
-        mockMvc.perform(get("/items/search?text={text}", "thirdItem")
-                        .header(X_HEADER_USER_ID, FIRST_ID))
-                .andExpect(status().isOk())
-                .andExpect(header().stringValues(X_COUNT_ITEMS, String.valueOf(1)))
-                .andExpect(jsonPath("$", hasSize(1)));
-
-        mockMvc.perform(get("/items/search?text={text}", "Item")
-                        .header(X_HEADER_USER_ID, FIRST_ID))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2)));
-
-        secondItem.setAvailable(true);
-        mockMvc.perform(patch("/items/{itemId}", FIRST_ID + 1)
-                        .header(X_HEADER_USER_ID, FIRST_ID)
-                        .content(objectMapper.writeValueAsString(secondItem))
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
-
-        mockMvc.perform(get("/items/search?text={text}", "Item")
-                        .header(X_HEADER_USER_ID, FIRST_ID))
-                .andExpect(status().isOk())
-                .andExpect(header().stringValues(X_COUNT_ITEMS, String.valueOf(3)))
-                .andExpect(jsonPath("$", hasSize(3)));
-
-        mockMvc.perform(get("/items/search?text={text}", "description_1")
-                        .header(X_HEADER_USER_ID, FIRST_ID))
-                .andExpect(status().isOk())
-                .andExpect(header().stringValues(X_COUNT_ITEMS, String.valueOf(1)))
-                .andExpect(jsonPath("$", hasSize(1)));
     }
 
     @Test

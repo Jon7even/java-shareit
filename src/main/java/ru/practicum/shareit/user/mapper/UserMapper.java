@@ -1,4 +1,4 @@
-package ru.practicum.shareit.mappers;
+package ru.practicum.shareit.user.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -6,12 +6,13 @@ import org.mapstruct.factory.Mappers;
 import ru.practicum.shareit.user.dto.UserRequestCreateDTO;
 import ru.practicum.shareit.user.dto.UserRequestUpdateDTO;
 import ru.practicum.shareit.user.dto.UserResponseDTO;
-import ru.practicum.shareit.user.entity.User;
+import ru.practicum.shareit.user.model.User;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
     UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
 
+    @Mapping(target = "id", ignore = true)
     @Mapping(source = "userRequestCreateDTO.name", target = "name")
     @Mapping(source = "userRequestCreateDTO.email", target = "email")
     User toEntityFromDTOCreate(UserRequestCreateDTO userRequestCreateDTO);

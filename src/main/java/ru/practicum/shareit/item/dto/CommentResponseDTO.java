@@ -1,0 +1,19 @@
+package ru.practicum.shareit.item.dto;
+
+import lombok.*;
+
+import java.time.LocalDateTime;
+
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class CommentResponseDTO {
+    private Long id;
+
+    private String text;
+
+    private String authorName;
+
+    private LocalDateTime created;
+}
