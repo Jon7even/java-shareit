@@ -1,16 +1,18 @@
-package ru.practicum.shareit.controllers;
+package ru.practicum.shareit.controllers.item.controller;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import ru.practicum.shareit.controllers.setup.controller.GenericControllerTest;
 
 import java.util.Optional;
 
 import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -35,10 +37,10 @@ public class ItemControllerTest extends GenericControllerTest {
                         .content(objectMapper.writeValueAsString(firstItem))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
-                .andExpect(MockMvcResultMatchers.jsonPath("id").value(FIRST_ID))
-                .andExpect(MockMvcResultMatchers.jsonPath("name").value("firstItem"))
-                .andExpect(MockMvcResultMatchers.jsonPath("description").value("description_1"))
-                .andExpect(MockMvcResultMatchers.jsonPath("available").value(true));
+                .andExpect(jsonPath("id").value(FIRST_ID))
+                .andExpect(jsonPath("name").value("firstItem"))
+                .andExpect(jsonPath("description").value("description_1"))
+                .andExpect(jsonPath("available").value(true));
     }
 
     @Test
@@ -120,10 +122,10 @@ public class ItemControllerTest extends GenericControllerTest {
                         .content(objectMapper.writeValueAsString(firstItem))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("id").value(FIRST_ID))
-                .andExpect(MockMvcResultMatchers.jsonPath("name").value("firstItemAfterUpdate"))
-                .andExpect(MockMvcResultMatchers.jsonPath("description").value("description_1"))
-                .andExpect(MockMvcResultMatchers.jsonPath("available").value(true));
+                .andExpect(jsonPath("id").value(FIRST_ID))
+                .andExpect(jsonPath("name").value("firstItemAfterUpdate"))
+                .andExpect(jsonPath("description").value("description_1"))
+                .andExpect(jsonPath("available").value(true));
 
         firstItem.setDescription("description_1_AfterUpdate");
 
@@ -132,10 +134,10 @@ public class ItemControllerTest extends GenericControllerTest {
                         .content(objectMapper.writeValueAsString(firstItem))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("id").value(1))
-                .andExpect(MockMvcResultMatchers.jsonPath("name").value("firstItemAfterUpdate"))
-                .andExpect(MockMvcResultMatchers.jsonPath("description").value("description_1_AfterUpdate"))
-                .andExpect(MockMvcResultMatchers.jsonPath("available").value(true));
+                .andExpect(jsonPath("id").value(1))
+                .andExpect(jsonPath("name").value("firstItemAfterUpdate"))
+                .andExpect(jsonPath("description").value("description_1_AfterUpdate"))
+                .andExpect(jsonPath("available").value(true));
 
         firstItem.setAvailable(false);
 
@@ -144,10 +146,10 @@ public class ItemControllerTest extends GenericControllerTest {
                         .content(objectMapper.writeValueAsString(firstItem))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("id").value(1))
-                .andExpect(MockMvcResultMatchers.jsonPath("name").value("firstItemAfterUpdate"))
-                .andExpect(MockMvcResultMatchers.jsonPath("description").value("description_1_AfterUpdate"))
-                .andExpect(MockMvcResultMatchers.jsonPath("available").value(false));
+                .andExpect(jsonPath("id").value(1))
+                .andExpect(jsonPath("name").value("firstItemAfterUpdate"))
+                .andExpect(jsonPath("description").value("description_1_AfterUpdate"))
+                .andExpect(jsonPath("available").value(false));
 
         firstItem.setName("firstItem");
         firstItem.setDescription("description_1");
@@ -158,10 +160,10 @@ public class ItemControllerTest extends GenericControllerTest {
                         .content(objectMapper.writeValueAsString(firstItem))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("id").value(1))
-                .andExpect(MockMvcResultMatchers.jsonPath("name").value("firstItem"))
-                .andExpect(MockMvcResultMatchers.jsonPath("description").value("description_1"))
-                .andExpect(MockMvcResultMatchers.jsonPath("available").value(true));
+                .andExpect(jsonPath("id").value(1))
+                .andExpect(jsonPath("name").value("firstItem"))
+                .andExpect(jsonPath("description").value("description_1"))
+                .andExpect(jsonPath("available").value(true));
     }
 
     @Test
@@ -174,10 +176,10 @@ public class ItemControllerTest extends GenericControllerTest {
         mockMvc.perform(get("/items/{itemId}", FIRST_ID)
                         .header(X_HEADER_USER_ID, FIRST_ID))
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("id").value(1))
-                .andExpect(MockMvcResultMatchers.jsonPath("name").value("firstItem"))
-                .andExpect(MockMvcResultMatchers.jsonPath("description").value("description_1"))
-                .andExpect(MockMvcResultMatchers.jsonPath("available").value(true));
+                .andExpect(jsonPath("id").value(1))
+                .andExpect(jsonPath("name").value("firstItem"))
+                .andExpect(jsonPath("description").value("description_1"))
+                .andExpect(jsonPath("available").value(true));
 
         mockMvc.perform(get("/items/{itemId}", FIRST_ID + 1)
                         .header(X_HEADER_USER_ID, FIRST_ID))

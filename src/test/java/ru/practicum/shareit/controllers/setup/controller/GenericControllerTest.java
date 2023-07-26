@@ -1,4 +1,4 @@
-package ru.practicum.shareit.controllers;
+package ru.practicum.shareit.controllers.setup.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +8,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.booking.dto.BookingCreateTO;
-import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.item.dto.ItemCreateTO;
 import ru.practicum.shareit.item.model.ItemEntity;
 import ru.practicum.shareit.item.service.ItemService;
@@ -33,9 +32,6 @@ public class GenericControllerTest {
 
     @Autowired
     protected ItemService itemService;
-
-    @Autowired
-    protected BookingService bookingService;
 
     protected static long FIRST_ID = 1;
 
@@ -65,7 +61,7 @@ public class GenericControllerTest {
 
     protected ItemEntity thirdItem;
 
-    void initUsers() {
+    protected void initUsers() {
         firstUser = UserCreateTO.builder()
                 .name("firstUser")
                 .email("firstUser@yandex.ru")
@@ -78,7 +74,7 @@ public class GenericControllerTest {
                 .build();
     }
 
-    void initBookings() {
+    protected void initBookings() {
         firstBooking = BookingCreateTO.builder()
                 .itemId(FIRST_ID)
                 .build();
@@ -90,7 +86,7 @@ public class GenericControllerTest {
                 .build();
     }
 
-    void initItems() {
+    protected void initItems() {
         firstItem = ItemCreateTO.builder()
                 .name("firstItem")
                 .description("description_1")

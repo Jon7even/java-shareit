@@ -1,10 +1,10 @@
-package ru.practicum.shareit.controllers;
+package ru.practicum.shareit.controllers.user.controller;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import ru.practicum.shareit.controllers.setup.controller.GenericControllerTest;
 import ru.practicum.shareit.user.dto.UserResponseTO;
 
 import java.util.Optional;
@@ -34,9 +34,9 @@ public class UserControllerTest extends GenericControllerTest {
                         .content(objectMapper.writeValueAsString(firstUser))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
-                .andExpect(MockMvcResultMatchers.jsonPath("id").value(FIRST_ID))
-                .andExpect(MockMvcResultMatchers.jsonPath("name").value("firstUser"))
-                .andExpect(MockMvcResultMatchers.jsonPath("email").value("firstUser@yandex.ru"));
+                .andExpect(jsonPath("id").value(FIRST_ID))
+                .andExpect(jsonPath("name").value("firstUser"))
+                .andExpect(jsonPath("email").value("firstUser@yandex.ru"));
     }
 
     @Test
@@ -90,9 +90,9 @@ public class UserControllerTest extends GenericControllerTest {
                         .content(objectMapper.writeValueAsString(thirdUser))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("id").value(FIRST_ID))
-                .andExpect(MockMvcResultMatchers.jsonPath("name").value("thirdUser"))
-                .andExpect(MockMvcResultMatchers.jsonPath("email").value("secondUser@yandex.ru"));
+                .andExpect(jsonPath("id").value(FIRST_ID))
+                .andExpect(jsonPath("name").value("thirdUser"))
+                .andExpect(jsonPath("email").value("secondUser@yandex.ru"));
 
         thirdUser.setEmail("thirdUser@yandex.ru");
 
@@ -100,9 +100,9 @@ public class UserControllerTest extends GenericControllerTest {
                         .content(objectMapper.writeValueAsString(thirdUser))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("id").value(FIRST_ID))
-                .andExpect(MockMvcResultMatchers.jsonPath("name").value("thirdUser"))
-                .andExpect(MockMvcResultMatchers.jsonPath("email").value("thirdUser@yandex.ru"));
+                .andExpect(jsonPath("id").value(FIRST_ID))
+                .andExpect(jsonPath("name").value("thirdUser"))
+                .andExpect(jsonPath("email").value("thirdUser@yandex.ru"));
     }
 
     @Test
@@ -112,9 +112,9 @@ public class UserControllerTest extends GenericControllerTest {
 
         mockMvc.perform(get("/users/{id}", FIRST_ID))
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("id").value(FIRST_ID))
-                .andExpect(MockMvcResultMatchers.jsonPath("name").value(firstUser.getName()))
-                .andExpect(MockMvcResultMatchers.jsonPath("email").value(firstUser.getEmail()));
+                .andExpect(jsonPath("id").value(FIRST_ID))
+                .andExpect(jsonPath("name").value(firstUser.getName()))
+                .andExpect(jsonPath("email").value(firstUser.getEmail()));
 
         mockMvc.perform(get("/users/{id}", FIRST_ID + 1))
                 .andExpect(status().isNotFound())
