@@ -5,7 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import ru.practicum.shareit.user.dto.UserResponseDTO;
+import ru.practicum.shareit.user.dto.UserResponseTO;
 
 import java.util.Optional;
 
@@ -189,8 +189,8 @@ public class UserControllerTest extends GenericControllerTest {
     @Test
     @DisplayName("Получить всех пользователей")
     void shouldGetAllUsers_thenStatus200AndResultTwoUsers() throws Exception {
-        UserResponseDTO user1 = userService.createUser(firstUser);
-        UserResponseDTO user2 = userService.createUser(secondUser);
+        UserResponseTO user1 = userService.createUser(firstUser);
+        UserResponseTO user2 = userService.createUser(secondUser);
 
         mockMvc.perform(get("/users"))
                 .andExpect(status().isOk())

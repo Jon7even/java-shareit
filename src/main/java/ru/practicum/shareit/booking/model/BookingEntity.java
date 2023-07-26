@@ -1,4 +1,4 @@
-package ru.practicum.shareit.item.model;
+package ru.practicum.shareit.booking.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -6,7 +6,8 @@ import lombok.ToString;
 import lombok.Setter;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.item.model.ItemEntity;
+import ru.practicum.shareit.user.model.UserEntity;
 
 import javax.persistence.Id;
 import javax.persistence.Entity;
@@ -17,6 +18,8 @@ import javax.persistence.Column;
 import javax.persistence.ManyToOne;
 import javax.persistence.JoinColumn;
 import javax.persistence.FetchType;
+import javax.persistence.Enumerated;
+import javax.persistence.EnumType;
 import java.time.LocalDateTime;
 
 @Entity
@@ -26,34 +29,37 @@ import java.time.LocalDateTime;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "comments", schema = "public")
-public class Comment {
+@Table(name = "bookings", schema = "public")
+public class BookingEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     @Id
     private Long id;
 
-    @Column(name = "text")
-    private String text;
+    @Column(name = "start_date", nullable = false)
+    private LocalDateTime start;
+
+    @Column(name = "end_date", nullable = false)
+    private LocalDateTime end;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "item_id")
+    @JoinColumn(name = "item_id", nullable = false)
     @ToString.Exclude
-    private Item item;
+    private ItemEntity item;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id")
+    @JoinColumn(name = "booker_id", nullable = false)
     @ToString.Exclude
-    private User user;
+    private UserEntity user;
 
-    @Column(name = "created")
-    private LocalDateTime created;
+    @Enumerated(EnumType.STRING)
+    private BookingStatus status;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Comment)) return false;
-        return id != null && id.equals(((Comment) o).getId());
+        if (!(o instanceof BookingEntity)) return false;
+        return id != null && id.equals(((BookingEntity) o).getId());
     }
 
     @Override

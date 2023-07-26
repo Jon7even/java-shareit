@@ -1,8 +1,8 @@
-package ru.practicum.shareit.request.entity;
+package ru.practicum.shareit.request.model;
 
 import lombok.Builder;
 import lombok.Data;
-import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.model.UserEntity;
 
 import java.time.LocalDateTime;
 
@@ -12,12 +12,12 @@ import java.time.LocalDateTime;
 
 @Data
 @Builder
-public class ItemRequest {
+public class ItemRequestEntity {
     private long id;
 
     private String description;
 
-    private User requestor;
+    private UserEntity requestor;
 
     private LocalDateTime created;
 }

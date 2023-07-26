@@ -7,12 +7,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.practicum.shareit.booking.dto.BookingRequestCreateDTO;
+import ru.practicum.shareit.booking.dto.BookingCreateTO;
 import ru.practicum.shareit.booking.service.BookingService;
-import ru.practicum.shareit.item.dto.ItemRequestCreateDTO;
-import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.dto.ItemCreateTO;
+import ru.practicum.shareit.item.model.ItemEntity;
 import ru.practicum.shareit.item.service.ItemService;
-import ru.practicum.shareit.user.dto.UserRequestCreateDTO;
+import ru.practicum.shareit.user.dto.UserCreateTO;
 import ru.practicum.shareit.user.service.UserService;
 
 import static ru.practicum.shareit.constants.NamesParametersInController.X_HEADER_USER_ID;
@@ -47,61 +47,61 @@ public class GenericControllerTest {
 
     protected static String ERROR_M_HEADER_USER_ID = "Parameter [" + X_HEADER_USER_ID + "] incorrect";
 
-    protected UserRequestCreateDTO firstUser;
+    protected UserCreateTO firstUser;
 
-    protected UserRequestCreateDTO secondUser;
+    protected UserCreateTO secondUser;
 
-    protected UserRequestCreateDTO thirdUser;
+    protected UserCreateTO thirdUser;
 
-    protected ItemRequestCreateDTO firstItem;
+    protected ItemCreateTO firstItem;
 
-    protected ItemRequestCreateDTO secondItem;
+    protected ItemCreateTO secondItem;
 
-    protected BookingRequestCreateDTO firstBooking;
+    protected BookingCreateTO firstBooking;
 
-    protected BookingRequestCreateDTO secondBooking;
+    protected BookingCreateTO secondBooking;
 
-    protected BookingRequestCreateDTO thirdBooking;
+    protected BookingCreateTO thirdBooking;
 
-    protected Item thirdItem;
+    protected ItemEntity thirdItem;
 
     void initUsers() {
-        firstUser = UserRequestCreateDTO.builder()
+        firstUser = UserCreateTO.builder()
                 .name("firstUser")
                 .email("firstUser@yandex.ru")
                 .build();
-        secondUser = UserRequestCreateDTO.builder()
+        secondUser = UserCreateTO.builder()
                 .name("secondUser")
                 .email("secondUser@yandex.ru")
                 .build();
-        thirdUser = UserRequestCreateDTO.builder()
+        thirdUser = UserCreateTO.builder()
                 .build();
     }
 
     void initBookings() {
-        firstBooking = BookingRequestCreateDTO.builder()
+        firstBooking = BookingCreateTO.builder()
                 .itemId(FIRST_ID)
                 .build();
-        secondBooking = BookingRequestCreateDTO.builder()
+        secondBooking = BookingCreateTO.builder()
                 .itemId(FIRST_ID)
                 .build();
-        thirdBooking = BookingRequestCreateDTO.builder()
+        thirdBooking = BookingCreateTO.builder()
                 .itemId(FIRST_ID)
                 .build();
     }
 
     void initItems() {
-        firstItem = ItemRequestCreateDTO.builder()
+        firstItem = ItemCreateTO.builder()
                 .name("firstItem")
                 .description("description_1")
                 .available(true)
                 .build();
-        secondItem = ItemRequestCreateDTO.builder()
+        secondItem = ItemCreateTO.builder()
                 .name("secondItem")
                 .description("description_2")
                 .available(false)
                 .build();
-        thirdItem = Item.builder()
+        thirdItem = ItemEntity.builder()
                 .build();
     }
 }

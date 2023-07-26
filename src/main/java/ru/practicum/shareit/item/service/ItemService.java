@@ -7,17 +7,17 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ItemService {
-    ItemResponseDTO createItem(ItemRequestCreateDTO itemRequestCreateDTO, Optional<Long> idUser);
+    ItemResponseTO createItem(ItemCreateTO itemRequestCreateDTO, Optional<Long> idUser);
 
-    ItemResponseBookingAndCommentDTO findItemById(Optional<Long> idUser, Optional<Long> idItem);
+    ItemResponseBookingAndCommentTO findItemById(Optional<Long> idUser, Optional<Long> idItem);
 
-    ItemResponseDTO updateItem(Optional<Long> idUser, Optional<Long> idItem, ItemRequestUpdateDTO itemRequestUpdateDTO);
+    ItemResponseTO updateItem(Optional<Long> idUser, Optional<Long> idItem, ItemUpdateTO itemRequestUpdateDTO);
 
-    List<ItemResponseBookingAndCommentDTO> getAllItemsByUserId(Optional<Long> idUser);
+    List<ItemResponseBookingAndCommentTO> getAllItemsByUserId(Optional<Long> idUser);
 
     List<ItemShort> getListSearchItem(Optional<Long> idUser, Optional<String> searchText);
 
     void deleteItemById(Optional<Long> idUser, Optional<Long> idItem);
 
-    CommentResponseDTO createComment(Optional<Long> idUser, Optional<Long> idItem, CommentRequestCreateDTO comment);
+    CommentResponseTO createComment(Optional<Long> idUser, Optional<Long> idItem, CommentCreateTO comment);
 }

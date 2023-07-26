@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class BookingRequestCreateDTO {
+public class BookingCreateTO {
     @NotNull
     private Long itemId;
 

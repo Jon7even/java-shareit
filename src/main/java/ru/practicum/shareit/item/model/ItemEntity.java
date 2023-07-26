@@ -1,4 +1,4 @@
-package ru.practicum.shareit.booking.model;
+package ru.practicum.shareit.item.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -6,8 +6,7 @@ import lombok.ToString;
 import lombok.Setter;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.model.UserEntity;
 
 import javax.persistence.Id;
 import javax.persistence.Entity;
@@ -18,9 +17,6 @@ import javax.persistence.Column;
 import javax.persistence.ManyToOne;
 import javax.persistence.JoinColumn;
 import javax.persistence.FetchType;
-import javax.persistence.Enumerated;
-import javax.persistence.EnumType;
-import java.time.LocalDateTime;
 
 @Entity
 @Builder
@@ -29,37 +25,32 @@ import java.time.LocalDateTime;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "bookings", schema = "public")
-public class Booking {
+@Table(name = "items", schema = "public")
+public class ItemEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     @Id
     private Long id;
 
-    @Column(name = "start_date", nullable = false)
-    private LocalDateTime start;
+    @Column(name = "name", nullable = false)
+    private String name;
 
-    @Column(name = "end_date", nullable = false)
-    private LocalDateTime end;
+    @Column(name = "description", nullable = false)
+    private String description;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "item_id", nullable = false)
-    @ToString.Exclude
-    private Item item;
+    @Column(name = "is_available", nullable = false)
+    private boolean available;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "booker_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     @ToString.Exclude
-    private User user;
-
-    @Enumerated(EnumType.STRING)
-    private BookingStatus status;
+    private UserEntity user;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Booking)) return false;
-        return id != null && id.equals(((Booking) o).getId());
+        if (!(o instanceof ItemEntity)) return false;
+        return id != null && id.equals(((ItemEntity) o).getId());
     }
 
     @Override

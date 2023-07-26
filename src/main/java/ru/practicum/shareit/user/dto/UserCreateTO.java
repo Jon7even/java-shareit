@@ -13,7 +13,7 @@ import javax.validation.constraints.NotNull;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserRequestCreateDTO {
+public class UserCreateTO {
     @NotBlank
     @NotNull
     private String name;

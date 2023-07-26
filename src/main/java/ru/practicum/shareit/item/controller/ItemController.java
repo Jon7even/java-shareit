@@ -37,9 +37,9 @@ public class ItemController {
     private final ItemService itemService;
 
     @PostMapping
-    public ResponseEntity<ItemResponseDTO> createItem(@RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
-                                                      @Valid @RequestBody ItemRequestCreateDTO itemRequestCreateDTO,
-                                                      HttpServletRequest request) {
+    public ResponseEntity<ItemResponseTO> createItem(@RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
+                                                     @Valid @RequestBody ItemCreateTO itemRequestCreateDTO,
+                                                     HttpServletRequest request) {
 
         log.debug("On {} {} {}", request.getRequestURL(), IN_CONTROLLER_METHOD, request.getMethod());
 
@@ -47,7 +47,7 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ResponseEntity<ItemResponseBookingAndCommentDTO> getItemById(
+    public ResponseEntity<ItemResponseBookingAndCommentTO> getItemById(
             @RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
             @PathVariable Optional<Long> itemId,
             HttpServletRequest request) {
@@ -58,10 +58,10 @@ public class ItemController {
     }
 
     @PatchMapping("/{itemId}")
-    public ResponseEntity<ItemResponseDTO> updateItemById(@RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
-                                                          @PathVariable Optional<Long> itemId,
-                                                          @Valid @RequestBody ItemRequestUpdateDTO itemRequestUpdateDTO,
-                                                          HttpServletRequest request) {
+    public ResponseEntity<ItemResponseTO> updateItemById(@RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
+                                                         @PathVariable Optional<Long> itemId,
+                                                         @Valid @RequestBody ItemUpdateTO itemRequestUpdateDTO,
+                                                         HttpServletRequest request) {
 
         log.debug("On {} {} {}", request.getRequestURL(), IN_CONTROLLER_METHOD, request.getMethod());
 
@@ -69,13 +69,13 @@ public class ItemController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ItemResponseBookingAndCommentDTO>> getAllItemsByUserId(
+    public ResponseEntity<List<ItemResponseBookingAndCommentTO>> getAllItemsByUserId(
             @RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
             HttpServletRequest request) {
 
         log.debug("On {} {} {}", request.getRequestURL(), IN_CONTROLLER_METHOD, request.getMethod());
 
-        List<ItemResponseBookingAndCommentDTO> getAllItemsByUserId = itemService.getAllItemsByUserId(userId);
+        List<ItemResponseBookingAndCommentTO> getAllItemsByUserId = itemService.getAllItemsByUserId(userId);
 
         return ResponseEntity.ok()
                 .header(X_COUNT_ITEMS, String.valueOf(getAllItemsByUserId.size()))
@@ -110,10 +110,10 @@ public class ItemController {
     }
 
     @PostMapping("/{itemId}/comment")
-    public ResponseEntity<CommentResponseDTO> createComment(@RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
-                                                            @PathVariable Optional<Long> itemId,
-                                                            @Valid @RequestBody CommentRequestCreateDTO comment,
-                                                            HttpServletRequest request) {
+    public ResponseEntity<CommentResponseTO> createComment(@RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
+                                                           @PathVariable Optional<Long> itemId,
+                                                           @Valid @RequestBody CommentCreateTO comment,
+                                                           HttpServletRequest request) {
 
         log.debug("On {} {} {}", request.getRequestURL(), IN_CONTROLLER_METHOD, request.getMethod());
 

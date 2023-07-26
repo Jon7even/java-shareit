@@ -5,13 +5,18 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotBlank;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CommentRequestCreateDTO {
-    @NotBlank
+public class CommentResponseTO {
+    private Long id;
+
     private String text;
+
+    private String authorName;
+
+    private LocalDateTime created;
 }

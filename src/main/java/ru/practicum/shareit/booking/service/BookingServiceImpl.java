@@ -4,18 +4,18 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.dto.BookingCreateTO;
+import ru.practicum.shareit.booking.dto.BookingResponseTO;
+import ru.practicum.shareit.booking.model.BookingEntity;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.booking.dto.BookingRequestCreateDTO;
-import ru.practicum.shareit.booking.dto.BookingResponseDTO;
-import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.exception.*;
+import ru.practicum.shareit.item.model.ItemEntity;
 import ru.practicum.shareit.item.repository.ItemRepository;
-import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.model.UserEntity;
 import ru.practicum.shareit.user.repository.UserRepository;
-import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -39,16 +39,16 @@ public class BookingServiceImpl implements BookingService {
 
     @Transactional
     @Override
-    public BookingResponseDTO createBooking(BookingRequestCreateDTO bookingRequestCreateDTO, Optional<Long> idUser) {
+    public BookingResponseTO createBooking(BookingCreateTO bookingRequestCreateDTO, Optional<Long> idUser) {
         log.debug("New booking came {} [BookingRequestCreateDTO={}]", SERVICE_FROM_CONTROLLER, bookingRequestCreateDTO);
         Long checkedUserId = checkParameterUserId(idUser);
         checkStartAndEndTime(bookingRequestCreateDTO, checkedUserId);
 
-        Booking bookingForCreateInRepository = validBookingForCreate(bookingRequestCreateDTO, checkedUserId);
+        BookingEntity bookingForCreateInRepository = validBookingForCreate(bookingRequestCreateDTO, checkedUserId);
 
         log.debug("Add new [booking={}] {}", bookingForCreateInRepository, SERVICE_IN_DB);
-        Booking createdBooking = repositoryBooking.save(bookingForCreateInRepository);
-        Optional<Booking> foundBookingAfterCreation = repositoryBooking.findById(createdBooking.getId());
+        BookingEntity createdBooking = repositoryBooking.save(bookingForCreateInRepository);
+        Optional<BookingEntity> foundBookingAfterCreation = repositoryBooking.findById(createdBooking.getId());
 
         if (foundBookingAfterCreation.isPresent() && createdBooking.equals(foundBookingAfterCreation.get())) {
             log.debug("New booking has returned [booking={}] {}", createdBooking, SERVICE_FROM_DB);
@@ -60,13 +60,13 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public BookingResponseDTO findBookingById(Optional<Long> idUser, Optional<Long> idBooking) {
+    public BookingResponseTO findBookingById(Optional<Long> idUser, Optional<Long> idBooking) {
         Long checkedUserId = checkParameterUserId(idUser);
         Long checkedBookingId = checkParameterBookingId(idBooking);
-        User user = findUserEntityById(checkedUserId);
+        UserEntity user = findUserEntityById(checkedUserId);
 
         log.debug("Get booking by [idBooking={}] by User [idUser={}] {}", checkedBookingId, checkedUserId, SERVICE_IN_DB);
-        Optional<Booking> foundBookingById = repositoryBooking.findById(checkedBookingId);
+        Optional<BookingEntity> foundBookingById = repositoryBooking.findById(checkedBookingId);
 
         if (foundBookingById.isPresent()) {
             boolean userEqualsOwnerItem = foundBookingById.get().getItem().getUser().equals(user);
@@ -89,16 +89,16 @@ public class BookingServiceImpl implements BookingService {
 
     @Transactional
     @Override
-    public BookingResponseDTO confirmBooking(Optional<Long> idUser, Optional<Long> idBooking, Optional<Boolean> approved) {
+    public BookingResponseTO confirmBooking(Optional<Long> idUser, Optional<Long> idBooking, Optional<Boolean> approved) {
         Long checkedUserId = checkParameterUserId(idUser);
         Long checkedBookingId = checkParameterBookingId(idBooking);
         BookingStatus statusForUpdate = getStatusForUpdate(approved);
 
-        Booking bookingForUpdateStatus = validBookingForUpdateStatus(checkedUserId, checkedBookingId, statusForUpdate);
+        BookingEntity bookingForUpdateStatus = validBookingForUpdateStatus(checkedUserId, checkedBookingId, statusForUpdate);
 
         log.debug("Update Booking status[status={}] for [bookingId={}] by [bookerId={}] {}", statusForUpdate,
                 checkedBookingId, checkedUserId, SERVICE_IN_DB);
-        Booking updatedBooking = repositoryBooking.save(bookingForUpdateStatus);
+        BookingEntity updatedBooking = repositoryBooking.save(bookingForUpdateStatus);
 
         if (updatedBooking.getStatus().equals(statusForUpdate)) {
             log.debug("Owner [IdUser={}] by Item[IdItem={}] success updated status [bookingId={}] {}", checkedUserId,
@@ -112,12 +112,12 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingResponseDTO> getListBookingByIdUser(Optional<Long> idUser, BookingState state) {
+    public List<BookingResponseTO> getListBookingByIdUser(Optional<Long> idUser, BookingState state) {
         Long checkedUserId = checkParameterUserId(idUser);
-        User checkedUserFromDB = findUserEntityById(checkedUserId);
+        UserEntity checkedUserFromDB = findUserEntityById(checkedUserId);
         LocalDateTime currentTime = LocalDateTime.now();
 
-        List<Booking> bookings = Collections.emptyList();
+        List<BookingEntity> bookings = Collections.emptyList();
         log.debug("Get list booking by user [userId={}] [BookingState={}], [currentTime={}] {}", checkedUserId,
                 state.toString(), currentTime, SERVICE_FROM_DB);
 
@@ -151,12 +151,12 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingResponseDTO> getAllItemBookingByIdOwner(Optional<Long> idUser, BookingState state) {
+    public List<BookingResponseTO> getAllItemBookingByIdOwner(Optional<Long> idUser, BookingState state) {
         Long checkedUserId = checkParameterUserId(idUser);
-        User checkedUserFromDB = findUserEntityById(checkedUserId);
+        UserEntity checkedUserFromDB = findUserEntityById(checkedUserId);
         LocalDateTime currentTime = LocalDateTime.now();
 
-        List<Booking> bookings = Collections.emptyList();
+        List<BookingEntity> bookings = Collections.emptyList();
         log.debug("Get list booking by owner [ownerId={}] [BookingState={}], [currentTime={}] {}", checkedUserId,
                 state.toString(), currentTime, SERVICE_FROM_DB);
 
@@ -191,9 +191,9 @@ public class BookingServiceImpl implements BookingService {
                 .collect(Collectors.toList());
     }
 
-    private Booking validBookingForCreate(BookingRequestCreateDTO bookingRequestCreateDTO, Long checkedUserId) {
-        User checkedUserFromDB = findUserEntityById(checkedUserId);
-        Item checkedItemFromDB = findItemEntityById(bookingRequestCreateDTO.getItemId());
+    private BookingEntity validBookingForCreate(BookingCreateTO bookingRequestCreateDTO, Long checkedUserId) {
+        UserEntity checkedUserFromDB = findUserEntityById(checkedUserId);
+        ItemEntity checkedItemFromDB = findItemEntityById(bookingRequestCreateDTO.getItemId());
 
         if (!checkedItemFromDB.isAvailable()) {
             log.debug("Booking item [item{}] by [booker_id={}] was suspended", checkedItemFromDB, checkedUserFromDB);
@@ -209,10 +209,10 @@ public class BookingServiceImpl implements BookingService {
                 checkedItemFromDB, checkedUserFromDB, DEFAULT_STATUS_AFTER_CREATED);
     }
 
-    private Booking validBookingForUpdateStatus(Long checkedUserId, Long checkedBookingId,
-                                                BookingStatus statusForUpdate) {
-        User checkedUserFromDB = findUserEntityById(checkedUserId);
-        Booking checkedBookingFromDB = findBookingEntityById(checkedBookingId);
+    private BookingEntity validBookingForUpdateStatus(Long checkedUserId, Long checkedBookingId,
+                                                      BookingStatus statusForUpdate) {
+        UserEntity checkedUserFromDB = findUserEntityById(checkedUserId);
+        BookingEntity checkedBookingFromDB = findBookingEntityById(checkedBookingId);
 
         if (!checkedBookingFromDB.getItem().getUser().getId().equals(checkedUserFromDB.getId())) {
             log.error("User by [idUser={}] is not owner of item[IdItem={}]",
@@ -231,9 +231,9 @@ public class BookingServiceImpl implements BookingService {
         return checkedBookingFromDB;
     }
 
-    private Booking findBookingEntityById(Long checkedBookingId) {
+    private BookingEntity findBookingEntityById(Long checkedBookingId) {
         log.debug("Get booking entity for checking by [idBooking={}] {}", checkedBookingId, SERVICE_IN_DB);
-        Optional<Booking> foundCheckBooking = repositoryBooking.findById(checkedBookingId);
+        Optional<BookingEntity> foundCheckBooking = repositoryBooking.findById(checkedBookingId);
 
         if (foundCheckBooking.isPresent()) {
             log.debug("Check was successful found [booking={}] {}", foundCheckBooking.get(), SERVICE_FROM_DB);
@@ -244,9 +244,9 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    private User findUserEntityById(Long checkedUserId) {
+    private UserEntity findUserEntityById(Long checkedUserId) {
         log.debug("Get user entity for checking by [idUser={}] {}", checkedUserId, SERVICE_IN_DB);
-        Optional<User> foundCheckUser = repositoryUser.findById(checkedUserId);
+        Optional<UserEntity> foundCheckUser = repositoryUser.findById(checkedUserId);
 
         if (foundCheckUser.isPresent()) {
             log.debug("Check was successful found [user={}] {}", foundCheckUser.get(), SERVICE_FROM_DB);
@@ -257,9 +257,9 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    private Item findItemEntityById(Long checkedItemId) {
+    private ItemEntity findItemEntityById(Long checkedItemId) {
         log.debug("Get item entity for checking by [idItem={}] {}", checkedItemId, SERVICE_IN_DB);
-        Optional<Item> foundCheckItem = repositoryItem.findById(checkedItemId);
+        Optional<ItemEntity> foundCheckItem = repositoryItem.findById(checkedItemId);
 
         if (foundCheckItem.isPresent()) {
             log.debug("Check was successful found [item={}] {}", foundCheckItem.get(), SERVICE_FROM_DB);
@@ -270,7 +270,7 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    private void checkStartAndEndTime(BookingRequestCreateDTO bookingRequestCreateDTO, Long checkedUserId) {
+    private void checkStartAndEndTime(BookingCreateTO bookingRequestCreateDTO, Long checkedUserId) {
         LocalDateTime startTime = bookingRequestCreateDTO.getStart();
         LocalDateTime endTime = bookingRequestCreateDTO.getEnd();
 

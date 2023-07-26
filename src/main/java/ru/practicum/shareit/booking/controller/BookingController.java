@@ -5,8 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.booking.dto.BookingRequestCreateDTO;
-import ru.practicum.shareit.booking.dto.BookingResponseDTO;
+import ru.practicum.shareit.booking.dto.BookingCreateTO;
+import ru.practicum.shareit.booking.dto.BookingResponseTO;
 import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.service.BookingService;
 
@@ -27,9 +27,9 @@ public class BookingController {
     private final BookingService bookingService;
 
     @PostMapping
-    public ResponseEntity<BookingResponseDTO> createBooking(@RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
-                                                            @Valid @RequestBody BookingRequestCreateDTO bookingCreate,
-                                                            HttpServletRequest request) {
+    public ResponseEntity<BookingResponseTO> createBooking(@RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
+                                                           @Valid @RequestBody BookingCreateTO bookingCreate,
+                                                           HttpServletRequest request) {
 
         log.debug("On {} {} {}", request.getRequestURL(), IN_CONTROLLER_METHOD, request.getMethod());
 
@@ -37,9 +37,9 @@ public class BookingController {
     }
 
     @GetMapping("/{bookingId}")
-    public ResponseEntity<BookingResponseDTO> getBookingById(@RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
-                                                             @PathVariable Optional<Long> bookingId,
-                                                             HttpServletRequest request) {
+    public ResponseEntity<BookingResponseTO> getBookingById(@RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
+                                                            @PathVariable Optional<Long> bookingId,
+                                                            HttpServletRequest request) {
 
         log.debug("On {} {} {}", request.getRequestURL(), IN_CONTROLLER_METHOD, request.getMethod());
 
@@ -47,10 +47,10 @@ public class BookingController {
     }
 
     @PatchMapping("/{bookingId}")
-    public ResponseEntity<BookingResponseDTO> confirmBooking(@RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
-                                                             @PathVariable Optional<Long> bookingId,
-                                                             @RequestParam Optional<Boolean> approved,
-                                                             HttpServletRequest request) {
+    public ResponseEntity<BookingResponseTO> confirmBooking(@RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
+                                                            @PathVariable Optional<Long> bookingId,
+                                                            @RequestParam Optional<Boolean> approved,
+                                                            HttpServletRequest request) {
 
         log.debug("On {} {} {}", request.getRequestURL(), IN_CONTROLLER_METHOD, request.getMethod());
 
@@ -58,7 +58,7 @@ public class BookingController {
     }
 
     @GetMapping
-    public ResponseEntity<List<BookingResponseDTO>> getListBookingByIdUser(
+    public ResponseEntity<List<BookingResponseTO>> getListBookingByIdUser(
             @RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
             @RequestParam(required = false, defaultValue = DEFAULT_STATE_IN_CONTROLLER) BookingState state,
             HttpServletRequest request) {
@@ -69,7 +69,7 @@ public class BookingController {
     }
 
     @GetMapping("/owner")
-    public ResponseEntity<List<BookingResponseDTO>> getAllItemBookingByIdOwner(
+    public ResponseEntity<List<BookingResponseTO>> getAllItemBookingByIdOwner(
             @RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
             @RequestParam(required = false, defaultValue = DEFAULT_STATE_IN_CONTROLLER) BookingState state,
             HttpServletRequest request) {

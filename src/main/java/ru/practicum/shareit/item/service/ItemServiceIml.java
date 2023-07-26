@@ -4,23 +4,23 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.dto.BookingQueueTO;
+import ru.practicum.shareit.booking.model.BookingEntity;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
-import ru.practicum.shareit.booking.dto.BookingQueueDTO;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.exception.*;
 
+import ru.practicum.shareit.item.model.CommentEntity;
+import ru.practicum.shareit.item.model.ItemEntity;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.dto.*;
-import ru.practicum.shareit.item.model.Comment;
-import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.mapper.CommentMapper;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.projections.ItemShort;
+import ru.practicum.shareit.user.model.UserEntity;
 import ru.practicum.shareit.user.repository.UserRepository;
-import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -45,14 +45,14 @@ public class ItemServiceIml implements ItemService {
 
     @Transactional
     @Override
-    public ItemResponseDTO createItem(ItemRequestCreateDTO itemRequestCreateDTO, Optional<Long> idUser) {
+    public ItemResponseTO createItem(ItemCreateTO itemRequestCreateDTO, Optional<Long> idUser) {
         log.debug("New item came {} [ItemRequestCreateDTO={}]", SERVICE_FROM_CONTROLLER, itemRequestCreateDTO);
         Long checkedUserId = checkParameterUserId(idUser);
-        Item itemForCreateInRepository = validItemForCreate(itemRequestCreateDTO, checkedUserId);
+        ItemEntity itemForCreateInRepository = validItemForCreate(itemRequestCreateDTO, checkedUserId);
 
         log.debug("Add new [item={}] {}", itemForCreateInRepository, SERVICE_IN_DB);
-        Item createdItem = repositoryItem.save(itemForCreateInRepository);
-        Optional<Item> foundItemAfterCreation = repositoryItem.findById(createdItem.getId());
+        ItemEntity createdItem = repositoryItem.save(itemForCreateInRepository);
+        Optional<ItemEntity> foundItemAfterCreation = repositoryItem.findById(createdItem.getId());
 
         if (foundItemAfterCreation.isPresent() && createdItem.equals(foundItemAfterCreation.get())) {
             log.debug("New item has returned [item={}] {}", createdItem, SERVICE_FROM_DB);
@@ -64,22 +64,22 @@ public class ItemServiceIml implements ItemService {
     }
 
     @Override
-    public ItemResponseBookingAndCommentDTO findItemById(Optional<Long> idUser, Optional<Long> idItem) {
+    public ItemResponseBookingAndCommentTO findItemById(Optional<Long> idUser, Optional<Long> idItem) {
         Long checkedUserId = checkParameterUserId(idUser);
         Long checkedItemId = checkParameterItemId(idItem);
-        User checkedUserFromDB = findUserEntityById(checkedUserId);
+        UserEntity checkedUserFromDB = findUserEntityById(checkedUserId);
 
         log.debug("Get item by [id={}] owner [user={}] {}", checkedItemId, checkedUserId, SERVICE_IN_DB);
-        Optional<Item> foundItemById = repositoryItem.findById(checkedItemId);
+        Optional<ItemEntity> foundItemById = repositoryItem.findById(checkedItemId);
 
         if (foundItemById.isPresent()) {
             log.debug("Found [item={}] {}", foundItemById.get(), SERVICE_FROM_DB);
 
-            List<CommentResponseDTO> listCommentsDTO = getListCommentsByItemFromDb(foundItemById.get());
+            List<CommentResponseTO> listCommentsDTO = getListCommentsByItemFromDb(foundItemById.get());
             log.debug("Found [countListComments={}] {}", listCommentsDTO.size(), SERVICE_FROM_DB);
 
             if (foundItemById.get().getUser().equals(checkedUserFromDB)) {
-                ItemResponseBookingAndCommentDTO itemResponseDTO = getItemWithBookingAndComment(
+                ItemResponseBookingAndCommentTO itemResponseDTO = getItemWithBookingAndComment(
                         foundItemById.get(), listCommentsDTO);
                 log.debug("Return item with booking queue");
 
@@ -97,18 +97,18 @@ public class ItemServiceIml implements ItemService {
 
     @Transactional
     @Override
-    public ItemResponseDTO updateItem(Optional<Long> idUser,
-                                      Optional<Long> idItem,
-                                      ItemRequestUpdateDTO itemRequestUpdateDTO) {
+    public ItemResponseTO updateItem(Optional<Long> idUser,
+                                     Optional<Long> idItem,
+                                     ItemUpdateTO itemRequestUpdateDTO) {
         log.debug("Item for update came {} [ItemRequestUpdateDTO={}]", SERVICE_FROM_CONTROLLER, itemRequestUpdateDTO);
         Long checkedUserId = checkParameterUserId(idUser);
         Long checkedItemId = checkParameterItemId(idItem);
 
-        Item itemUpdateInRepository = validItemForUpdate(itemRequestUpdateDTO, checkedUserId, checkedItemId);
+        ItemEntity itemUpdateInRepository = validItemForUpdate(itemRequestUpdateDTO, checkedUserId, checkedItemId);
 
         log.debug("Update [item={}] {}", itemRequestUpdateDTO, SERVICE_IN_DB);
-        Item updatedItem = repositoryItem.save(itemUpdateInRepository);
-        Optional<Item> foundItemAfterUpdate = repositoryItem.findById(checkedItemId);
+        ItemEntity updatedItem = repositoryItem.save(itemUpdateInRepository);
+        Optional<ItemEntity> foundItemAfterUpdate = repositoryItem.findById(checkedItemId);
 
         if (foundItemAfterUpdate.isPresent() && updatedItem.equals(foundItemAfterUpdate.get())) {
             log.debug("Updated item has returned [item={}] {}", updatedItem, SERVICE_FROM_DB);
@@ -120,21 +120,21 @@ public class ItemServiceIml implements ItemService {
     }
 
     @Override
-    public List<ItemResponseBookingAndCommentDTO> getAllItemsByUserId(Optional<Long> idUser) {
+    public List<ItemResponseBookingAndCommentTO> getAllItemsByUserId(Optional<Long> idUser) {
         Long checkedUserId = checkParameterUserId(idUser);
         findUserEntityById(checkedUserId);
 
         log.debug("Get all items {} by [idUser={}]", SERVICE_IN_DB, checkedUserId);
-        List<Item> itemsByIdUser = repositoryItem.findByUserId(checkedUserId);
+        List<ItemEntity> itemsByIdUser = repositoryItem.findByUserId(checkedUserId);
 
         if (itemsByIdUser.isEmpty()) {
             log.debug("Has returned empty list items {} by [idUser={}]", SERVICE_FROM_DB, idUser);
             return Collections.emptyList();
         } else {
-            List<ItemResponseBookingAndCommentDTO> listForResponseDTO = new ArrayList<>();
+            List<ItemResponseBookingAndCommentTO> listForResponseDTO = new ArrayList<>();
 
-            for (Item item : itemsByIdUser) {
-                List<CommentResponseDTO> comments = getListCommentsByItemFromDb(item);
+            for (ItemEntity item : itemsByIdUser) {
+                List<CommentResponseTO> comments = getListCommentsByItemFromDb(item);
                 listForResponseDTO.add(getItemWithBookingAndComment(item, comments));
             }
 
@@ -178,8 +178,8 @@ public class ItemServiceIml implements ItemService {
         Long checkedUserId = checkParameterUserId(idUser);
         Long checkedItemId = checkParameterItemId(idItem);
 
-        Item checkedItemFromDB = findItemEntityById(checkedItemId);
-        User checkedUserFromDB = findUserEntityById(checkedUserId);
+        ItemEntity checkedItemFromDB = findItemEntityById(checkedItemId);
+        UserEntity checkedUserFromDB = findUserEntityById(checkedUserId);
         checkIsUserTheOwnerOfItem(checkedItemFromDB.getUser().getId(), checkedUserFromDB.getId());
 
         log.debug("Remove [item={}] by [userId={}] {}", checkedItemFromDB, checkedUserFromDB.getId(), SERVICE_IN_DB);
@@ -197,17 +197,17 @@ public class ItemServiceIml implements ItemService {
 
     @Transactional
     @Override
-    public CommentResponseDTO createComment(Optional<Long> idUser, Optional<Long> idItem,
-                                            CommentRequestCreateDTO comment) {
+    public CommentResponseTO createComment(Optional<Long> idUser, Optional<Long> idItem,
+                                           CommentCreateTO comment) {
         Long checkedUserId = checkParameterUserId(idUser);
         Long checkedItemId = checkParameterItemId(idItem);
 
-        Comment commentForCreateInRepository = validCommentForCreate(checkedUserId, checkedItemId, comment);
+        CommentEntity commentForCreateInRepository = validCommentForCreate(checkedUserId, checkedItemId, comment);
 
         log.debug("Add new [comment={}] {}", commentForCreateInRepository, SERVICE_IN_DB);
 
-        Comment createdComment = repositoryComment.save(commentForCreateInRepository);
-        Optional<Comment> foundCommentAfterCreation = repositoryComment.findById(createdComment.getId());
+        CommentEntity createdComment = repositoryComment.save(commentForCreateInRepository);
+        Optional<CommentEntity> foundCommentAfterCreation = repositoryComment.findById(createdComment.getId());
 
         if (foundCommentAfterCreation.isPresent() && createdComment.equals(foundCommentAfterCreation.get())) {
             log.debug("New comment has returned [comment={}] {}", createdComment, SERVICE_FROM_DB);
@@ -218,12 +218,12 @@ public class ItemServiceIml implements ItemService {
         }
     }
 
-    private Comment validCommentForCreate(Long userId, Long itemId, CommentRequestCreateDTO comment) {
-        User checkedUserFromDB = findUserEntityById(userId);
-        Item checkedItemFromDB = findItemEntityById(itemId);
+    private CommentEntity validCommentForCreate(Long userId, Long itemId, CommentCreateTO comment) {
+        UserEntity checkedUserFromDB = findUserEntityById(userId);
+        ItemEntity checkedItemFromDB = findItemEntityById(itemId);
         LocalDateTime currentTime = LocalDateTime.now();
 
-        List<Booking> pastBookingItem = repositoryBooking.getBookingByOwnerBeforeCurrentTime(checkedUserFromDB,
+        List<BookingEntity> pastBookingItem = repositoryBooking.getBookingByOwnerBeforeCurrentTime(checkedUserFromDB,
                 checkedItemFromDB, currentTime);
 
         if (pastBookingItem.size() > 0) {
@@ -238,8 +238,8 @@ public class ItemServiceIml implements ItemService {
         }
     }
 
-    private List<CommentResponseDTO> getListCommentsByItemFromDb(Item item) {
-        List<Comment> listCommentsByItem = repositoryComment.findAllCommentsByItem(item);
+    private List<CommentResponseTO> getListCommentsByItemFromDb(ItemEntity item) {
+        List<CommentEntity> listCommentsByItem = repositoryComment.findAllCommentsByItem(item);
         log.debug("Found [countListComments={}] {}", listCommentsByItem.size(), SERVICE_FROM_DB);
 
         return listCommentsByItem.stream()
@@ -247,19 +247,19 @@ public class ItemServiceIml implements ItemService {
                 .collect(Collectors.toList());
     }
 
-    private ItemResponseBookingAndCommentDTO getItemWithBookingAndComment(Item item,
-                                                                          List<CommentResponseDTO> listCommentsDTO) {
-        List<Booking> listBookingByItem = repositoryBooking.findByItemOrderByStart(item);
+    private ItemResponseBookingAndCommentTO getItemWithBookingAndComment(ItemEntity item,
+                                                                         List<CommentResponseTO> listCommentsDTO) {
+        List<BookingEntity> listBookingByItem = repositoryBooking.findByItemOrderByStart(item);
         LocalDateTime currentTime = LocalDateTime.now();
 
-        BookingQueueDTO lastBooking = listBookingByItem.stream()
-                .sorted(Comparator.comparing(Booking::getStart).reversed())
+        BookingQueueTO lastBooking = listBookingByItem.stream()
+                .sorted(Comparator.comparing(BookingEntity::getStart).reversed())
                 .filter(booking -> booking.getStart().isBefore(currentTime)
                         && booking.getStatus().equals(BookingStatus.APPROVED))
                 .map(BookingMapper.INSTANCE::toDTOResponseShortFromEntity)
                 .findFirst().orElse(null);
 
-        BookingQueueDTO nextBooking = listBookingByItem.stream()
+        BookingQueueTO nextBooking = listBookingByItem.stream()
                 .filter(booking -> booking.getStart().isAfter(currentTime)
                         && booking.getStatus().equals(BookingStatus.APPROVED))
                 .map(BookingMapper.INSTANCE::toDTOResponseShortFromEntity)
@@ -272,21 +272,21 @@ public class ItemServiceIml implements ItemService {
         );
     }
 
-    private Item validItemForCreate(ItemRequestCreateDTO itemRequestCreateDTO, Long checkedUserId) {
-        User checkedUserFromDB = findUserEntityById(checkedUserId);
+    private ItemEntity validItemForCreate(ItemCreateTO itemRequestCreateDTO, Long checkedUserId) {
+        UserEntity checkedUserFromDB = findUserEntityById(checkedUserId);
 
         return ItemMapper.INSTANCE.toEntityFromDTOCreate(itemRequestCreateDTO, checkedUserFromDB);
     }
 
-    private Item validItemForUpdate(ItemRequestUpdateDTO itemRequestUpdateDTO,
-                                    Long checkedUserId,
-                                    Long checkedItemId) {
+    private ItemEntity validItemForUpdate(ItemUpdateTO itemRequestUpdateDTO,
+                                          Long checkedUserId,
+                                          Long checkedItemId) {
 
-        Item checkedItemFromDB = findItemEntityById(checkedItemId);
-        User checkedUserFromDB = findUserEntityById(checkedUserId);
+        ItemEntity checkedItemFromDB = findItemEntityById(checkedItemId);
+        UserEntity checkedUserFromDB = findUserEntityById(checkedUserId);
         checkIsUserTheOwnerOfItem(checkedItemFromDB.getUser().getId(), checkedUserFromDB.getId());
 
-        Item buildValidItem = Item.builder()
+        ItemEntity buildValidItem = ItemEntity.builder()
                 .id(checkedItemId)
                 .user(checkedUserFromDB)
                 .build();
@@ -320,9 +320,9 @@ public class ItemServiceIml implements ItemService {
         }
     }
 
-    private User findUserEntityById(Long checkedUserId) {
+    private UserEntity findUserEntityById(Long checkedUserId) {
         log.debug("Get user entity for checking by [idUser={}] {}", checkedUserId, SERVICE_IN_DB);
-        Optional<User> foundCheckUser = repositoryUser.findById(checkedUserId);
+        Optional<UserEntity> foundCheckUser = repositoryUser.findById(checkedUserId);
 
         if (foundCheckUser.isPresent()) {
             log.debug("Check was successful found [user={}] {}", foundCheckUser.get(), SERVICE_FROM_DB);
@@ -333,9 +333,9 @@ public class ItemServiceIml implements ItemService {
         }
     }
 
-    private Item findItemEntityById(Long checkedItemId) {
+    private ItemEntity findItemEntityById(Long checkedItemId) {
         log.debug("Get item entity for checking by [idItem={}] {}", checkedItemId, SERVICE_IN_DB);
-        Optional<Item> foundCheckItem = repositoryItem.findById(checkedItemId);
+        Optional<ItemEntity> foundCheckItem = repositoryItem.findById(checkedItemId);
 
         if (foundCheckItem.isPresent()) {
             log.debug("Check was successful found [item={}] {}", foundCheckItem.get(), SERVICE_FROM_DB);
