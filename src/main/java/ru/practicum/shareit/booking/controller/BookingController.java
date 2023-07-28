@@ -2,11 +2,13 @@ package ru.practicum.shareit.booking.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingCreateTO;
 import ru.practicum.shareit.booking.dto.BookingResponseTO;
+import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.service.BookingService;
 
@@ -61,22 +63,30 @@ public class BookingController {
     public ResponseEntity<List<BookingResponseTO>> getListBookingByIdUser(
             @RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
             @RequestParam(required = false, defaultValue = DEFAULT_STATE_IN_CONTROLLER) BookingState state,
+            @RequestParam(required = false)  Optional<Integer> from,
+            @RequestParam(required = false) Optional<Integer> size,
             HttpServletRequest request) {
 
         log.debug("On {} {} {}", request.getRequestURL(), IN_CONTROLLER_METHOD, request.getMethod());
 
-        return ResponseEntity.ok().body(bookingService.getListBookingByIdUser(userId, state));
+        return ResponseEntity.ok().body(bookingService.getListBookingByIdUser(
+                BookingMapper.INSTANCE.toDTOFromRequestParam(userId, state, from, size))
+        );
     }
 
     @GetMapping("/owner")
     public ResponseEntity<List<BookingResponseTO>> getAllItemBookingByIdOwner(
             @RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
             @RequestParam(required = false, defaultValue = DEFAULT_STATE_IN_CONTROLLER) BookingState state,
+            @RequestParam(required = false)  Optional<Integer> from,
+            @RequestParam(required = false) Optional<Integer> size,
             HttpServletRequest request) {
 
         log.debug("On {} {} {}", request.getRequestURL(), IN_CONTROLLER_METHOD, request.getMethod());
 
-        return ResponseEntity.ok().body(bookingService.getAllItemBookingByIdOwner(userId, state));
+        return ResponseEntity.ok().body(bookingService.getAllItemBookingByIdOwner(
+                BookingMapper.INSTANCE.toDTOFromRequestParam(userId, state, from, size))
+        );
     }
 
 }

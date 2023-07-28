@@ -2,13 +2,15 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingCreateTO;
+import ru.practicum.shareit.booking.dto.BookingRequestListTO;
 import ru.practicum.shareit.booking.dto.BookingResponseTO;
 import ru.practicum.shareit.booking.model.BookingEntity;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.exception.*;
@@ -24,7 +26,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static ru.practicum.shareit.config.StaticConfig.DEFAULT_STATUS_AFTER_CREATED;
+import static ru.practicum.shareit.config.StaticConfig.*;
 import static ru.practicum.shareit.constants.NamesLogsInService.*;
 import static ru.practicum.shareit.constants.NamesParametersInController.X_HEADER_USER_ID;
 
@@ -111,37 +113,63 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
+    private PageRequest getPageRequest(BookingRequestListTO bookingRequestListTO) {
+        boolean isExistParamOfSize = bookingRequestListTO.getFrom().isPresent();
+        boolean isExistParamOfPage = bookingRequestListTO.getSize().isPresent();
+        int page = 0;
+        int size = DEFAULT_COUNT_SIZE;
+
+        if (isExistParamOfSize && isExistParamOfPage) {
+            int pageFromDTO = bookingRequestListTO.getFrom().get();
+            int sizeFromDTO = bookingRequestListTO.getSize().get();
+
+            if (pageFromDTO >= 0 && sizeFromDTO >= 1) {
+                page = pageFromDTO / sizeFromDTO;
+                size = sizeFromDTO;
+            } else {
+                log.warn("User used incorrect parameters: [from] and [size] [bookingRequestListTO={}]",
+                        bookingRequestListTO);
+                throw new IncorrectParameterException("from and size");
+            }
+        }
+
+        return PageRequest.of(page, size);
+    }
+
+    @Transactional(readOnly = true)
     @Override
-    public List<BookingResponseTO> getListBookingByIdUser(Optional<Long> idUser, BookingState state) {
-        Long checkedUserId = checkParameterUserId(idUser);
+    public List<BookingResponseTO> getListBookingByIdUser(BookingRequestListTO bookingRequestListTO) {
+        Long checkedUserId = checkParameterUserId(bookingRequestListTO.getIdUser());
         UserEntity checkedUserFromDB = findUserEntityById(checkedUserId);
+
         LocalDateTime currentTime = LocalDateTime.now();
-
         List<BookingEntity> bookings = Collections.emptyList();
-        log.debug("Get list booking by user [userId={}] [BookingState={}], [currentTime={}] {}", checkedUserId,
-                state.toString(), currentTime, SERVICE_FROM_DB);
+        Pageable page = getPageRequest(bookingRequestListTO);
 
-        switch (state) {
+        log.debug("Get list booking by user [userId={}] [BookingState={}], [page={}] [currentTime={}] {}",
+                checkedUserId, bookingRequestListTO.getState().toString(), page, currentTime, SERVICE_FROM_DB);
+
+        switch (bookingRequestListTO.getState()) {
             case ALL:
-                bookings = repositoryBooking.findByUserIdOrderByIdDesc(checkedUserId);
+                bookings = repositoryBooking.findAllByUserIdBooking(checkedUserFromDB, page);
                 break;
             case CURRENT:
-                bookings = repositoryBooking.findCurrentByUserId(checkedUserFromDB, currentTime);
+                bookings = repositoryBooking.findCurrentByUserId(checkedUserFromDB, currentTime, page);
                 break;
             case PAST:
-                bookings = repositoryBooking.findAllPastByUserId(checkedUserFromDB, currentTime);
+                bookings = repositoryBooking.findAllPastByUserId(checkedUserFromDB, currentTime, page);
                 break;
             case FUTURE:
-                bookings = repositoryBooking.findFutureByUserId(checkedUserFromDB, currentTime);
+                bookings = repositoryBooking.findFutureByUserId(checkedUserFromDB, currentTime, page);
                 break;
             case WAITING:
-                bookings = repositoryBooking.findAllByUserIdAndStatus(checkedUserFromDB, BookingStatus.WAITING);
+                bookings = repositoryBooking.findAllByUserIdAndStatus(checkedUserFromDB, BookingStatus.WAITING, page);
                 break;
             case REJECTED:
-                bookings = repositoryBooking.findAllByUserIdAndStatus(checkedUserFromDB, BookingStatus.REJECTED);
+                bookings = repositoryBooking.findAllByUserIdAndStatus(checkedUserFromDB, BookingStatus.REJECTED, page);
                 break;
             default:
-                log.error("Unknown detection error of [BookingState={}]", state);
+                log.error("Unknown detection error of [BookingState={}]", bookingRequestListTO.getState());
                 break;
         }
 
@@ -151,38 +179,40 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingResponseTO> getAllItemBookingByIdOwner(Optional<Long> idUser, BookingState state) {
-        Long checkedUserId = checkParameterUserId(idUser);
+    public List<BookingResponseTO> getAllItemBookingByIdOwner(BookingRequestListTO bookingRequestListTO) {
+        Long checkedUserId = checkParameterUserId(bookingRequestListTO.getIdUser());
         UserEntity checkedUserFromDB = findUserEntityById(checkedUserId);
+
         LocalDateTime currentTime = LocalDateTime.now();
-
         List<BookingEntity> bookings = Collections.emptyList();
-        log.debug("Get list booking by owner [ownerId={}] [BookingState={}], [currentTime={}] {}", checkedUserId,
-                state.toString(), currentTime, SERVICE_FROM_DB);
+        Pageable page = getPageRequest(bookingRequestListTO);
 
-        switch (state) {
+        log.debug("Get list booking by owner [ownerId={}] [BookingState={}], [page={}] [currentTime={}] {}",
+                checkedUserId, bookingRequestListTO.getState().toString(), page, currentTime, SERVICE_FROM_DB);
+
+        switch (bookingRequestListTO.getState()) {
             case ALL:
-                bookings = repositoryBooking.findAllItemsBookingByOwnerId(checkedUserFromDB);
+                bookings = repositoryBooking.findAllItemsBookingByOwnerId(checkedUserFromDB, page);
                 break;
             case CURRENT:
-                bookings = repositoryBooking.findCurrentItemsBookingByOwnerId(checkedUserFromDB, currentTime);
+                bookings = repositoryBooking.findCurrentItemsBookingByOwnerId(checkedUserFromDB, currentTime, page);
                 break;
             case PAST:
-                bookings = repositoryBooking.findPastItemsBookingByOwnerId(checkedUserFromDB, currentTime);
+                bookings = repositoryBooking.findPastItemsBookingByOwnerId(checkedUserFromDB, currentTime, page);
                 break;
             case FUTURE:
-                bookings = repositoryBooking.findFutureItemsBookingByOwnerId(checkedUserFromDB, currentTime);
+                bookings = repositoryBooking.findFutureItemsBookingByOwnerId(checkedUserFromDB, currentTime, page);
                 break;
             case WAITING:
                 bookings = repositoryBooking.findItemsBookingByOwnerIdAndStatus(checkedUserFromDB,
-                        BookingStatus.WAITING);
+                        BookingStatus.WAITING, page);
                 break;
             case REJECTED:
                 bookings = repositoryBooking.findItemsBookingByOwnerIdAndStatus(checkedUserFromDB,
-                        BookingStatus.REJECTED);
+                        BookingStatus.REJECTED, page);
                 break;
             default:
-                log.error("Unknown detection error of [BookingState={}]", state);
+                log.error("Unknown detection error of [BookingState={}]", bookingRequestListTO.getState());
                 break;
         }
 
