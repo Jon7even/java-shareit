@@ -6,6 +6,7 @@ import org.mapstruct.factory.Mappers;
 import ru.practicum.shareit.booking.dto.BookingQueueTO;
 import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.model.ItemEntity;
+import ru.practicum.shareit.request.model.ItemRequestEntity;
 import ru.practicum.shareit.user.model.UserEntity;
 
 import java.util.List;
@@ -15,16 +16,28 @@ import java.util.Optional;
 public interface ItemMapper {
     ItemMapper INSTANCE = Mappers.getMapper(ItemMapper.class);
 
+    @Mapping(target = "id", ignore = true)
     @Mapping(source = "itemRequestCreateDTO.name", target = "name")
     @Mapping(source = "itemRequestCreateDTO.description", target = "description")
     @Mapping(source = "itemRequestCreateDTO.available", target = "available")
     @Mapping(source = "user", target = "user")
     ItemEntity toEntityFromDTOCreate(ItemCreateTO itemRequestCreateDTO, UserEntity user);
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(source = "itemRequestCreateDTO.name", target = "name")
+    @Mapping(source = "itemRequestCreateDTO.description", target = "description")
+    @Mapping(source = "itemRequestCreateDTO.available", target = "available")
+    @Mapping(source = "user", target = "user")
+    @Mapping(source = "request", target = "request")
+    ItemEntity toEntityFromDTOCreateWithRequest(ItemCreateTO itemRequestCreateDTO,
+                                                UserEntity user,
+                                                ItemRequestEntity request);
+
     @Mapping(source = "item.id", target = "id")
     @Mapping(source = "item.name", target = "name")
     @Mapping(source = "item.description", target = "description")
     @Mapping(source = "item.available", target = "available")
+    @Mapping(source = "item.request.id", target = "requestId")
     ItemResponseTO toDTOResponseFromEntity(ItemEntity item);
 
     @Mapping(source = "item.id", target = "id")

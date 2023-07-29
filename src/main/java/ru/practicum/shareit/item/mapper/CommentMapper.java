@@ -20,7 +20,10 @@ public interface CommentMapper {
     @Mapping(source = "item", target = "item")
     @Mapping(source = "user", target = "user")
     @Mapping(source = "created", target = "created")
-    CommentEntity toEntityFromDTOCreate(CommentCreateTO comment, ItemEntity item, UserEntity user, LocalDateTime created);
+    CommentEntity toEntityFromDTOCreate(CommentCreateTO comment,
+                                        ItemEntity item,
+                                        UserEntity user,
+                                        LocalDateTime created);
 
     @Mapping(source = "comment.id", target = "id")
     @Mapping(source = "comment.text", target = "text")

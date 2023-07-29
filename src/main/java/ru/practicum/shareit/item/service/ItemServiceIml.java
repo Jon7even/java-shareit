@@ -21,6 +21,8 @@ import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.mapper.CommentMapper;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.projections.ItemShort;
+import ru.practicum.shareit.request.model.ItemRequestEntity;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.UserEntity;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -44,14 +46,15 @@ public class ItemServiceIml implements ItemService {
     private final ItemRepository repositoryItem;
     private final UserRepository repositoryUser;
     private final BookingRepository repositoryBooking;
+    private final ItemRequestRepository repositoryRequest;
     private final CommentRepository repositoryComment;
 
     @Transactional
     @Override
-    public ItemResponseTO createItem(ItemCreateTO itemRequestCreateDTO, Optional<Long> idUser) {
-        log.debug("New item came {} [ItemRequestCreateDTO={}]", SERVICE_FROM_CONTROLLER, itemRequestCreateDTO);
+    public ItemResponseTO createItem(ItemCreateTO itemCreateDTO, Optional<Long> idUser) {
+        log.debug("New item came {} [itemCreateDTO={}]", SERVICE_FROM_CONTROLLER, itemCreateDTO);
         Long checkedUserId = checkParameterUserId(idUser);
-        ItemEntity itemForCreateInRepository = validItemForCreate(itemRequestCreateDTO, checkedUserId);
+        ItemEntity itemForCreateInRepository = validItemForCreate(itemCreateDTO, checkedUserId);
 
         log.debug("Add new [item={}] {}", itemForCreateInRepository, SERVICE_IN_DB);
         ItemEntity createdItem = repositoryItem.save(itemForCreateInRepository);
@@ -72,14 +75,13 @@ public class ItemServiceIml implements ItemService {
         Long checkedItemId = checkParameterItemId(idItem);
         UserEntity checkedUserFromDB = findUserEntityById(checkedUserId);
 
-        log.debug("Get item by [id={}] owner [user={}] {}", checkedItemId, checkedUserId, SERVICE_IN_DB);
+        log.debug("Get item by [idItem={}] by owner [user={}] {}", checkedItemId, checkedUserId, SERVICE_IN_DB);
         Optional<ItemEntity> foundItemById = repositoryItem.findById(checkedItemId);
 
         if (foundItemById.isPresent()) {
             log.debug("Found [item={}] {}", foundItemById.get(), SERVICE_FROM_DB);
 
             List<CommentResponseTO> listCommentsDTO = getListCommentsByItemFromDb(foundItemById.get());
-            log.debug("Found [countListComments={}] {}", listCommentsDTO.size(), SERVICE_FROM_DB);
 
             if (foundItemById.get().getUser().equals(checkedUserFromDB)) {
                 ItemResponseBookingAndCommentTO itemResponseDTO = getItemWithBookingAndComment(
@@ -302,8 +304,18 @@ public class ItemServiceIml implements ItemService {
 
     private ItemEntity validItemForCreate(ItemCreateTO itemRequestCreateDTO, Long checkedUserId) {
         UserEntity checkedUserFromDB = findUserEntityById(checkedUserId);
+        Optional<Long> checkedRequestId = checkParameterRequestId(itemRequestCreateDTO);
 
-        return ItemMapper.INSTANCE.toEntityFromDTOCreate(itemRequestCreateDTO, checkedUserFromDB);
+        if (checkedRequestId.isPresent()) {
+            ItemRequestEntity checkedRequestFromDB = findItemRequestEntityById(checkedRequestId.get());
+            log.debug("[itemName={}] creates for [itemRequestId={}]", itemRequestCreateDTO.getName(), checkedRequestId);
+            return ItemMapper.INSTANCE.toEntityFromDTOCreateWithRequest(
+                    itemRequestCreateDTO, checkedUserFromDB, checkedRequestFromDB
+            );
+        } else {
+            log.debug("[itemName={}] creates without [itemRequest]", itemRequestCreateDTO.getName());
+            return ItemMapper.INSTANCE.toEntityFromDTOCreate(itemRequestCreateDTO, checkedUserFromDB);
+        }
     }
 
     private ItemEntity validItemForUpdate(ItemUpdateTO itemRequestUpdateDTO,
@@ -356,8 +368,21 @@ public class ItemServiceIml implements ItemService {
             log.debug("Check was successful found [user={}] {}", foundCheckUser.get(), SERVICE_FROM_DB);
             return foundCheckUser.get();
         } else {
-            log.warn("User by [id={}] was not found", checkedUserId);
+            log.warn("User by [idUser={}] was not found", checkedUserId);
             throw new EntityNotFoundException(String.format("User with [idUser=%d]", checkedUserId));
+        }
+    }
+
+    private ItemRequestEntity findItemRequestEntityById(Long checkedRequestId) {
+        log.debug("Get ItemRequest entity for checking by [idItemRequest={}] {}", checkedRequestId, SERVICE_IN_DB);
+        Optional<ItemRequestEntity> foundCheckRequest = repositoryRequest.findById(checkedRequestId);
+
+        if (foundCheckRequest.isPresent()) {
+            log.debug("Check was successful found [ItemRequest={}] {}", foundCheckRequest.get(), SERVICE_FROM_DB);
+            return foundCheckRequest.get();
+        } else {
+            log.warn("ItemRequest by [idItemRequest={}] was not found", checkedRequestId);
+            throw new EntityNotFoundException(String.format("ItemRequest with [idItemRequest=%d]", checkedRequestId));
         }
     }
 
@@ -411,6 +436,18 @@ public class ItemServiceIml implements ItemService {
         }
 
         return searchText.get();
+    }
+
+    private Optional<Long> checkParameterRequestId(ItemCreateTO itemRequestCreateDTO) {
+        Long requestId = itemRequestCreateDTO.getRequestId();
+        if (!(requestId == null)) {
+            if (requestId > 0) {
+                log.debug("Checking [requestId={}] for [itemName={}] is ok", requestId, itemRequestCreateDTO.getName());
+                return Optional.of(requestId);
+            }
+        }
+
+        return Optional.empty();
     }
 
 }

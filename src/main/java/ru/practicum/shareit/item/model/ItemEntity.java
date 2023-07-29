@@ -6,6 +6,7 @@ import lombok.ToString;
 import lombok.Setter;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import ru.practicum.shareit.request.model.ItemRequestEntity;
 import ru.practicum.shareit.user.model.UserEntity;
 
 import javax.persistence.Id;
@@ -45,6 +46,11 @@ public class ItemEntity {
     @JoinColumn(name = "user_id", nullable = false)
     @ToString.Exclude
     private UserEntity user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "request_id", nullable = false)
+    @ToString.Exclude
+    private ItemRequestEntity request;
 
     @Override
     public boolean equals(Object o) {
