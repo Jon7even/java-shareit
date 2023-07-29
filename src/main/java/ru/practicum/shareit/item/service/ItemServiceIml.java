@@ -2,6 +2,8 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingQueueTO;
@@ -30,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.stream.Collectors;
 
+import static ru.practicum.shareit.config.StaticConfig.DEFAULT_COUNT_SIZE;
 import static ru.practicum.shareit.constants.NamesLogsInService.*;
 import static ru.practicum.shareit.constants.NamesParametersInController.X_HEADER_USER_ID;
 
@@ -120,15 +123,16 @@ public class ItemServiceIml implements ItemService {
     }
 
     @Override
-    public List<ItemResponseBookingAndCommentTO> getAllItemsByUserId(Optional<Long> idUser) {
-        Long checkedUserId = checkParameterUserId(idUser);
+    public List<ItemResponseBookingAndCommentTO> getAllItemsByUserId(ItemRequestListTO itemRequestListTO) {
+        Long checkedUserId = checkParameterUserId(itemRequestListTO.getIdUser());
         findUserEntityById(checkedUserId);
+        Pageable page = getPageRequest(itemRequestListTO);
 
-        log.debug("Get all items {} by [idUser={}]", SERVICE_IN_DB, checkedUserId);
-        List<ItemEntity> itemsByIdUser = repositoryItem.findByUserId(checkedUserId);
+        log.debug("Get all items {} by [idUser={}] [page={}]", SERVICE_IN_DB, checkedUserId, page);
+        List<ItemEntity> itemsByIdUser = repositoryItem.findByUserId(checkedUserId, page);
 
         if (itemsByIdUser.isEmpty()) {
-            log.debug("Has returned empty list items {} by [idUser={}]", SERVICE_FROM_DB, idUser);
+            log.debug("Has returned empty list items {} by [idUser={}]", SERVICE_FROM_DB, checkedUserId);
             return Collections.emptyList();
         } else {
             List<ItemResponseBookingAndCommentTO> listForResponseDTO = new ArrayList<>();
@@ -139,17 +143,16 @@ public class ItemServiceIml implements ItemService {
             }
 
             log.debug("Found list items [count={}] {} by [idUser={}]",
-                    listForResponseDTO.size(), SERVICE_FROM_DB, idUser);
+                    listForResponseDTO.size(), SERVICE_FROM_DB, checkedUserId);
 
             return listForResponseDTO;
         }
     }
 
     @Override
-    public List<ItemShort> getListSearchItem(Optional<Long> idUser,
-                                             Optional<String> searchText) {
-        long checkedUserId = checkParameterUserId(idUser);
-        String checkedSearchText = checkParameterSearchText(searchText);
+    public List<ItemShort> getListSearchItem(ItemRequestListTO itemRequestListTO) {
+        Long checkedUserId = checkParameterUserId(itemRequestListTO.getIdUser());
+        String checkedSearchText = checkParameterSearchText(itemRequestListTO.getText());
 
         if (checkedSearchText.isBlank()) {
             log.debug("Has returned empty list items [searchText is empty] by [idUser={}]", checkedUserId);
@@ -157,16 +160,18 @@ public class ItemServiceIml implements ItemService {
         }
 
         findUserEntityById(checkedUserId);
+        Pageable page = getPageRequest(itemRequestListTO);
 
-        log.debug("Get list items [searchText={}] {} by [idUser={}]", checkedSearchText, SERVICE_IN_DB, idUser);
-        List<ItemShort> listFoundItemsByText = repositoryItem.getListSearchItemShort(checkedSearchText);
+        log.debug("Get list items [searchText={}] {} by [idUser={}] [page={}]",
+                checkedSearchText, SERVICE_IN_DB, checkedUserId, page);
+        List<ItemShort> listFoundItemsByText = repositoryItem.getListSearchItemShort(checkedSearchText, page);
 
         if (listFoundItemsByText.isEmpty()) {
             log.debug("Has returned empty list items [searchText={}] {} by [idUser={}]",
-                    checkedSearchText, SERVICE_FROM_DB, idUser);
+                    checkedSearchText, SERVICE_FROM_DB, checkedUserId);
         } else {
             log.debug("Found list items [count={}] {} by [idUser={}]",
-                    listFoundItemsByText.size(), SERVICE_FROM_DB, idUser);
+                    listFoundItemsByText.size(), SERVICE_FROM_DB, checkedUserId);
         }
 
         return listFoundItemsByText;
@@ -216,6 +221,29 @@ public class ItemServiceIml implements ItemService {
             log.error("[comment={}] was not created", createdComment);
             throw new EntityNotCreatedException("New comment");
         }
+    }
+
+    private PageRequest getPageRequest(ItemRequestListTO itemRequestListTO) {
+        boolean isExistParamOfSize = itemRequestListTO.getFrom().isPresent();
+        boolean isExistParamOfPage = itemRequestListTO.getSize().isPresent();
+        int page = 0;
+        int size = DEFAULT_COUNT_SIZE;
+
+        if (isExistParamOfSize && isExistParamOfPage) {
+            int pageFromDTO = itemRequestListTO.getFrom().get();
+            int sizeFromDTO = itemRequestListTO.getSize().get();
+
+            if (pageFromDTO >= 0 && sizeFromDTO >= 1) {
+                page = pageFromDTO / sizeFromDTO;
+                size = sizeFromDTO;
+            } else {
+                log.warn("User used incorrect parameters: [from] and [size] [bookingRequestListTO={}]",
+                        itemRequestListTO);
+                throw new IncorrectParameterException("from and size");
+            }
+        }
+
+        return PageRequest.of(page, size);
     }
 
     private CommentEntity validCommentForCreate(Long userId, Long itemId, CommentCreateTO comment) {
@@ -312,7 +340,7 @@ public class ItemServiceIml implements ItemService {
         return buildValidItem;
     }
 
-    private void checkIsUserTheOwnerOfItem(long idOwnerOfItem, long idUserRequest) {
+    private void checkIsUserTheOwnerOfItem(Long idOwnerOfItem, Long idUserRequest) {
         if (idOwnerOfItem != idUserRequest) {
             log.error("User [idUserRequest={}] was attempt to apply unauthorized method " +
                     "to Owner [idOwnerOfItem={}]", idUserRequest, idOwnerOfItem);

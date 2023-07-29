@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.repository;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -11,7 +12,7 @@ import java.util.List;
 @Repository
 public interface ItemRepository extends JpaRepository<ItemEntity, Long> {
 
-    List<ItemEntity> findByUserId(Long userId);
+    List<ItemEntity> findByUserId(Long userId, Pageable pageable);
 
     @Query("SELECT new ru.practicum.shareit.item.projections.ItemShort(it.id, it.name, it.description, it.available) " +
             " FROM ItemEntity AS it " +
@@ -19,6 +20,6 @@ public interface ItemRepository extends JpaRepository<ItemEntity, Long> {
             "  AND (LOWER(it.name) LIKE LOWER(CONCAT('%', ?1,'%')) " +
             "       OR LOWER(it.description) LIKE LOWER(CONCAT('%', ?1,'%'))" +
             "      )")
-    List<ItemShort> getListSearchItemShort(String text);
+    List<ItemShort> getListSearchItemShort(String text, Pageable pageable);
 
 }

@@ -113,30 +113,6 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    private PageRequest getPageRequest(BookingRequestListTO bookingRequestListTO) {
-        boolean isExistParamOfSize = bookingRequestListTO.getFrom().isPresent();
-        boolean isExistParamOfPage = bookingRequestListTO.getSize().isPresent();
-        int page = 0;
-        int size = DEFAULT_COUNT_SIZE;
-
-        if (isExistParamOfSize && isExistParamOfPage) {
-            int pageFromDTO = bookingRequestListTO.getFrom().get();
-            int sizeFromDTO = bookingRequestListTO.getSize().get();
-
-            if (pageFromDTO >= 0 && sizeFromDTO >= 1) {
-                page = pageFromDTO / sizeFromDTO;
-                size = sizeFromDTO;
-            } else {
-                log.warn("User used incorrect parameters: [from] and [size] [bookingRequestListTO={}]",
-                        bookingRequestListTO);
-                throw new IncorrectParameterException("from and size");
-            }
-        }
-
-        return PageRequest.of(page, size);
-    }
-
-    @Transactional(readOnly = true)
     @Override
     public List<BookingResponseTO> getListBookingByIdUser(BookingRequestListTO bookingRequestListTO) {
         Long checkedUserId = checkParameterUserId(bookingRequestListTO.getIdUser());
@@ -219,6 +195,29 @@ public class BookingServiceImpl implements BookingService {
         return bookings.stream()
                 .map(BookingMapper.INSTANCE::toDTOResponseFromEntity)
                 .collect(Collectors.toList());
+    }
+
+    private PageRequest getPageRequest(BookingRequestListTO bookingRequestListTO) {
+        boolean isExistParamOfSize = bookingRequestListTO.getFrom().isPresent();
+        boolean isExistParamOfPage = bookingRequestListTO.getSize().isPresent();
+        int page = 0;
+        int size = DEFAULT_COUNT_SIZE;
+
+        if (isExistParamOfSize && isExistParamOfPage) {
+            int pageFromDTO = bookingRequestListTO.getFrom().get();
+            int sizeFromDTO = bookingRequestListTO.getSize().get();
+
+            if (pageFromDTO >= 0 && sizeFromDTO >= 1) {
+                page = pageFromDTO / sizeFromDTO;
+                size = sizeFromDTO;
+            } else {
+                log.warn("User used incorrect parameters: [from] and [size] [bookingRequestListTO={}]",
+                        bookingRequestListTO);
+                throw new IncorrectParameterException("from and size");
+            }
+        }
+
+        return PageRequest.of(page, size);
     }
 
     private BookingEntity validBookingForCreate(BookingCreateTO bookingRequestCreateDTO, Long checkedUserId) {

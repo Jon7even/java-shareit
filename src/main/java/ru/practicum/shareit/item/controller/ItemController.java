@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.practicum.shareit.item.dto.*;
+import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.projections.ItemShort;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.utils.HttpServletUtils;
@@ -71,11 +72,15 @@ public class ItemController {
     @GetMapping
     public ResponseEntity<List<ItemResponseBookingAndCommentTO>> getAllItemsByUserId(
             @RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
+            @RequestParam(required = false) Optional<Integer> from,
+            @RequestParam(required = false) Optional<Integer> size,
             HttpServletRequest request) {
 
         log.debug("On {} {} {}", request.getRequestURL(), IN_CONTROLLER_METHOD, request.getMethod());
 
-        List<ItemResponseBookingAndCommentTO> getAllItemsByUserId = itemService.getAllItemsByUserId(userId);
+        List<ItemResponseBookingAndCommentTO> getAllItemsByUserId = itemService.getAllItemsByUserId(
+                ItemMapper.INSTANCE.toDTOFromRequestParamWithoutText(userId, from, size)
+        );
 
         return ResponseEntity.ok()
                 .header(X_COUNT_ITEMS, String.valueOf(getAllItemsByUserId.size()))
@@ -86,11 +91,15 @@ public class ItemController {
     public ResponseEntity<List<ItemShort>> searchItemBySearchBar(
             @RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
             @RequestParam Optional<String> text,
+            @RequestParam(required = false) Optional<Integer> from,
+            @RequestParam(required = false) Optional<Integer> size,
             HttpServletRequest request) {
 
         log.debug("On {} {} {}", HttpServletUtils.getURLWithParam(request), IN_CONTROLLER_METHOD, request.getMethod());
 
-        List<ItemShort> listFoundItemsBySearchBar = itemService.getListSearchItem(userId, text);
+        List<ItemShort> listFoundItemsBySearchBar = itemService.getListSearchItem(
+                ItemMapper.INSTANCE.toDTOFromRequestParam(userId, from, size, text)
+        );
 
         return ResponseEntity.ok()
                 .header(X_COUNT_ITEMS, String.valueOf(listFoundItemsBySearchBar.size()))

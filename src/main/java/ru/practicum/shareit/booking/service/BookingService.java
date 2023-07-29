@@ -1,10 +1,8 @@
 package ru.practicum.shareit.booking.service;
 
-import org.springframework.data.domain.Page;
 import ru.practicum.shareit.booking.dto.BookingCreateTO;
 import ru.practicum.shareit.booking.dto.BookingRequestListTO;
 import ru.practicum.shareit.booking.dto.BookingResponseTO;
-import ru.practicum.shareit.booking.model.BookingState;
 
 import java.util.List;
 import java.util.Optional;

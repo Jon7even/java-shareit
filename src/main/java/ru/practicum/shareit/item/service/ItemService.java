@@ -13,9 +13,9 @@ public interface ItemService {
 
     ItemResponseTO updateItem(Optional<Long> idUser, Optional<Long> idItem, ItemUpdateTO itemRequestUpdateDTO);
 
-    List<ItemResponseBookingAndCommentTO> getAllItemsByUserId(Optional<Long> idUser);
+    List<ItemResponseBookingAndCommentTO> getAllItemsByUserId(ItemRequestListTO itemRequestListTO);
 
-    List<ItemShort> getListSearchItem(Optional<Long> idUser, Optional<String> searchText);
+    List<ItemShort> getListSearchItem(ItemRequestListTO itemRequestListTO);
 
     void deleteItemById(Optional<Long> idUser, Optional<Long> idItem);
 

@@ -36,5 +36,5 @@ public class StaticConfig {
 
     public static final String DEFAULT_STATE_IN_CONTROLLER = "ALL";
 
-    public static final int DEFAULT_COUNT_SIZE = 100;
+    public static final int DEFAULT_COUNT_SIZE = 50;
 }
