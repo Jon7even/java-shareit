@@ -4,11 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.exception.EntityNotCreatedException;
 import ru.practicum.shareit.exception.EntityNotDeletedException;
 import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.exception.EntityAlreadyExistsException;
-import ru.practicum.shareit.exception.EntityNotUpdatedException;
 import ru.practicum.shareit.user.dto.UserResponseTO;
 import ru.practicum.shareit.user.dto.UserUpdateTO;
 import ru.practicum.shareit.user.mapper.UserMapper;
@@ -33,22 +31,17 @@ public class UserServiceIml implements UserService {
 
     @Transactional
     @Override
-    public UserResponseTO createUser(UserCreateTO userRequestCreateDTO) {
-        log.debug("New user came {} [UserRequestCreateDTO={}]", SERVICE_FROM_CONTROLLER, userRequestCreateDTO);
-        UserEntity user = UserMapper.INSTANCE.toEntityFromDTOCreate(userRequestCreateDTO);
+    public UserResponseTO createUser(UserCreateTO userRequestCreateTO) {
+        log.debug("New userTO came {} [UserRequestCreateTO={}]", SERVICE_FROM_CONTROLLER, userRequestCreateTO);
+        UserEntity user = UserMapper.INSTANCE.toEntityFromDTOCreate(userRequestCreateTO);
 
         try {
-            log.debug("Add new [user={}] {}", user, SERVICE_IN_DB);
+            log.debug("Add new entity [user={}] {}", user, SERVICE_IN_DB);
             UserEntity createdUser = repositoryUser.save(user);
-            Optional<UserEntity> foundUserAfterCreation = repositoryUser.findById(createdUser.getId());
 
-            if (foundUserAfterCreation.isPresent() && createdUser.equals(foundUserAfterCreation.get())) {
-                log.debug("New user has returned [user={}] {}", createdUser, SERVICE_FROM_DB);
-                return UserMapper.INSTANCE.toDTOResponseFromEntity(createdUser);
-            } else {
-                log.error("[user={}] was not created", user);
-                throw new EntityNotCreatedException("New user");
-            }
+            log.debug("New user has returned [user={}] {}", createdUser, SERVICE_FROM_DB);
+            return UserMapper.INSTANCE.toDTOResponseFromEntity(createdUser);
+
         } catch (ConstraintViolationException e) {
             throw new EntityAlreadyExistsException("This email");
         }
@@ -117,17 +110,13 @@ public class UserServiceIml implements UserService {
                 updateUserInRepository.setName(user.getName());
             }
 
-            log.debug("Update [user={}] {}", updateUserInRepository, SERVICE_IN_DB);
+            log.debug("Update entity [user={}] {}", updateUserInRepository, SERVICE_IN_DB);
             UserEntity updatedUser = repositoryUser.save(updateUserInRepository);
-            Optional<UserEntity> foundUserAfterUpdate = repositoryUser.findById(checkedUserId);
 
-            if (foundUserAfterUpdate.isPresent() && updatedUser.equals(foundUserAfterUpdate.get())) {
-                log.debug("Updated user has returned [user={}] {}", updatedUser, SERVICE_FROM_DB);
-                return UserMapper.INSTANCE.toDTOResponseFromEntity(updatedUser);
-            } else {
-                log.error("[user={}] was not updated", user);
-                throw new EntityNotUpdatedException(String.format("User with [idUser=%d]", checkedUserId));
-            }
+            Optional<UserEntity> foundUserAfterUpdate = repositoryUser.findById(checkedUserId);
+            log.debug("Updated user has returned [user={}] {}", updatedUser, SERVICE_FROM_DB);
+
+            return UserMapper.INSTANCE.toDTOResponseFromEntity(updatedUser);
         }
     }
 
@@ -176,7 +165,7 @@ public class UserServiceIml implements UserService {
         }
     }
 
-    private Long checkParameterUserId(Optional<Long> idUser) {
+    public Long checkParameterUserId(Optional<Long> idUser) {
         if (idUser.isPresent()) {
             if (idUser.get() > 0) {
                 log.debug("Checking [idUser={}] is ok", idUser.get());

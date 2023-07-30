@@ -25,6 +25,7 @@ import ru.practicum.shareit.request.model.ItemRequestEntity;
 import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.UserEntity;
 import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.utils.CommonValidator;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -36,7 +37,6 @@ import java.util.stream.Collectors;
 
 import static ru.practicum.shareit.config.StaticConfig.DEFAULT_COUNT_SIZE;
 import static ru.practicum.shareit.constants.NamesLogsInService.*;
-import static ru.practicum.shareit.constants.NamesParametersInController.X_HEADER_USER_ID;
 
 @Slf4j
 @Service
@@ -51,28 +51,23 @@ public class ItemServiceIml implements ItemService {
 
     @Transactional
     @Override
-    public ItemResponseTO createItem(ItemCreateTO itemCreateDTO, Optional<Long> idUser) {
-        log.debug("New item came {} [itemCreateDTO={}]", SERVICE_FROM_CONTROLLER, itemCreateDTO);
-        Long checkedUserId = checkParameterUserId(idUser);
-        ItemEntity itemForCreateInRepository = validItemForCreate(itemCreateDTO, checkedUserId);
+    public ItemResponseTO createItem(ItemCreateTO itemCreateTO, Optional<Long> idUser) {
+        log.debug("New itemTO came {} [itemCreateTO={}]", SERVICE_FROM_CONTROLLER, itemCreateTO);
+        Long checkedUserId = CommonValidator.checkParameterUserId(idUser);
 
-        log.debug("Add new [item={}] {}", itemForCreateInRepository, SERVICE_IN_DB);
+        ItemEntity itemForCreateInRepository = validItemForCreate(itemCreateTO, checkedUserId);
+        log.debug("Add new entity [item={}] {}", itemForCreateInRepository, SERVICE_IN_DB);
+
         ItemEntity createdItem = repositoryItem.save(itemForCreateInRepository);
-        Optional<ItemEntity> foundItemAfterCreation = repositoryItem.findById(createdItem.getId());
+        log.debug("New item has returned [item={}] {}", createdItem, SERVICE_FROM_DB);
 
-        if (foundItemAfterCreation.isPresent() && createdItem.equals(foundItemAfterCreation.get())) {
-            log.debug("New item has returned [item={}] {}", createdItem, SERVICE_FROM_DB);
-            return ItemMapper.INSTANCE.toDTOResponseFromEntity(createdItem);
-        } else {
-            log.error("[item={}] was not created", createdItem);
-            throw new EntityNotCreatedException("New item");
-        }
+        return ItemMapper.INSTANCE.toDTOResponseFromEntity(createdItem);
     }
 
     @Override
     public ItemResponseBookingAndCommentTO findItemById(Optional<Long> idUser, Optional<Long> idItem) {
-        Long checkedUserId = checkParameterUserId(idUser);
-        Long checkedItemId = checkParameterItemId(idItem);
+        Long checkedUserId = CommonValidator.checkParameterUserId(idUser);
+        Long checkedItemId = CommonValidator.checkParameterItemId(idItem);
         UserEntity checkedUserFromDB = findUserEntityById(checkedUserId);
 
         log.debug("Get item by [idItem={}] by owner [user={}] {}", checkedItemId, checkedUserId, SERVICE_IN_DB);
@@ -106,29 +101,26 @@ public class ItemServiceIml implements ItemService {
                                      Optional<Long> idItem,
                                      ItemUpdateTO itemRequestUpdateDTO) {
         log.debug("Item for update came {} [ItemRequestUpdateDTO={}]", SERVICE_FROM_CONTROLLER, itemRequestUpdateDTO);
-        Long checkedUserId = checkParameterUserId(idUser);
-        Long checkedItemId = checkParameterItemId(idItem);
+        Long checkedUserId = CommonValidator.checkParameterUserId(idUser);
+        Long checkedItemId = CommonValidator.checkParameterItemId(idItem);
 
         ItemEntity itemUpdateInRepository = validItemForUpdate(itemRequestUpdateDTO, checkedUserId, checkedItemId);
+        log.debug("Update entity [item={}] {}", itemRequestUpdateDTO, SERVICE_IN_DB);
 
-        log.debug("Update [item={}] {}", itemRequestUpdateDTO, SERVICE_IN_DB);
         ItemEntity updatedItem = repositoryItem.save(itemUpdateInRepository);
-        Optional<ItemEntity> foundItemAfterUpdate = repositoryItem.findById(checkedItemId);
+        log.debug("Updated item has returned [item={}] {}", updatedItem, SERVICE_FROM_DB);
 
-        if (foundItemAfterUpdate.isPresent() && updatedItem.equals(foundItemAfterUpdate.get())) {
-            log.debug("Updated item has returned [item={}] {}", updatedItem, SERVICE_FROM_DB);
-            return ItemMapper.INSTANCE.toDTOResponseFromEntity(updatedItem);
-        } else {
-            log.error("[item={}] was not updated", itemUpdateInRepository);
-            throw new EntityNotUpdatedException(String.format("Item with [idItem=%d]", checkedItemId));
-        }
+        return ItemMapper.INSTANCE.toDTOResponseFromEntity(updatedItem);
     }
 
     @Override
     public List<ItemResponseBookingAndCommentTO> getAllItemsByUserId(ItemRequestListTO itemRequestListTO) {
-        Long checkedUserId = checkParameterUserId(itemRequestListTO.getIdUser());
-        findUserEntityById(checkedUserId);
-        Pageable page = getPageRequest(itemRequestListTO);
+        Long checkedUserId = CommonValidator.checkParameterUserId(itemRequestListTO.getIdUser());
+        existDoesUserEntityById(checkedUserId);
+
+        Pageable page = CommonValidator.getPageRequest(
+                itemRequestListTO.getFrom(), itemRequestListTO.getSize(), Optional.empty()
+        );
 
         log.debug("Get all items {} by [idUser={}] [page={}]", SERVICE_IN_DB, checkedUserId, page);
         List<ItemEntity> itemsByIdUser = repositoryItem.findByUserId(checkedUserId, page);
@@ -153,7 +145,7 @@ public class ItemServiceIml implements ItemService {
 
     @Override
     public List<ItemShort> getListSearchItem(ItemRequestListTO itemRequestListTO) {
-        Long checkedUserId = checkParameterUserId(itemRequestListTO.getIdUser());
+        Long checkedUserId = CommonValidator.checkParameterUserId(itemRequestListTO.getIdUser());
         String checkedSearchText = checkParameterSearchText(itemRequestListTO.getText());
 
         if (checkedSearchText.isBlank()) {
@@ -161,8 +153,10 @@ public class ItemServiceIml implements ItemService {
             return Collections.emptyList();
         }
 
-        findUserEntityById(checkedUserId);
-        Pageable page = getPageRequest(itemRequestListTO);
+        existDoesUserEntityById(checkedUserId);
+        Pageable page = CommonValidator.getPageRequest(
+                itemRequestListTO.getFrom(), itemRequestListTO.getSize(), Optional.empty()
+        );
 
         log.debug("Get list items [searchText={}] {} by [idUser={}] [page={}]",
                 checkedSearchText, SERVICE_IN_DB, checkedUserId, page);
@@ -182,22 +176,22 @@ public class ItemServiceIml implements ItemService {
     @Transactional
     @Override
     public void deleteItemById(Optional<Long> idUser, Optional<Long> idItem) {
-        Long checkedUserId = checkParameterUserId(idUser);
-        Long checkedItemId = checkParameterItemId(idItem);
+        Long checkedUserId = CommonValidator.checkParameterUserId(idUser);
+        Long checkedItemId = CommonValidator.checkParameterItemId(idItem);
 
-        ItemEntity checkedItemFromDB = findItemEntityById(checkedItemId);
-        UserEntity checkedUserFromDB = findUserEntityById(checkedUserId);
-        checkIsUserTheOwnerOfItem(checkedItemFromDB.getUser().getId(), checkedUserFromDB.getId());
+        existDoesItemEntityById(checkedItemId);
+        existDoesUserEntityById(checkedUserId);
+        checkIsUserTheOwnerOfItem(checkedItemId, checkedUserId);
 
-        log.debug("Remove [item={}] by [userId={}] {}", checkedItemFromDB, checkedUserFromDB.getId(), SERVICE_IN_DB);
+        log.debug("Remove [item={}] by [userId={}] {}", checkedItemId, checkedUserId, SERVICE_IN_DB);
         repositoryItem.deleteById(checkedItemId);
         boolean isRemoved = repositoryItem.existsById(checkedItemId);
 
         if (!isRemoved) {
-            log.debug("Item by [id={}] [ownerName{}] has removed {}",
-                    checkedItemId, checkedUserFromDB.getName(), SERVICE_FROM_DB);
+            log.debug("Item by [idItem={}] [idOwner{}] has removed {}",
+                    checkedItemId, checkedUserId, SERVICE_FROM_DB);
         } else {
-            log.error("Item by [id={}] [ownerName{}] was not removed", checkedItemId, checkedUserFromDB.getName());
+            log.error("Item by [id={}] [idOwner{}] was not removed", checkedItemId, checkedUserId);
             throw new EntityNotDeletedException(String.format("Item with [idItem=%d]", checkedItemId));
         }
     }
@@ -206,8 +200,8 @@ public class ItemServiceIml implements ItemService {
     @Override
     public CommentResponseTO createComment(Optional<Long> idUser, Optional<Long> idItem,
                                            CommentCreateTO comment) {
-        Long checkedUserId = checkParameterUserId(idUser);
-        Long checkedItemId = checkParameterItemId(idItem);
+        Long checkedUserId = CommonValidator.checkParameterUserId(idUser);
+        Long checkedItemId = CommonValidator.checkParameterItemId(idItem);
 
         CommentEntity commentForCreateInRepository = validCommentForCreate(checkedUserId, checkedItemId, comment);
 
@@ -225,32 +219,9 @@ public class ItemServiceIml implements ItemService {
         }
     }
 
-    private PageRequest getPageRequest(ItemRequestListTO itemRequestListTO) {
-        boolean isExistParamOfSize = itemRequestListTO.getFrom().isPresent();
-        boolean isExistParamOfPage = itemRequestListTO.getSize().isPresent();
-        int page = 0;
-        int size = DEFAULT_COUNT_SIZE;
-
-        if (isExistParamOfSize && isExistParamOfPage) {
-            int pageFromDTO = itemRequestListTO.getFrom().get();
-            int sizeFromDTO = itemRequestListTO.getSize().get();
-
-            if (pageFromDTO >= 0 && sizeFromDTO >= 1) {
-                page = pageFromDTO / sizeFromDTO;
-                size = sizeFromDTO;
-            } else {
-                log.warn("User used incorrect parameters: [from] and [size] [bookingRequestListTO={}]",
-                        itemRequestListTO);
-                throw new IncorrectParameterException("from and size");
-            }
-        }
-
-        return PageRequest.of(page, size);
-    }
-
-    private CommentEntity validCommentForCreate(Long userId, Long itemId, CommentCreateTO comment) {
-        UserEntity checkedUserFromDB = findUserEntityById(userId);
-        ItemEntity checkedItemFromDB = findItemEntityById(itemId);
+    private CommentEntity validCommentForCreate(Long checkedUserId, Long checkedItemId, CommentCreateTO comment) {
+        UserEntity checkedUserFromDB = findUserEntityById(checkedUserId);
+        ItemEntity checkedItemFromDB = findItemEntityById(checkedItemId);
         LocalDateTime currentTime = LocalDateTime.now();
 
         List<BookingEntity> pastBookingItem = repositoryBooking.getBookingByOwnerBeforeCurrentTime(checkedUserFromDB,
@@ -263,7 +234,7 @@ public class ItemServiceIml implements ItemService {
         } else {
             throw new NoCompletedBookingsException(
                     String.format("User with [idUser=%d] not have completed bookings for this item[idItem=%d]",
-                            userId, itemId)
+                            checkedUserId, checkedItemId)
             );
         }
     }
@@ -353,7 +324,7 @@ public class ItemServiceIml implements ItemService {
     }
 
     private void checkIsUserTheOwnerOfItem(Long idOwnerOfItem, Long idUserRequest) {
-        if (idOwnerOfItem != idUserRequest) {
+        if (!idOwnerOfItem.equals(idUserRequest)) {
             log.error("User [idUserRequest={}] was attempt to apply unauthorized method " +
                     "to Owner [idOwnerOfItem={}]", idUserRequest, idOwnerOfItem);
             throw new AccessDeniedException("this item");
@@ -367,6 +338,18 @@ public class ItemServiceIml implements ItemService {
         if (foundCheckUser.isPresent()) {
             log.debug("Check was successful found [user={}] {}", foundCheckUser.get(), SERVICE_FROM_DB);
             return foundCheckUser.get();
+        } else {
+            log.warn("User by [idUser={}] was not found", checkedUserId);
+            throw new EntityNotFoundException(String.format("User with [idUser=%d]", checkedUserId));
+        }
+    }
+
+    private void existDoesUserEntityById(Long checkedUserId) {
+        log.debug("Checking entity user by [idUser={}] {}", checkedUserId, SERVICE_IN_DB);
+        boolean existsById = repositoryUser.existsById(checkedUserId);
+
+        if (existsById) {
+            log.debug("Check was successful [idUser={}] exist in {}", checkedUserId, SERVICE_IN_DB);
         } else {
             log.warn("User by [idUser={}] was not found", checkedUserId);
             throw new EntityNotFoundException(String.format("User with [idUser=%d]", checkedUserId));
@@ -399,28 +382,16 @@ public class ItemServiceIml implements ItemService {
         }
     }
 
-    private Long checkParameterUserId(Optional<Long> idUser) {
-        if (idUser.isPresent()) {
-            if (idUser.get() > 0) {
-                log.debug("Checking Header[param={}] [idUser={}] is ok", X_HEADER_USER_ID, idUser.get());
-            }
+    private void existDoesItemEntityById(Long checkedItemId) {
+        log.debug("Checking entity item by [idItem={}] {}", checkedItemId, SERVICE_IN_DB);
+        boolean existsById = repositoryItem.existsById(checkedItemId);
+
+        if (existsById) {
+            log.debug("Check was successful [idItem={}] exist in {}", checkedItemId, SERVICE_IN_DB);
         } else {
-            throw new IncorrectParameterException(X_HEADER_USER_ID);
+            log.warn("Item by [idItem={}] was not found", checkedItemId);
+            throw new EntityNotFoundException(String.format("Item with [idItem=%d]", checkedItemId));
         }
-
-        return idUser.get();
-    }
-
-    private Long checkParameterItemId(Optional<Long> idItem) {
-        if (idItem.isPresent()) {
-            if (idItem.get() > 0) {
-                log.debug("Checking Path [idItem={}] is ok", idItem.get());
-            }
-        } else {
-            throw new EntityNotFoundException(String.format("Item with [idItem=%d]", idItem.get()));
-        }
-
-        return idItem.get();
     }
 
     private String checkParameterSearchText(Optional<String> searchText) {

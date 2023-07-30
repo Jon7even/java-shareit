@@ -18,6 +18,7 @@ import ru.practicum.shareit.item.model.ItemEntity;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.UserEntity;
 import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.utils.CommonValidator;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -28,7 +29,6 @@ import java.util.stream.Collectors;
 
 import static ru.practicum.shareit.config.StaticConfig.*;
 import static ru.practicum.shareit.constants.NamesLogsInService.*;
-import static ru.practicum.shareit.constants.NamesParametersInController.X_HEADER_USER_ID;
 
 @Slf4j
 @Service
@@ -41,38 +41,33 @@ public class BookingServiceImpl implements BookingService {
 
     @Transactional
     @Override
-    public BookingResponseTO createBooking(BookingCreateTO bookingRequestCreateDTO, Optional<Long> idUser) {
-        log.debug("New booking came {} [BookingRequestCreateDTO={}]", SERVICE_FROM_CONTROLLER, bookingRequestCreateDTO);
-        Long checkedUserId = checkParameterUserId(idUser);
-        checkStartAndEndTime(bookingRequestCreateDTO, checkedUserId);
+    public BookingResponseTO createBooking(BookingCreateTO bookingRequestCreateTO, Optional<Long> idUser) {
+        log.debug("New bookingTO came {} [BookingRequestCreateTO={}]", SERVICE_FROM_CONTROLLER, bookingRequestCreateTO);
+        Long checkedUserId = CommonValidator.checkParameterUserId(idUser);
+        checkStartAndEndTime(bookingRequestCreateTO, checkedUserId);
 
-        BookingEntity bookingForCreateInRepository = validBookingForCreate(bookingRequestCreateDTO, checkedUserId);
+        BookingEntity bookingForCreateInRepository = validBookingForCreate(bookingRequestCreateTO, checkedUserId);
+        log.debug("Add new entity [booking={}] {}", bookingForCreateInRepository, SERVICE_IN_DB);
 
-        log.debug("Add new [booking={}] {}", bookingForCreateInRepository, SERVICE_IN_DB);
         BookingEntity createdBooking = repositoryBooking.save(bookingForCreateInRepository);
-        Optional<BookingEntity> foundBookingAfterCreation = repositoryBooking.findById(createdBooking.getId());
+        log.debug("New booking has returned [booking={}] {}", createdBooking, SERVICE_FROM_DB);
 
-        if (foundBookingAfterCreation.isPresent() && createdBooking.equals(foundBookingAfterCreation.get())) {
-            log.debug("New booking has returned [booking={}] {}", createdBooking, SERVICE_FROM_DB);
-            return BookingMapper.INSTANCE.toDTOResponseFromEntity(createdBooking);
-        } else {
-            log.error("[booking={}] was not created", createdBooking);
-            throw new EntityNotCreatedException("New booking");
-        }
+        return BookingMapper.INSTANCE.toDTOResponseFromEntity(createdBooking);
     }
 
     @Override
     public BookingResponseTO findBookingById(Optional<Long> idUser, Optional<Long> idBooking) {
-        Long checkedUserId = checkParameterUserId(idUser);
-        Long checkedBookingId = checkParameterBookingId(idBooking);
-        UserEntity user = findUserEntityById(checkedUserId);
+        Long checkedUserId = CommonValidator.checkParameterUserId(idUser);
+        Long checkedBookingId = CommonValidator.checkParameterBookingId(idBooking);
+        existDoesUserEntityById(checkedUserId);
 
-        log.debug("Get booking by [idBooking={}] by User [idUser={}] {}", checkedBookingId, checkedUserId, SERVICE_IN_DB);
+        log.debug("Get booking by [idBooking={}] by User [idUser={}] {}",
+                checkedBookingId, checkedUserId, SERVICE_IN_DB);
         Optional<BookingEntity> foundBookingById = repositoryBooking.findById(checkedBookingId);
 
         if (foundBookingById.isPresent()) {
-            boolean userEqualsOwnerItem = foundBookingById.get().getItem().getUser().equals(user);
-            boolean userEqualsOwnerBooking = foundBookingById.get().getUser().equals(user);
+            boolean userEqualsOwnerItem = foundBookingById.get().getItem().getUser().getId().equals(checkedUserId);
+            boolean userEqualsOwnerBooking = foundBookingById.get().getUser().getId().equals(checkedUserId);
 
             if (userEqualsOwnerItem || userEqualsOwnerBooking) {
                 log.debug("Found [booking={}] {}", foundBookingById.get(), SERVICE_FROM_DB);
@@ -91,36 +86,36 @@ public class BookingServiceImpl implements BookingService {
 
     @Transactional
     @Override
-    public BookingResponseTO confirmBooking(Optional<Long> idUser, Optional<Long> idBooking, Optional<Boolean> approved) {
-        Long checkedUserId = checkParameterUserId(idUser);
-        Long checkedBookingId = checkParameterBookingId(idBooking);
+    public BookingResponseTO confirmBooking(Optional<Long> idUser,
+                                            Optional<Long> idBooking,
+                                            Optional<Boolean> approved) {
+        Long checkedUserId = CommonValidator.checkParameterUserId(idUser);
+        Long checkedBookingId = CommonValidator.checkParameterBookingId(idBooking);
         BookingStatus statusForUpdate = getStatusForUpdate(approved);
 
-        BookingEntity bookingForUpdateStatus = validBookingForUpdateStatus(checkedUserId, checkedBookingId, statusForUpdate);
-
+        BookingEntity bookingForUpdateStatus = validBookingForUpdateStatus(
+                checkedUserId, checkedBookingId, statusForUpdate
+        );
         log.debug("Update Booking status[status={}] for [bookingId={}] by [bookerId={}] {}", statusForUpdate,
                 checkedBookingId, checkedUserId, SERVICE_IN_DB);
-        BookingEntity updatedBooking = repositoryBooking.save(bookingForUpdateStatus);
 
-        if (updatedBooking.getStatus().equals(statusForUpdate)) {
-            log.debug("Owner [IdUser={}] by Item[IdItem={}] success updated status [bookingId={}] {}", checkedUserId,
-                    updatedBooking.getItem().getId(), checkedBookingId, SERVICE_FROM_DB);
-            return BookingMapper.INSTANCE.toDTOResponseFromEntity(updatedBooking);
-        } else {
-            log.debug("Owner [IdUser={}] by Item[IdItem={}] did not update status [bookingId={}] {}", checkedUserId,
-                    updatedBooking.getItem().getId(), checkedBookingId, SERVICE_FROM_DB);
-            throw new EntityNotUpdatedException("Status booking");
-        }
+        BookingEntity updatedBooking = repositoryBooking.save(bookingForUpdateStatus);
+        log.debug("Owner [IdUser={}] by Item[IdItem={}] success updated status [bookingId={}] {}", checkedUserId,
+                updatedBooking.getItem().getId(), checkedBookingId, SERVICE_FROM_DB);
+
+        return BookingMapper.INSTANCE.toDTOResponseFromEntity(updatedBooking);
     }
 
     @Override
     public List<BookingResponseTO> getListBookingByIdUser(BookingRequestListTO bookingRequestListTO) {
-        Long checkedUserId = checkParameterUserId(bookingRequestListTO.getIdUser());
+        Long checkedUserId = CommonValidator.checkParameterUserId(bookingRequestListTO.getIdUser());
         UserEntity checkedUserFromDB = findUserEntityById(checkedUserId);
 
         LocalDateTime currentTime = LocalDateTime.now();
         List<BookingEntity> bookings = Collections.emptyList();
-        Pageable page = getPageRequest(bookingRequestListTO);
+        Pageable page = CommonValidator.getPageRequest(
+                bookingRequestListTO.getFrom(), bookingRequestListTO.getSize(), Optional.empty()
+        );
 
         log.debug("Get list booking by user [userId={}] [BookingState={}], [page={}] [currentTime={}] {}",
                 checkedUserId, bookingRequestListTO.getState().toString(), page, currentTime, SERVICE_FROM_DB);
@@ -156,12 +151,15 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingResponseTO> getAllItemBookingByIdOwner(BookingRequestListTO bookingRequestListTO) {
-        Long checkedUserId = checkParameterUserId(bookingRequestListTO.getIdUser());
+        Long checkedUserId = CommonValidator.checkParameterUserId(bookingRequestListTO.getIdUser());
         UserEntity checkedUserFromDB = findUserEntityById(checkedUserId);
 
         LocalDateTime currentTime = LocalDateTime.now();
         List<BookingEntity> bookings = Collections.emptyList();
-        Pageable page = getPageRequest(bookingRequestListTO);
+
+        Pageable page = CommonValidator.getPageRequest(
+                bookingRequestListTO.getFrom(), bookingRequestListTO.getSize(), Optional.empty()
+        );
 
         log.debug("Get list booking by owner [ownerId={}] [BookingState={}], [page={}] [currentTime={}] {}",
                 checkedUserId, bookingRequestListTO.getState().toString(), page, currentTime, SERVICE_FROM_DB);
@@ -197,29 +195,6 @@ public class BookingServiceImpl implements BookingService {
                 .collect(Collectors.toList());
     }
 
-    private PageRequest getPageRequest(BookingRequestListTO bookingRequestListTO) {
-        boolean isExistParamOfSize = bookingRequestListTO.getFrom().isPresent();
-        boolean isExistParamOfPage = bookingRequestListTO.getSize().isPresent();
-        int page = 0;
-        int size = DEFAULT_COUNT_SIZE;
-
-        if (isExistParamOfSize && isExistParamOfPage) {
-            int pageFromDTO = bookingRequestListTO.getFrom().get();
-            int sizeFromDTO = bookingRequestListTO.getSize().get();
-
-            if (pageFromDTO >= 0 && sizeFromDTO >= 1) {
-                page = pageFromDTO / sizeFromDTO;
-                size = sizeFromDTO;
-            } else {
-                log.warn("User used incorrect parameters: [from] and [size] [bookingRequestListTO={}]",
-                        bookingRequestListTO);
-                throw new IncorrectParameterException("from and size");
-            }
-        }
-
-        return PageRequest.of(page, size);
-    }
-
     private BookingEntity validBookingForCreate(BookingCreateTO bookingRequestCreateDTO, Long checkedUserId) {
         UserEntity checkedUserFromDB = findUserEntityById(checkedUserId);
         ItemEntity checkedItemFromDB = findItemEntityById(bookingRequestCreateDTO.getItemId());
@@ -240,10 +215,10 @@ public class BookingServiceImpl implements BookingService {
 
     private BookingEntity validBookingForUpdateStatus(Long checkedUserId, Long checkedBookingId,
                                                       BookingStatus statusForUpdate) {
-        UserEntity checkedUserFromDB = findUserEntityById(checkedUserId);
+        existDoesUserEntityById(checkedUserId);
         BookingEntity checkedBookingFromDB = findBookingEntityById(checkedBookingId);
 
-        if (!checkedBookingFromDB.getItem().getUser().getId().equals(checkedUserFromDB.getId())) {
+        if (!checkedBookingFromDB.getItem().getUser().getId().equals(checkedUserId)) {
             log.error("User by [idUser={}] is not owner of item[IdItem={}]",
                     checkedUserId, checkedBookingFromDB.getItem().getId());
             throw new EntityNotFoundException(String.format("Booking with [idBooking=%d]", checkedBookingId));
@@ -286,6 +261,18 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
+    private void existDoesUserEntityById(Long checkedUserId) {
+        log.debug("Checking entity user by [idUser={}] {}", checkedUserId, SERVICE_IN_DB);
+        boolean existsById = repositoryUser.existsById(checkedUserId);
+
+        if (existsById) {
+            log.debug("Check was successful [idUser={}] exist in {}", checkedUserId, SERVICE_IN_DB);
+        } else {
+            log.warn("User by [idUser={}] was not found", checkedUserId);
+            throw new EntityNotFoundException(String.format("User with [idUser=%d]", checkedUserId));
+        }
+    }
+
     private ItemEntity findItemEntityById(Long checkedItemId) {
         log.debug("Get item entity for checking by [idItem={}] {}", checkedItemId, SERVICE_IN_DB);
         Optional<ItemEntity> foundCheckItem = repositoryItem.findById(checkedItemId);
@@ -316,18 +303,6 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    private Long checkParameterBookingId(Optional<Long> idBooking) {
-        if (idBooking.isPresent()) {
-            if (idBooking.get() > 0) {
-                log.debug("Checking Path [idBooking={}] is ok", idBooking.get());
-            }
-        } else {
-            throw new EntityNotFoundException(String.format("Booking with [idBooking=%d]", idBooking.get()));
-        }
-
-        return idBooking.get();
-    }
-
     private Boolean checkParameterApproved(Optional<Boolean> approved) {
         if (approved.isPresent()) {
             log.debug("Checking RequestParam [approved={}] is ok", approved.get());
@@ -335,18 +310,6 @@ public class BookingServiceImpl implements BookingService {
         } else {
             throw new IncorrectParameterException("approved");
         }
-    }
-
-    private Long checkParameterUserId(Optional<Long> idUser) {
-        if (idUser.isPresent()) {
-            if (idUser.get() > 0) {
-                log.debug("Checking Header[param={}] [idUser={}] is ok", X_HEADER_USER_ID, idUser.get());
-            }
-        } else {
-            throw new IncorrectParameterException(X_HEADER_USER_ID);
-        }
-
-        return idUser.get();
     }
 
     private BookingStatus getStatusForUpdate(Optional<Boolean> approved) {
