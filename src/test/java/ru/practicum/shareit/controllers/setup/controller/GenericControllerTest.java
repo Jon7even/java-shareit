@@ -8,9 +8,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.booking.dto.BookingCreateTO;
+import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.item.dto.ItemCreateTO;
 import ru.practicum.shareit.item.model.ItemEntity;
 import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.request.dto.ItemRequestCreateTO;
 import ru.practicum.shareit.user.dto.UserCreateTO;
 import ru.practicum.shareit.user.service.UserService;
 
@@ -32,6 +34,9 @@ public class GenericControllerTest {
 
     @Autowired
     protected ItemService itemService;
+
+    @Autowired
+    protected BookingService bookingService;
 
     protected static long FIRST_ID = 1;
 
@@ -61,6 +66,12 @@ public class GenericControllerTest {
 
     protected ItemEntity thirdItem;
 
+    protected ItemRequestCreateTO firstItemRequest;
+
+    protected ItemRequestCreateTO secondItemRequest;
+
+    protected ItemRequestCreateTO thirdItemRequest;
+
     protected void initUsers() {
         firstUser = UserCreateTO.builder()
                 .name("firstUser")
@@ -74,12 +85,24 @@ public class GenericControllerTest {
                 .build();
     }
 
+    protected void initItemRequests() {
+        firstItemRequest = ItemRequestCreateTO.builder()
+                .description("test description")
+                .build();
+        secondItemRequest = ItemRequestCreateTO.builder()
+                .description("test description second")
+                .build();
+        thirdItemRequest = ItemRequestCreateTO.builder()
+                .description("test description third")
+                .build();
+    }
+
     protected void initBookings() {
         firstBooking = BookingCreateTO.builder()
                 .itemId(FIRST_ID)
                 .build();
         secondBooking = BookingCreateTO.builder()
-                .itemId(FIRST_ID)
+                .itemId(FIRST_ID + 1)
                 .build();
         thirdBooking = BookingCreateTO.builder()
                 .itemId(FIRST_ID)

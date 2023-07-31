@@ -28,7 +28,7 @@ public class UserControllerTest extends GenericControllerTest {
     }
 
     @Test
-    @DisplayName("Пользователь должен создаться с релевантными полями")
+    @DisplayName("Пользователь должен создаться с релевантными полями [createUser]")
     void shouldCreateUser_thenStatus201() throws Exception {
         mockMvc.perform(post("/users")
                         .content(objectMapper.writeValueAsString(firstUser))
@@ -40,7 +40,7 @@ public class UserControllerTest extends GenericControllerTest {
     }
 
     @Test
-    @DisplayName("Пользователь не должен создаться")
+    @DisplayName("Пользователь не должен создаться [createUser]")
     void shouldNotCreateUser_thenStatus400() throws Exception {
         mockMvc.perform(post("/users")
                         .content(objectMapper.writeValueAsString(thirdUser))
@@ -75,7 +75,36 @@ public class UserControllerTest extends GenericControllerTest {
     }
 
     @Test
-    @DisplayName("Пользователь должен обновить поля частично")
+    @DisplayName("Поиск пользователя по [ID] [getUserById]")
+    void shouldGetUserById_thenStatus200AndStatus404() throws Exception {
+        userService.createUser(firstUser);
+
+        mockMvc.perform(get("/users/{id}", FIRST_ID))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("id").value(FIRST_ID))
+                .andExpect(jsonPath("name").value(firstUser.getName()))
+                .andExpect(jsonPath("email").value(firstUser.getEmail()));
+
+        mockMvc.perform(get("/users/{id}", FIRST_ID + 1))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath(ERROR_NAME).value(ERROR_M_USER_NOT_FOUND));
+    }
+
+    @Test
+    @DisplayName("Поиск пользователя по неправильному [ID] [getUserById]")
+    void shouldNotGetUserById_thenStatus404() throws Exception {
+        mockMvc.perform(get("/users/{id}", -1))
+                .andExpect(status().isNotFound());
+
+        mockMvc.perform(get("/users/{id}", 0))
+                .andExpect(status().isNotFound());
+
+        mockMvc.perform(get("/users/{id}", 9999))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Пользователь должен обновить поля частично [updateUserById]")
     void shouldUserUseMethodPatch_thenStatus200() throws Exception {
         userService.createUser(secondUser);
 
@@ -106,36 +135,7 @@ public class UserControllerTest extends GenericControllerTest {
     }
 
     @Test
-    @DisplayName("Поиск пользователя по [ID]")
-    void shouldGetUserById_thenStatus200AndStatus404() throws Exception {
-        userService.createUser(firstUser);
-
-        mockMvc.perform(get("/users/{id}", FIRST_ID))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("id").value(FIRST_ID))
-                .andExpect(jsonPath("name").value(firstUser.getName()))
-                .andExpect(jsonPath("email").value(firstUser.getEmail()));
-
-        mockMvc.perform(get("/users/{id}", FIRST_ID + 1))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath(ERROR_NAME).value(ERROR_M_USER_NOT_FOUND));
-    }
-
-    @Test
-    @DisplayName("Поиск пользователя по неправильному [ID]")
-    void shouldNotGetUserById_thenStatus404() throws Exception {
-        mockMvc.perform(get("/users/{id}", -1))
-                .andExpect(status().isNotFound());
-
-        mockMvc.perform(get("/users/{id}", 0))
-                .andExpect(status().isNotFound());
-
-        mockMvc.perform(get("/users/{id}", 9999))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    @DisplayName("Пользователь должен удалиться по [ID]")
+    @DisplayName("Пользователь должен удалиться по [ID] [removeUserById]")
     void shouldDeleteUserById_thenStatus204And404() throws Exception {
         userService.createUser(secondUser);
 
@@ -151,7 +151,7 @@ public class UserControllerTest extends GenericControllerTest {
     }
 
     @Test
-    @DisplayName("Удалить пользователя по [ID] и все его итемы")
+    @DisplayName("Удалить пользователя по [ID] и все его итемы [removeUserById]")
     void shouldDeleteUserByIdAndShouldDeleteItem_thenStatus204And404() throws Exception {
         initItems();
         userService.createUser(firstUser);
@@ -187,7 +187,7 @@ public class UserControllerTest extends GenericControllerTest {
     }
 
     @Test
-    @DisplayName("Получить всех пользователей")
+    @DisplayName("Получить всех пользователей [getAllUsers]")
     void shouldGetAllUsers_thenStatus200AndResultTwoUsers() throws Exception {
         UserResponseTO user1 = userService.createUser(firstUser);
         UserResponseTO user2 = userService.createUser(secondUser);
