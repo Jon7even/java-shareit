@@ -1,4 +1,4 @@
-package ru.practicum.shareit.controllers.setup.controller;
+package ru.practicum.shareit.controllers.setup;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;

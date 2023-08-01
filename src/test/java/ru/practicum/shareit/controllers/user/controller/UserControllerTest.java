@@ -4,7 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
-import ru.practicum.shareit.controllers.setup.controller.GenericControllerTest;
+import ru.practicum.shareit.controllers.setup.GenericControllerTest;
 import ru.practicum.shareit.user.dto.UserResponseTO;
 
 import java.util.Optional;

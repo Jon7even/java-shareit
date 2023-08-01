@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 
 import ru.practicum.shareit.booking.model.BookingStatus;
-import ru.practicum.shareit.controllers.setup.controller.GenericControllerTest;
+import ru.practicum.shareit.controllers.setup.GenericControllerTest;
 
 import java.time.LocalDateTime;
 import java.util.Optional;

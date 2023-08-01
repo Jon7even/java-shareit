@@ -5,7 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import ru.practicum.shareit.controllers.setup.controller.GenericControllerTest;
+import ru.practicum.shareit.controllers.setup.GenericControllerTest;
 import ru.practicum.shareit.request.service.ItemRequestService;
 
 import java.util.Optional;
