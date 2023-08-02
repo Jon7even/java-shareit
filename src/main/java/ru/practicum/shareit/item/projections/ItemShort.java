@@ -1,9 +1,11 @@
 package ru.practicum.shareit.item.projections;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.AllArgsConstructor;
 
+@Builder
 @Getter
 @Setter
 @AllArgsConstructor

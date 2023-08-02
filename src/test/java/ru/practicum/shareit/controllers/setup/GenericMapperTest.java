@@ -35,7 +35,6 @@ public class GenericMapperTest {
 
     protected CommentEntity commentEntity;
 
-
     protected BookingEntity bookingEntity;
 
     protected BookingState state;
