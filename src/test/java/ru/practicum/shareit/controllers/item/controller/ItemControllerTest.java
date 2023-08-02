@@ -308,6 +308,7 @@ public class ItemControllerTest extends GenericControllerTest {
         Long idUser1 = 1L;
         Long idUser2 = 2L;
         itemService.createItem(firstItem, Optional.of(idUser2));
+        secondItem.setAvailable(true);
         itemService.createItem(secondItem, Optional.of(idUser2));
 
         firstBooking.setStart(currentTime);
