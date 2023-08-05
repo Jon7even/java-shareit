@@ -2,11 +2,12 @@ package ru.practicum.shareit.request.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.practicum.shareit.item.model.ItemEntity;
 import ru.practicum.shareit.request.dto.ItemRequestCreateTO;
 import ru.practicum.shareit.request.dto.ItemRequestResponseTO;
+import ru.practicum.shareit.request.model.ItemRequestEntity;
 import ru.practicum.shareit.setup.GenericServiceTest;
 
+import java.util.Collections;
 import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -36,13 +37,14 @@ public class ItemRequestServiceTest extends GenericServiceTest {
                 .description(itemRequestEntity.getDescription())
                 .build();
 
+        initOptionalVariable();
         ItemRequestResponseTO result = itemRequestService.createItemRequest(originalDto, idUserOptional);
 
         assertThat(result.getId(), notNullValue());
         assertThat(result.getDescription(), equalTo(originalDto.getDescription()));
         assertThat(result.getCreated(), notNullValue());
-        assertThat(result.getItems(), equalTo((0)));
-        verify(itemRepository, times(1)).save(any(ItemEntity.class));
+        assertThat(result.getItems(), equalTo((Collections.emptyList())));
+        verify(itemRequestRepository, times(1)).save(any(ItemRequestEntity.class));
         verify(userRepository, times(1)).findById(anyLong());
     }
 
