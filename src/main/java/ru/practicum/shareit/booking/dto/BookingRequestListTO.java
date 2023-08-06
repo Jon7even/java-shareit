@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.booking.model.BookingState;
 
+import javax.validation.constraints.NotNull;
 import java.util.Optional;
 
 @Data
@@ -14,6 +15,7 @@ import java.util.Optional;
 @NoArgsConstructor
 public class BookingRequestListTO {
     private Optional<Long> idUser;
+    @NotNull
     private BookingState state;
     private Optional<Integer> from;
     private Optional<Integer> size;

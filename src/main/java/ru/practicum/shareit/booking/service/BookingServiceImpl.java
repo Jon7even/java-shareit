@@ -117,7 +117,7 @@ public class BookingServiceImpl implements BookingService {
         );
 
         log.debug("Get list booking by user [userId={}] [BookingState={}], [page={}] [currentTime={}] {}",
-                checkedUserId, bookingRequestListTO.getState().toString(), page, currentTime, SERVICE_FROM_DB);
+                checkedUserId, bookingRequestListTO.getState(), page, currentTime, SERVICE_FROM_DB);
 
         switch (bookingRequestListTO.getState()) {
             case ALL:
