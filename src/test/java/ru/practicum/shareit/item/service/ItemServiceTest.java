@@ -107,6 +107,7 @@ public class ItemServiceTest extends GenericServiceTest {
         assertThat(result.getDescription(), equalTo(itemEntity.getDescription()));
         assertThat(result.getAvailable(), equalTo(itemEntity.isAvailable()));
         assertThat(result.getNextBooking(), nullValue());
+        assertThat(result.getLastBooking(), notNullValue());
         assertThat(result.getLastBooking().getBookerId(), equalTo(bookingEntity.getId()));
         assertThat(result.getComments().size(), equalTo(1));
         assertThat(result.getComments().get(0).getId(), equalTo(commentEntity.getId()));
@@ -377,6 +378,7 @@ public class ItemServiceTest extends GenericServiceTest {
         assertThat(result.get(0).getDescription(), equalTo(itemEntity.getDescription()));
         assertThat(result.get(0).getAvailable(), equalTo(itemEntity.isAvailable()));
         assertThat(result.get(0).getNextBooking(), nullValue());
+        assertThat(result.get(0).getLastBooking(), notNullValue());
         assertThat(result.get(0).getLastBooking().getBookerId(), equalTo(bookingEntity.getId()));
         assertThat(result.get(0).getComments().size(), equalTo(0));
 
@@ -440,6 +442,7 @@ public class ItemServiceTest extends GenericServiceTest {
         assertThat(result.get(0).getDescription(), equalTo(itemEntity.getDescription()));
         assertThat(result.get(0).getAvailable(), equalTo(itemEntity.isAvailable()));
         assertThat(result.get(0).getNextBooking(), nullValue());
+        assertThat(result.get(0).getLastBooking(), notNullValue());
         assertThat(result.get(0).getLastBooking().getBookerId(), equalTo(bookingEntity.getId()));
         assertThat(result.get(0).getComments().size(), equalTo(1));
         assertThat(result.get(0).getComments().get(0).getId(), equalTo(commentEntity.getId()));

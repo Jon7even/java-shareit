@@ -76,11 +76,11 @@ public class UserServiceTest extends GenericServiceTest {
     }
 
     @Test
-    void updateUser_whenThereIsNewDate() {
+    void updateUser_whenHaveName() {
         initTestVariable(false, false, false);
         when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.of(userEntity));
-        when(userRepository.findUserEntityByEmailContainingIgnoreCase(userEntity.getEmail()))
+        when(userRepository.findUserEntityByEmailContainingIgnoreCase(anyString()))
                 .thenReturn(Optional.of(userEntity));
 
         initTestVariable(false, false, false);
@@ -99,6 +99,35 @@ public class UserServiceTest extends GenericServiceTest {
         assertThat(result, notNullValue());
         assertThat(result.getId(), equalTo(userEntity.getId()));
         assertThat(result.getName(), equalTo(originalDto.getName()));
+        assertThat(result.getEmail(), equalTo(originalDto.getEmail()));
+        verify(userRepository, times(1)).save(Mockito.any(UserEntity.class));
+        verify(userRepository, times(1)).findById(anyLong());
+        verify(userRepository, times(1)).findUserEntityByEmailContainingIgnoreCase(anyString());
+    }
+
+    @Test
+    void updateUser_whenHaveEmail() {
+        initTestVariable(false, false, false);
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.of(userEntity));
+        when(userRepository.findUserEntityByEmailContainingIgnoreCase(anyString()))
+                .thenReturn(Optional.of(userEntity));
+
+        initTestVariable(false, false, false);
+        UserUpdateTO originalDto = UserUpdateTO.builder()
+                .email("newEmail@ya.ru")
+                .build();
+
+        userEntity.setEmail(originalDto.getEmail());
+        when(userRepository.save(any()))
+                .thenReturn(userEntity);
+
+        initOptionalVariable();
+        UserResponseTO result = userService.updateUser(originalDto, idUserOptional);
+
+        assertThat(result, notNullValue());
+        assertThat(result.getId(), equalTo(userEntity.getId()));
+        assertThat(result.getName(), equalTo(userEntity.getName()));
         assertThat(result.getEmail(), equalTo(originalDto.getEmail()));
         verify(userRepository, times(1)).save(Mockito.any(UserEntity.class));
         verify(userRepository, times(1)).findById(anyLong());
