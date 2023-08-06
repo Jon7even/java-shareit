@@ -31,9 +31,9 @@ public class UserServiceIml implements UserService {
 
     @Transactional
     @Override
-    public UserResponseTO createUser(UserCreateTO userRequestCreateTO) {
-        log.debug("New userTO came {} [UserRequestCreateTO={}]", SERVICE_FROM_CONTROLLER, userRequestCreateTO);
-        UserEntity user = UserMapper.INSTANCE.toEntityFromDTOCreate(userRequestCreateTO);
+    public UserResponseTO createUser(UserCreateTO userCreateTO) {
+        log.debug("New userTO came {} [UserRequestCreateTO={}]", SERVICE_FROM_CONTROLLER, userCreateTO);
+        UserEntity user = UserMapper.INSTANCE.toEntityFromDTOCreate(userCreateTO);
 
         try {
             log.debug("Add new entity [user={}] {}", user, SERVICE_IN_DB);
@@ -66,10 +66,10 @@ public class UserServiceIml implements UserService {
 
     @Transactional
     @Override
-    public UserResponseTO updateUser(UserUpdateTO userRequestUpdateDTO, Optional<Long> idUser) {
-        log.debug("User for update came {} [UserRequestUpdateDTO={}]", SERVICE_FROM_CONTROLLER, userRequestUpdateDTO);
+    public UserResponseTO updateUser(UserUpdateTO userUpdateTO, Optional<Long> idUser) {
+        log.debug("User for update came {} [UserRequestUpdateDTO={}]", SERVICE_FROM_CONTROLLER, userUpdateTO);
         Long checkedUserId = checkParameterUserId(idUser);
-        UserEntity user = UserMapper.INSTANCE.toEntityFromDTOUpdate(userRequestUpdateDTO, checkedUserId);
+        UserEntity user = UserMapper.INSTANCE.toEntityFromDTOUpdate(userUpdateTO, checkedUserId);
 
         UserEntity checkedUserFromRepository = findUserEntityById(checkedUserId);
         UserEntity updateUserInRepository = UserEntity.builder().id(checkedUserId).build();
@@ -113,7 +113,6 @@ public class UserServiceIml implements UserService {
             log.debug("Update entity [user={}] {}", updateUserInRepository, SERVICE_IN_DB);
             UserEntity updatedUser = repositoryUser.save(updateUserInRepository);
 
-            Optional<UserEntity> foundUserAfterUpdate = repositoryUser.findById(checkedUserId);
             log.debug("Updated user has returned [user={}] {}", updatedUser, SERVICE_FROM_DB);
 
             return UserMapper.INSTANCE.toDTOResponseFromEntity(updatedUser);

@@ -13,14 +13,14 @@ public interface UserMapper {
     UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(source = "userRequestCreateDTO.name", target = "name")
-    @Mapping(source = "userRequestCreateDTO.email", target = "email")
-    UserEntity toEntityFromDTOCreate(UserCreateTO userRequestCreateDTO);
+    @Mapping(source = "userCreateTO.name", target = "name")
+    @Mapping(source = "userCreateTO.email", target = "email")
+    UserEntity toEntityFromDTOCreate(UserCreateTO userCreateTO);
 
     @Mapping(source = "userId", target = "id")
-    @Mapping(source = "userRequestUpdateDTO.name", target = "name")
-    @Mapping(source = "userRequestUpdateDTO.email", target = "email")
-    UserEntity toEntityFromDTOUpdate(UserUpdateTO userRequestUpdateDTO, Long userId);
+    @Mapping(source = "userUpdateTO.name", target = "name")
+    @Mapping(source = "userUpdateTO.email", target = "email")
+    UserEntity toEntityFromDTOUpdate(UserUpdateTO userUpdateTO, Long userId);
 
     @Mapping(source = "user.id", target = "id")
     @Mapping(source = "user.name", target = "name")

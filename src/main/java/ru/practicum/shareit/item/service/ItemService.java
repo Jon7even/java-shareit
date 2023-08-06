@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ItemService {
-    ItemResponseTO createItem(ItemCreateTO itemRequestCreateDTO, Optional<Long> idUser);
+    ItemResponseTO createItem(ItemCreateTO itemCreateTO, Optional<Long> idUser);
 
     ItemResponseBookingAndCommentTO findItemById(Optional<Long> idUser, Optional<Long> idItem);
 
-    ItemResponseTO updateItem(Optional<Long> idUser, Optional<Long> idItem, ItemUpdateTO itemRequestUpdateDTO);
+    ItemResponseTO updateItem(Optional<Long> idUser, Optional<Long> idItem, ItemUpdateTO itemUpdateTO);
 
     List<ItemResponseBookingAndCommentTO> getAllItemsByUserId(ItemRequestListTO itemRequestListTO);
 

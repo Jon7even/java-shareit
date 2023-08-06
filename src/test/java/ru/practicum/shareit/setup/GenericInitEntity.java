@@ -25,6 +25,8 @@ public class GenericInitEntity {
 
     protected Optional<Long> idUserOptional;
 
+    protected Optional<Long> idItemOptional;
+
     protected Optional<Integer> fromOptional;
 
     protected Optional<Integer> sizeOptional;
@@ -41,6 +43,7 @@ public class GenericInitEntity {
 
     protected void initOptionalVariable() {
         idUserOptional = Optional.of(1L);
+        idItemOptional = Optional.of(1L);
         fromOptional = Optional.of(0);
         sizeOptional = Optional.of(20);
         textOptional = Optional.of("TextSearch");

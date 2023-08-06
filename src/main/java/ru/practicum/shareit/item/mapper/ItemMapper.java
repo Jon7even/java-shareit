@@ -17,19 +17,19 @@ public interface ItemMapper {
     ItemMapper INSTANCE = Mappers.getMapper(ItemMapper.class);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(source = "itemRequestCreateDTO.name", target = "name")
-    @Mapping(source = "itemRequestCreateDTO.description", target = "description")
-    @Mapping(source = "itemRequestCreateDTO.available", target = "available")
+    @Mapping(source = "itemCreateTO.name", target = "name")
+    @Mapping(source = "itemCreateTO.description", target = "description")
+    @Mapping(source = "itemCreateTO.available", target = "available")
     @Mapping(source = "user", target = "user")
-    ItemEntity toEntityFromDTOCreate(ItemCreateTO itemRequestCreateDTO, UserEntity user);
+    ItemEntity toEntityFromDTOCreate(ItemCreateTO itemCreateTO, UserEntity user);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(source = "itemRequestCreateDTO.name", target = "name")
-    @Mapping(source = "itemRequestCreateDTO.description", target = "description")
-    @Mapping(source = "itemRequestCreateDTO.available", target = "available")
+    @Mapping(source = "itemCreateTO.name", target = "name")
+    @Mapping(source = "itemCreateTO.description", target = "description")
+    @Mapping(source = "itemCreateTO.available", target = "available")
     @Mapping(source = "user", target = "user")
     @Mapping(source = "request", target = "request")
-    ItemEntity toEntityFromDTOCreateWithRequest(ItemCreateTO itemRequestCreateDTO,
+    ItemEntity toEntityFromDTOCreateWithRequest(ItemCreateTO itemCreateTO,
                                                 UserEntity user,
                                                 ItemRequestEntity request);
 

@@ -8,11 +8,11 @@ import java.util.List;
 import java.util.Optional;
 
 public interface UserService {
-    UserResponseTO createUser(UserCreateTO userRequestCreateDTO);
+    UserResponseTO createUser(UserCreateTO userCreateTO);
 
     UserResponseTO findUserById(Optional<Long> idUser);
 
-    UserResponseTO updateUser(UserUpdateTO userRequestUpdateDTO, Optional<Long> idUser);
+    UserResponseTO updateUser(UserUpdateTO userUpdateTO, Optional<Long> idUser);
 
     void deleteUserById(Optional<Long> idUser);
 
