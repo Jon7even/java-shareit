@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 import ru.practicum.shareit.setup.GenericDTOTest;
-import ru.practicum.shareit.user.dto.UserResponseTO;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
