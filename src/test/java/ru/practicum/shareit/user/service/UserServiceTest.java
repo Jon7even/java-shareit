@@ -3,9 +3,12 @@ package ru.practicum.shareit.user.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import ru.practicum.shareit.booking.dto.BookingCreateTO;
+import ru.practicum.shareit.booking.model.BookingEntity;
 import ru.practicum.shareit.exception.EntityAlreadyExistsException;
 import ru.practicum.shareit.exception.EntityNotDeletedException;
 import ru.practicum.shareit.exception.EntityNotFoundException;
+import ru.practicum.shareit.exception.IncorrectParameterException;
 import ru.practicum.shareit.setup.GenericServiceTest;
 import ru.practicum.shareit.user.dto.UserCreateTO;
 import ru.practicum.shareit.user.dto.UserResponseTO;
@@ -48,6 +51,13 @@ public class UserServiceTest extends GenericServiceTest {
         assertThat(result.getName(), equalTo(originalDto.getName()));
         assertThat(result.getEmail(), equalTo(originalDto.getEmail()));
         verify(userRepository, times(1)).save(Mockito.any(UserEntity.class));
+    }
+
+    @Test
+    void findUserById_whenIdUserNull() {
+        assertThrows(EntityNotFoundException.class, () -> userService.findUserById(Optional.empty()));
+
+        verify(userRepository, never()).findById(anyLong());
     }
 
     @Test

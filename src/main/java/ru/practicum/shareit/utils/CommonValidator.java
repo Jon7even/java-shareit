@@ -46,7 +46,7 @@ public class CommonValidator {
                 log.debug("Checking Path [idBooking={}] is ok", idBooking.get());
             }
         } else {
-            throw new EntityNotFoundException(String.format("Booking with [idBooking=%d]", idBooking.get()));
+            throw new EntityNotFoundException("Booking");
         }
 
         return idBooking.get();
@@ -58,7 +58,7 @@ public class CommonValidator {
                 log.debug("Checking Path [idItem={}] is ok", idItem.get());
             }
         } else {
-            throw new EntityNotFoundException(String.format("Item with [idItem=%d]", idItem.get()));
+            throw new EntityNotFoundException("Item");
         }
 
         return idItem.get();

@@ -47,6 +47,24 @@ public class BookingServiceITest extends GenericServiceTest {
     }
 
     @Test
+    void createBooking_whenIdUserNull() {
+        initOptionalVariable();
+        initTestVariable(true, true, false);
+        BookingCreateTO originalDto = BookingCreateTO.builder()
+                .itemId(bookingEntity.getItem().getId())
+                .start(bookingEntity.getStart())
+                .end(bookingEntity.getEnd())
+                .build();
+
+        assertThrows(IncorrectParameterException.class, () -> bookingService.createBooking(
+                originalDto, Optional.empty()));
+
+        verify(bookingRepository, never()).save(any(BookingEntity.class));
+        verify(userRepository, never()).findById(anyLong());
+        verify(itemRepository, never()).findById(anyLong());
+    }
+
+    @Test
     void createBooking() {
         initTestVariable(true, true, false);
         userEntity.setId(2L);
@@ -105,6 +123,28 @@ public class BookingServiceITest extends GenericServiceTest {
         verify(bookingRepository, never()).save(any(BookingEntity.class));
         verify(userRepository, times(1)).findById(anyLong());
         verify(itemRepository, times(1)).findById(anyLong());
+    }
+
+    @Test
+    void findBookingById_whenIdBookingNull() {
+        initOptionalVariable();
+        assertThrows(EntityNotFoundException.class, () -> bookingService.findBookingById(
+                idUserOptional, Optional.empty()
+        ));
+
+        verify(userRepository, never()).existsById(anyLong());
+        verify(bookingRepository, never()).findById(anyLong());
+    }
+
+    @Test
+    void findBookingById_whenIdUserNull() {
+        initOptionalVariable();
+        assertThrows(IncorrectParameterException.class, () -> bookingService.findBookingById(
+                Optional.empty(), idBookingOptional
+        ));
+
+        verify(userRepository, never()).existsById(anyLong());
+        verify(bookingRepository, never()).findById(anyLong());
     }
 
     @Test
@@ -230,6 +270,30 @@ public class BookingServiceITest extends GenericServiceTest {
         initOptionalVariable();
         assertThrows(IncorrectParameterException.class, () -> bookingService.confirmBooking(
                 idUserOptional, idBookingOptional, Optional.empty()
+        ));
+
+        verify(userRepository, never()).existsById(anyLong());
+        verify(bookingRepository, never()).findById(anyLong());
+        verify(bookingRepository, never()).save(any());
+    }
+
+    @Test
+    void confirmBooking_whenIdUserNull() {
+        initOptionalVariable();
+        assertThrows(IncorrectParameterException.class, () -> bookingService.confirmBooking(
+                Optional.empty(), idBookingOptional, Optional.of(true)
+        ));
+
+        verify(userRepository, never()).existsById(anyLong());
+        verify(bookingRepository, never()).findById(anyLong());
+        verify(bookingRepository, never()).save(any());
+    }
+
+    @Test
+    void confirmBooking_whenIdBookingNull() {
+        initOptionalVariable();
+        assertThrows(EntityNotFoundException.class, () -> bookingService.confirmBooking(
+                idUserOptional, Optional.empty(), Optional.of(true)
         ));
 
         verify(userRepository, never()).existsById(anyLong());

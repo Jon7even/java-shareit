@@ -23,9 +23,12 @@ public class CommentResponseTOJsonTest extends GenericDTOTest {
                 .build();
         JsonContent<CommentResponseTO> result = json.write(commentResponseTO);
 
-        assertThat(result).hasJsonPath("$.id").extractingJsonPathNumberValue("$.id");
-        assertThat(result).hasJsonPath("$.text").extractingJsonPathStringValue("$.text");
-        assertThat(result).hasJsonPath("$.authorName").extractingJsonPathStringValue("$.authorName");
+        assertThat(result).hasJsonPath("$.id").extractingJsonPathNumberValue("$.id")
+                .isEqualTo(1);
+        assertThat(result).hasJsonPath("$.text").extractingJsonPathStringValue("$.text")
+                .isEqualTo(commentResponseTO.getText());
+        assertThat(result).hasJsonPath("$.authorName").extractingJsonPathStringValue("$.authorName")
+                .isEqualTo(commentResponseTO.getAuthorName());
         assertThat(result).hasJsonPath("$.created").extractingJsonPathStringValue("$.created");
     }
 }

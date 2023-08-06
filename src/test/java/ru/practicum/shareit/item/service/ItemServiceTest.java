@@ -3,6 +3,7 @@ package ru.practicum.shareit.item.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import ru.practicum.shareit.booking.dto.BookingCreateTO;
 import ru.practicum.shareit.booking.model.BookingEntity;
 import ru.practicum.shareit.exception.*;
 import ru.practicum.shareit.item.dto.*;
@@ -60,6 +61,23 @@ public class ItemServiceTest extends GenericServiceTest {
     }
 
     @Test
+    void createItem_whenIdUserNull() {
+        initTestVariable(true, false, false);
+        ItemCreateTO originalDto = ItemCreateTO.builder()
+                .name(itemEntity.getName())
+                .description(itemEntity.getDescription())
+                .available(itemEntity.isAvailable())
+                .build();
+        initOptionalVariable();
+
+        assertThrows(IncorrectParameterException.class, () -> itemService.createItem(
+                originalDto, Optional.empty()));
+
+        verify(itemRepository, never()).save(any(ItemEntity.class));
+        verify(userRepository, never()).findById(anyLong());
+    }
+
+    @Test
     void createItem() {
         initTestVariable(true, false, false);
         when(itemRepository.save(any()))
@@ -81,6 +99,30 @@ public class ItemServiceTest extends GenericServiceTest {
         assertThat(result.getAvailable(), equalTo(originalDto.getAvailable()));
         verify(itemRepository, times(1)).save(any(ItemEntity.class));
         verify(userRepository, times(1)).findById(anyLong());
+    }
+
+    @Test
+    void findItemById_whenIdUserNull() {
+        initOptionalVariable();
+        assertThrows(IncorrectParameterException.class, () -> itemService.findItemById(
+                Optional.empty(), idItemOptional));
+
+        verify(userRepository, never()).findById(anyLong());
+        verify(itemRepository, never()).findById(anyLong());
+        verify(commentRepository, never()).findAllCommentsByItem(any());
+        verify(bookingRepository, never()).findByItemOrderByStart(any());
+    }
+
+    @Test
+    void findItemById_whenItemNull() {
+        initOptionalVariable();
+        assertThrows(EntityNotFoundException.class, () -> itemService.findItemById(
+                idUserOptional, Optional.empty()));
+
+        verify(userRepository, never()).findById(anyLong());
+        verify(itemRepository, never()).findById(anyLong());
+        verify(commentRepository, never()).findAllCommentsByItem(any());
+        verify(bookingRepository, never()).findByItemOrderByStart(any());
     }
 
     @Test
@@ -113,7 +155,6 @@ public class ItemServiceTest extends GenericServiceTest {
         assertThat(result.getComments().get(0).getId(), equalTo(commentEntity.getId()));
         assertThat(result.getComments().get(0).getText(), equalTo(commentEntity.getText()));
         assertThat(result.getComments().get(0).getAuthorName(), equalTo(commentEntity.getUser().getName()));
-
         verify(userRepository, times(1)).findById(anyLong());
         verify(itemRepository, times(1)).findById(anyLong());
         verify(commentRepository, times(1)).findAllCommentsByItem(any());
