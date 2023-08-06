@@ -3,7 +3,6 @@ package ru.practicum.shareit.item.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import ru.practicum.shareit.booking.dto.BookingCreateTO;
 import ru.practicum.shareit.booking.model.BookingEntity;
 import ru.practicum.shareit.exception.*;
 import ru.practicum.shareit.item.dto.*;
