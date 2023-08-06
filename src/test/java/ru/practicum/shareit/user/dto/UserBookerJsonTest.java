@@ -8,6 +8,7 @@ import ru.practicum.shareit.setup.GenericDTOTest;
 import ru.practicum.shareit.user.projections.UserBooker;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.CoreMatchers.notNullValue;
 
 public class UserBookerJsonTest extends GenericDTOTest {
     @Autowired
@@ -19,7 +20,8 @@ public class UserBookerJsonTest extends GenericDTOTest {
         UserBooker userBooker = UserBooker.builder().id(id).build();
         JsonContent<UserBooker> result = json.write(userBooker);
 
-        assertThat(result).hasJsonPath("$.id").extractingJsonPathNumberValue("$.id");
+        assertThat(result).hasJsonPath("$.id").extractingJsonPathNumberValue("$.id")
+                .isEqualTo(1);
     }
 }
 

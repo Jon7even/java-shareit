@@ -18,8 +18,10 @@ public class BookingQueueTOJsonTest extends GenericDTOTest {
         BookingQueueTO bookingQueueTO = BookingQueueTO.builder().id(id).bookerId(id + 2).build();
         JsonContent<BookingQueueTO> result = json.write(bookingQueueTO);
 
-        assertThat(result).hasJsonPath("$.id").extractingJsonPathNumberValue("$.id");
-        assertThat(result).hasJsonPath("$.bookerId").extractingJsonPathNumberValue("$.bookerId");
+        assertThat(result).hasJsonPath("$.id").extractingJsonPathNumberValue("$.id")
+                .isEqualTo(1);
+        assertThat(result).hasJsonPath("$.bookerId").extractingJsonPathNumberValue("$.bookerId")
+                .isEqualTo(3);
     }
 }
 

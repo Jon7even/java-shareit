@@ -8,6 +8,7 @@ import ru.practicum.shareit.booking.dto.BookingResponseTO;
 import ru.practicum.shareit.booking.model.BookingEntity;
 import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.model.BookingStatus;
+import ru.practicum.shareit.exception.EntityAlreadyBookedException;
 import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.exception.IncorrectParameterException;
 import ru.practicum.shareit.setup.GenericServiceTest;
@@ -74,6 +75,34 @@ public class BookingServiceITest extends GenericServiceTest {
         assertThat(result.getBooker().getId(), equalTo(userEntity.getId()));
         assertThat(result.getStatus(), equalTo(bookingEntity.getStatus()));
         verify(bookingRepository, times(1)).save(any(BookingEntity.class));
+        verify(userRepository, times(1)).findById(anyLong());
+        verify(itemRepository, times(1)).findById(anyLong());
+    }
+
+    @Test
+    void createBooking_whenItemNotAvailable() {
+        initTestVariable(true, true, false);
+        userEntity.setId(2L);
+        itemEntity.setUser(userEntity);
+        itemEntity.setAvailable(false);
+        bookingEntity.setStatus(BookingStatus.WAITING);
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.of(userEntity));
+        when(itemRepository.findById(anyLong()))
+                .thenReturn(Optional.of(itemEntity));
+
+        BookingCreateTO originalDto = BookingCreateTO.builder()
+                .itemId(bookingEntity.getItem().getId())
+                .start(bookingEntity.getStart())
+                .end(bookingEntity.getEnd())
+                .build();
+
+        initOptionalVariable();
+        assertThrows(EntityAlreadyBookedException.class, () -> bookingService.createBooking(
+                originalDto, idUserOptional
+        ));
+
+        verify(bookingRepository, never()).save(any(BookingEntity.class));
         verify(userRepository, times(1)).findById(anyLong());
         verify(itemRepository, times(1)).findById(anyLong());
     }
