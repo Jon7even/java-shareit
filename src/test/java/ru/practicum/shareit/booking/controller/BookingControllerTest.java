@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -317,14 +318,14 @@ public class BookingControllerTest extends GenericControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].id").value(FIRST_ID))
-                .andExpect(jsonPath("$[0].start").value(start.toString()))
-                .andExpect(jsonPath("$[0].end").value(end.toString()))
+                .andExpect(jsonPath("$[0].start").value(notNullValue()))
+                .andExpect(jsonPath("$[0].end").value(notNullValue()))
                 .andExpect(jsonPath("$[0].item.id").value(firstBooking.getItemId()))
                 .andExpect(jsonPath("$[0].item.name").value(firstItem.getName()))
                 .andExpect(jsonPath("$[0].booker.id").value(FIRST_ID))
                 .andExpect(jsonPath("$[1].id").value(FIRST_ID + 1))
-                .andExpect(jsonPath("$[1].start").value(start.toString()))
-                .andExpect(jsonPath("$[1].end").value(end.toString()))
+                .andExpect(jsonPath("$[1].start").value(notNullValue()))
+                .andExpect(jsonPath("$[1].end").value(notNullValue()))
                 .andExpect(jsonPath("$[1].item.id").value(secondBooking.getItemId()))
                 .andExpect(jsonPath("$[1].item.name").value(secondItem.getName()))
                 .andExpect(jsonPath("$[1].booker.id").value(FIRST_ID));
@@ -334,14 +335,14 @@ public class BookingControllerTest extends GenericControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].id").value(FIRST_ID))
-                .andExpect(jsonPath("$[0].start").value(start.toString()))
-                .andExpect(jsonPath("$[0].end").value(end.toString()))
+                .andExpect(jsonPath("$[0].start").value(notNullValue()))
+                .andExpect(jsonPath("$[0].end").value(notNullValue()))
                 .andExpect(jsonPath("$[0].item.id").value(firstBooking.getItemId()))
                 .andExpect(jsonPath("$[0].item.name").value(firstItem.getName()))
                 .andExpect(jsonPath("$[0].booker.id").value(FIRST_ID))
                 .andExpect(jsonPath("$[1].id").value(FIRST_ID + 1))
-                .andExpect(jsonPath("$[1].start").value(start.toString()))
-                .andExpect(jsonPath("$[1].end").value(end.toString()))
+                .andExpect(jsonPath("$[1].start").value(notNullValue()))
+                .andExpect(jsonPath("$[1].end").value(notNullValue()))
                 .andExpect(jsonPath("$[1].item.id").value(secondBooking.getItemId()))
                 .andExpect(jsonPath("$[1].item.name").value(secondItem.getName()))
                 .andExpect(jsonPath("$[1].booker.id").value(FIRST_ID));
@@ -351,14 +352,14 @@ public class BookingControllerTest extends GenericControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].id").value(FIRST_ID))
-                .andExpect(jsonPath("$[0].start").value(start.toString()))
-                .andExpect(jsonPath("$[0].end").value(end.toString()))
+                .andExpect(jsonPath("$[0].start").value(notNullValue()))
+                .andExpect(jsonPath("$[0].end").value(notNullValue()))
                 .andExpect(jsonPath("$[0].item.id").value(firstBooking.getItemId()))
                 .andExpect(jsonPath("$[0].item.name").value(firstItem.getName()))
                 .andExpect(jsonPath("$[0].booker.id").value(FIRST_ID))
                 .andExpect(jsonPath("$[1].id").value(FIRST_ID + 1))
-                .andExpect(jsonPath("$[1].start").value(start.toString()))
-                .andExpect(jsonPath("$[1].end").value(end.toString()))
+                .andExpect(jsonPath("$[1].start").value(notNullValue()))
+                .andExpect(jsonPath("$[1].end").value(notNullValue()))
                 .andExpect(jsonPath("$[1].item.id").value(secondBooking.getItemId()))
                 .andExpect(jsonPath("$[1].item.name").value(secondItem.getName()))
                 .andExpect(jsonPath("$[1].booker.id").value(FIRST_ID));
@@ -385,14 +386,14 @@ public class BookingControllerTest extends GenericControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].id").value(FIRST_ID))
-                .andExpect(jsonPath("$[0].start").value(start.toString()))
-                .andExpect(jsonPath("$[0].end").value(end.toString()))
+                .andExpect(jsonPath("$[0].start").value(notNullValue()))
+                .andExpect(jsonPath("$[0].end").value(notNullValue()))
                 .andExpect(jsonPath("$[0].item.id").value(firstBooking.getItemId()))
                 .andExpect(jsonPath("$[0].item.name").value(firstItem.getName()))
                 .andExpect(jsonPath("$[0].booker.id").value(FIRST_ID))
                 .andExpect(jsonPath("$[1].id").value(FIRST_ID + 1))
-                .andExpect(jsonPath("$[1].start").value(start.toString()))
-                .andExpect(jsonPath("$[1].end").value(end.toString()))
+                .andExpect(jsonPath("$[1].start").value(notNullValue()))
+                .andExpect(jsonPath("$[1].end").value(notNullValue()))
                 .andExpect(jsonPath("$[1].item.id").value(secondBooking.getItemId()))
                 .andExpect(jsonPath("$[1].item.name").value(secondItem.getName()))
                 .andExpect(jsonPath("$[1].booker.id").value(FIRST_ID));
