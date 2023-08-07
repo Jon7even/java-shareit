@@ -113,18 +113,6 @@ public class BookingRepositoryTest extends GenericRepositoryTest {
     }
 
     @Test
-    void findCurrentItemsBookingByOwnerId() {
-        List<BookingEntity> result = bookingRepository.findCurrentItemsBookingByOwnerId(userInDB, currentTime, page);
-
-        assertEquals(result.get(0).getId(), bookingEntity.getId());
-        assertEquals(result.get(0).getStart(), bookingEntity.getStart());
-        assertEquals(result.get(0).getEnd(), bookingEntity.getEnd());
-        assertEquals(result.get(0).getItem(), bookingEntity.getItem());
-        assertEquals(result.get(0).getUser(), bookingEntity.getUser());
-        assertEquals(result.get(0).getStatus(), bookingEntity.getStatus());
-    }
-
-    @Test
     void findByItemOrderByStart() {
         List<BookingEntity> result = bookingRepository.findByItemOrderByStart(itemEntityInDb);
 

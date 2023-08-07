@@ -38,7 +38,6 @@ public class ErrorHandler {
 
     @ExceptionHandler({MethodArgumentNotValidException.class})
     protected ResponseEntity<Map<String, String>> handleValidationException(MethodArgumentNotValidException e) {
-        log.debug(e.getMessage());
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Map.of(
@@ -48,7 +47,7 @@ public class ErrorHandler {
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     protected ResponseEntity<Map<String, String>> handleThrowable(final MethodArgumentTypeMismatchException e) {
-        log.warn(e.getMessage());
+
 
         Throwable cause = e.getCause().getCause();
 

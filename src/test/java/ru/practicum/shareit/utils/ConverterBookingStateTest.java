@@ -1,7 +1,8 @@
-package ru.practicum.shareit.booking.utils;
+package ru.practicum.shareit.utils;
 
 import org.junit.jupiter.api.Test;
 import ru.practicum.shareit.booking.model.BookingState;
+import ru.practicum.shareit.booking.utils.ConverterBookingState;
 import ru.practicum.shareit.exception.UnknownException;
 
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -24,6 +25,7 @@ public class ConverterBookingStateTest {
     void testConvert_Exception() {
         ConverterBookingState state = new ConverterBookingState();
 
-        assertThrows(UnknownException.class, () -> state.convert("TEST"));
+        UnknownException ex = assertThrows(UnknownException.class, () -> state.convert("TEST"));
+        assertThat(ex.getMessage(), equalTo("Unknown [UNSUPPORTED_STATUS]"));
     }
 }

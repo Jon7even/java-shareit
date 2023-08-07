@@ -11,6 +11,7 @@ import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.exception.EntityAlreadyBookedException;
 import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.exception.IncorrectParameterException;
+import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.setup.GenericServiceTest;
 
 import java.util.List;
@@ -65,7 +66,51 @@ public class BookingServiceITest extends GenericServiceTest {
     }
 
     @Test
-    void createBooking() {
+    void createBooking_whenStartTimeEqualEndTime() {
+        initOptionalVariable();
+        initTestVariable(true, true, false);
+        BookingCreateTO originalDto = BookingCreateTO.builder()
+                .itemId(bookingEntity.getItem().getId())
+                .start(bookingEntity.getStart().withNano(0))
+                .end(bookingEntity.getStart().withNano(0))
+                .build();
+
+        ValidationException ex = assertThrows(ValidationException.class, () -> bookingService.createBooking(
+                originalDto, idUserOptional));
+
+        String errorMessage = "[Field [start and end time] invalid: [Time booking [" + originalDto.getStart() +
+                "] and [" + originalDto.getEnd() + "] is equals]]";
+
+        assertThat(ex.getMessage(), equalTo(errorMessage));
+        verify(bookingRepository, never()).save(any(BookingEntity.class));
+        verify(userRepository, never()).findById(anyLong());
+        verify(itemRepository, never()).findById(anyLong());
+    }
+
+    @Test
+    void createBooking_whenEndTimeBeforeStartTime() {
+        initOptionalVariable();
+        initTestVariable(true, true, false);
+        BookingCreateTO originalDto = BookingCreateTO.builder()
+                .itemId(bookingEntity.getItem().getId())
+                .start(bookingEntity.getEnd().withNano(0))
+                .end(bookingEntity.getStart().withNano(0))
+                .build();
+
+        ValidationException ex = assertThrows(ValidationException.class, () -> bookingService.createBooking(
+                originalDto, idUserOptional));
+
+        String errorMessage = "[Field [endTime] invalid: [Time booking [" + originalDto.getEnd() +
+                "] more [" + originalDto.getStart() + "]]]";
+
+        assertThat(ex.getMessage(), equalTo(errorMessage));
+        verify(bookingRepository, never()).save(any(BookingEntity.class));
+        verify(userRepository, never()).findById(anyLong());
+        verify(itemRepository, never()).findById(anyLong());
+    }
+
+    @Test
+    void createBooking_valid() {
         initTestVariable(true, true, false);
         userEntity.setId(2L);
         itemEntity.setUser(userEntity);
@@ -268,10 +313,12 @@ public class BookingServiceITest extends GenericServiceTest {
     @Test
     void confirmBooking_whenApprovedNull() {
         initOptionalVariable();
-        assertThrows(IncorrectParameterException.class, () -> bookingService.confirmBooking(
-                idUserOptional, idBookingOptional, Optional.empty()
-        ));
+        IncorrectParameterException ex = assertThrows(
+                IncorrectParameterException.class, () -> bookingService.confirmBooking(
+                        idUserOptional, idBookingOptional, Optional.empty()
+                ));
 
+        assertThat(ex.getMessage(), equalTo("Parameter [approved] incorrect"));
         verify(userRepository, never()).existsById(anyLong());
         verify(bookingRepository, never()).findById(anyLong());
         verify(bookingRepository, never()).save(any());
@@ -280,10 +327,12 @@ public class BookingServiceITest extends GenericServiceTest {
     @Test
     void confirmBooking_whenIdUserNull() {
         initOptionalVariable();
-        assertThrows(IncorrectParameterException.class, () -> bookingService.confirmBooking(
-                Optional.empty(), idBookingOptional, Optional.of(true)
-        ));
+        IncorrectParameterException ex = assertThrows(
+                IncorrectParameterException.class, () -> bookingService.confirmBooking(
+                        Optional.empty(), idBookingOptional, Optional.of(true)
+                ));
 
+        assertThat(ex.getMessage(), equalTo("Parameter [X-Sharer-User-Id] incorrect"));
         verify(userRepository, never()).existsById(anyLong());
         verify(bookingRepository, never()).findById(anyLong());
         verify(bookingRepository, never()).save(any());
@@ -292,10 +341,11 @@ public class BookingServiceITest extends GenericServiceTest {
     @Test
     void confirmBooking_whenIdBookingNull() {
         initOptionalVariable();
-        assertThrows(EntityNotFoundException.class, () -> bookingService.confirmBooking(
+        EntityNotFoundException ex = assertThrows(EntityNotFoundException.class, () -> bookingService.confirmBooking(
                 idUserOptional, Optional.empty(), Optional.of(true)
         ));
 
+        assertThat(ex.getMessage(), equalTo("[Booking] not found"));
         verify(userRepository, never()).existsById(anyLong());
         verify(bookingRepository, never()).findById(anyLong());
         verify(bookingRepository, never()).save(any());
@@ -307,10 +357,12 @@ public class BookingServiceITest extends GenericServiceTest {
                 .thenReturn(false);
 
         initOptionalVariable();
-        assertThrows(EntityNotFoundException.class, () -> bookingService.confirmBooking(
+        EntityNotFoundException ex = assertThrows(EntityNotFoundException.class, () -> bookingService.confirmBooking(
                 idUserOptional, idBookingOptional, Optional.of(true)
         ));
+        String errorMessage = "[User with [idUser=" + idUserOptional.get() + "]] not found";
 
+        assertThat(ex.getMessage(), equalTo(errorMessage));
         verify(userRepository, times(1)).existsById(anyLong());
         verify(bookingRepository, never()).findById(anyLong());
         verify(bookingRepository, never()).save(any());
@@ -324,10 +376,12 @@ public class BookingServiceITest extends GenericServiceTest {
                 .thenReturn(Optional.empty());
 
         initOptionalVariable();
-        assertThrows(EntityNotFoundException.class, () -> bookingService.confirmBooking(
+        EntityNotFoundException ex = assertThrows(EntityNotFoundException.class, () -> bookingService.confirmBooking(
                 idUserOptional, idBookingOptional, Optional.of(true)
         ));
+        String errorMessage = "[Booking with [idBooking=" + idBookingOptional.get() + "]] not found";
 
+        assertThat(ex.getMessage(), equalTo(errorMessage));
         verify(userRepository, times(1)).existsById(anyLong());
         verify(bookingRepository, times(1)).findById(anyLong());
         verify(bookingRepository, never()).save(any());
@@ -449,6 +503,50 @@ public class BookingServiceITest extends GenericServiceTest {
         verify(bookingRepository, never()).findPastItemsBookingByOwnerId(any(), any(), any());
         verify(bookingRepository, never()).findFutureItemsBookingByOwnerId(any(), any(), any());
         verify(bookingRepository, never()).findItemsBookingByOwnerIdAndStatus(any(), any(), any());
+    }
+
+    @Test
+    void getAllItemBookingByIdOwner_whenIncorrectPage() {
+        initTestVariable(true, true, false);
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.of(userEntity));
+
+        initBookingRequestList();
+        bookingRequestListTO.setFrom(Optional.of(-1));
+        IncorrectParameterException ex = assertThrows(
+                IncorrectParameterException.class, () -> bookingService.getAllItemBookingByIdOwner(
+                        bookingRequestListTO
+                ));
+
+        assertThat(ex.getMessage(), equalTo("Parameter [from and size] incorrect"));
+        verify(userRepository, times(1)).findById(anyLong());
+        verify(bookingRepository, never()).findAllItemsBookingByOwnerId(any(), any());
+        verify(bookingRepository, never()).findCurrentItemsBookingByOwnerId(any(), any(), any());
+        verify(bookingRepository, never()).findPastItemsBookingByOwnerId(any(), any(), any());
+        verify(bookingRepository, never()).findFutureItemsBookingByOwnerId(any(), any(), any());
+        verify(bookingRepository, never()).findItemsBookingByOwnerIdAndStatus(any(), any(), any());
+    }
+
+    @Test
+    void getListBookingByIdUser_whenIncorrectPage() {
+        initTestVariable(true, true, false);
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.of(userEntity));
+
+        initBookingRequestList();
+        bookingRequestListTO.setFrom(Optional.of(-1));
+        IncorrectParameterException ex = assertThrows(
+                IncorrectParameterException.class, () -> bookingService.getListBookingByIdUser(
+                        bookingRequestListTO
+                ));
+
+        assertThat(ex.getMessage(), equalTo("Parameter [from and size] incorrect"));
+        verify(userRepository, times(1)).findById(anyLong());
+        verify(bookingRepository, never()).findAllByUserIdBooking(any(), any());
+        verify(bookingRepository, never()).findCurrentByUserId(any(), any(), any());
+        verify(bookingRepository, never()).findAllPastByUserId(any(), any(), any());
+        verify(bookingRepository, never()).findFutureByUserId(any(), any(), any());
+        verify(bookingRepository, never()).findAllByUserIdAndStatus(any(), any(), any());
     }
 
     @Test

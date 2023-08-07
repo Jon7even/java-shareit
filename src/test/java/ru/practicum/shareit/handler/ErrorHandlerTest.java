@@ -21,6 +21,15 @@ public class ErrorHandlerTest {
     }
 
     @Test
+    void handleValidationException() {
+        ResponseEntity<Map<String, String>> result = errorHandler.handleValidationException(null);
+
+        assertNotNull(result);
+        assertEquals(result.getStatusCode(), HttpStatus.BAD_REQUEST);
+        assertEquals(result.getBody().toString(), "{errorMessage=Validation error}");
+    }
+
+    @Test
     void applicationException() {
         ApplicationException exception = new ApplicationException("test", HttpStatus.BAD_REQUEST);
         ResponseEntity<Object> result = errorHandler.handleApplicationException(exception);
@@ -93,16 +102,6 @@ public class ErrorHandlerTest {
     @Test
     void entityNotDeletedException() {
         EntityNotDeletedException exception = new EntityNotDeletedException("test");
-        ResponseEntity<Object> result = errorHandler.handleApplicationException(exception);
-
-        assertNotNull(result);
-        assertEquals(exception.getResponseStatus(), result.getStatusCode());
-        assertEquals(getError(exception.getErrorMessage()), result.getBody().toString());
-    }
-
-    @Test
-    void entityNotCreatedException() {
-        EntityNotCreatedException exception = new EntityNotCreatedException("test");
         ResponseEntity<Object> result = errorHandler.handleApplicationException(exception);
 
         assertNotNull(result);

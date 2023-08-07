@@ -77,7 +77,7 @@ public class ItemServiceTest extends GenericServiceTest {
     }
 
     @Test
-    void createItem() {
+    void createItem_valid_withoutRequest() {
         initTestVariable(true, false, false);
         when(itemRepository.save(any()))
                 .thenReturn(itemEntity);
@@ -98,6 +98,61 @@ public class ItemServiceTest extends GenericServiceTest {
         assertThat(result.getAvailable(), equalTo(originalDto.getAvailable()));
         verify(itemRepository, times(1)).save(any(ItemEntity.class));
         verify(userRepository, times(1)).findById(anyLong());
+    }
+
+    @Test
+    void createItem_valid_withRequest() {
+        initTestVariable(true, false, true);
+        itemEntity.setRequest(itemRequestEntity);
+        when(itemRepository.save(any()))
+                .thenReturn(itemEntity);
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.of(userEntity));
+        when(itemRequestRepository.findById(anyLong()))
+                .thenReturn(Optional.of(itemRequestEntity));
+
+        ItemCreateTO originalDto = ItemCreateTO.builder()
+                .name(itemEntity.getName())
+                .description(itemEntity.getDescription())
+                .available(itemEntity.isAvailable())
+                .requestId(itemRequestEntity.getId())
+                .build();
+        initOptionalVariable();
+        ItemResponseTO result = itemService.createItem(originalDto, idUserOptional);
+
+        assertThat(result.getId(), notNullValue());
+        assertThat(result.getName(), equalTo(originalDto.getName()));
+        assertThat(result.getDescription(), equalTo(originalDto.getDescription()));
+        assertThat(result.getAvailable(), equalTo(originalDto.getAvailable()));
+        assertThat(result.getRequestId(), equalTo(itemRequestEntity.getId()));
+        verify(itemRepository, times(1)).save(any(ItemEntity.class));
+        verify(userRepository, times(1)).findById(anyLong());
+        verify(itemRequestRepository, times(1)).findById(anyLong());
+    }
+
+    @Test
+    void createItem_whenRequestNotExist() {
+        initTestVariable(true, false, true);
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.of(userEntity));
+        when(itemRequestRepository.findById(anyLong()))
+                .thenReturn(Optional.empty());
+
+        ItemCreateTO originalDto = ItemCreateTO.builder()
+                .name(itemEntity.getName())
+                .description(itemEntity.getDescription())
+                .available(itemEntity.isAvailable())
+                .requestId(itemRequestEntity.getId())
+                .build();
+        initOptionalVariable();
+        EntityNotFoundException ex = assertThrows(EntityNotFoundException.class, () -> itemService.createItem(
+                originalDto, idUserOptional));
+        String errorMessage = "[ItemRequest with [idItemRequest=" + itemRequestEntity.getId() + "]] not found";
+
+        assertThat(ex.getMessage(), equalTo(errorMessage));
+        verify(itemRepository, never()).save(any(ItemEntity.class));
+        verify(userRepository, times(1)).findById(anyLong());
+        verify(itemRequestRepository, times(1)).findById(anyLong());
     }
 
     @Test
