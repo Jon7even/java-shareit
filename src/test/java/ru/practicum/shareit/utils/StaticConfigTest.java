@@ -8,7 +8,7 @@ import static ru.practicum.shareit.config.StaticConfig.DEFAULT_COUNT_SIZE;
 
 public class StaticConfigTest {
     @Test
-    void DEFAULT_COUNT_SIZE_should50() {
+    void defaultCountSizePages_shouldBe50() {
         assertNotNull(DEFAULT_COUNT_SIZE);
         assertEquals(DEFAULT_COUNT_SIZE, 50);
     }
