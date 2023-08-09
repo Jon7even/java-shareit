@@ -66,12 +66,12 @@ public class MapperBookingTest extends GenericInitEntity {
     void toDTOFromRequestParam() {
         initOptionalVariable();
         BookingRequestListTO resultDTO = BookingMapper.INSTANCE.toDTOFromRequestParam(
-                idUserOptional, state, fromOptional, sizeOptional
+                id, state, fromOptional, sizeOptional
         );
 
         assertNotNull(resultDTO);
         assertEquals(resultDTO.getState(), state);
-        assertEquals(resultDTO.getIdUser(), idUserOptional);
+        assertEquals(resultDTO.getIdUser(), id);
         assertEquals(resultDTO.getFrom(), fromOptional);
         assertEquals(resultDTO.getSize(), sizeOptional);
     }

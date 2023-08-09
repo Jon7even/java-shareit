@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import java.util.Optional;
 
 @Data
@@ -12,7 +14,9 @@ import java.util.Optional;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ItemRequestRequestListTO {
-    private Optional<Long> idUser;
+    @NotNull
+    @Positive
+    private Long idUser;
     private Optional<Integer> from;
     private Optional<Integer> size;
 }

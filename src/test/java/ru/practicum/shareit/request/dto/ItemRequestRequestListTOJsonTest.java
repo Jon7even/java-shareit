@@ -16,7 +16,7 @@ public class ItemRequestRequestListTOJsonTest extends GenericDTOTest {
     void testSerialize() throws Exception {
         initOptionalVariable();
         ItemRequestRequestListTO itemRequestListTO = ItemRequestRequestListTO.builder()
-                .idUser(idUserOptional)
+                .idUser(id)
                 .from(fromOptional)
                 .size(sizeOptional)
                 .build();

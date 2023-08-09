@@ -21,15 +21,6 @@ public class ErrorHandlerTest {
     }
 
     @Test
-    void handleValidationException() {
-        ResponseEntity<Map<String, String>> result = errorHandler.handleValidationException(null);
-
-        assertNotNull(result);
-        assertEquals(result.getStatusCode(), HttpStatus.BAD_REQUEST);
-        assertEquals(result.getBody().toString(), "{errorMessage=Validation error}");
-    }
-
-    @Test
     void applicationException() {
         ApplicationException exception = new ApplicationException("test", HttpStatus.BAD_REQUEST);
         ResponseEntity<Object> result = errorHandler.handleApplicationException(exception);

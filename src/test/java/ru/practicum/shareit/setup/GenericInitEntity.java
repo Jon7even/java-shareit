@@ -46,6 +46,7 @@ public class GenericInitEntity {
     protected BookingState state;
 
     protected void initOptionalVariable() {
+        id = 1L;
         idUserOptional = Optional.of(1L);
         idItemOptional = Optional.of(1L);
         idRequestOptional = Optional.of(1L);

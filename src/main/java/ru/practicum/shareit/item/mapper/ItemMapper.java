@@ -21,6 +21,7 @@ public interface ItemMapper {
     @Mapping(source = "itemCreateTO.description", target = "description")
     @Mapping(source = "itemCreateTO.available", target = "available")
     @Mapping(source = "user", target = "user")
+    @Mapping(target = "request", ignore = true)
     ItemEntity toEntityFromDTOCreate(ItemCreateTO itemCreateTO, UserEntity user);
 
     @Mapping(target = "id", ignore = true)
@@ -45,6 +46,8 @@ public interface ItemMapper {
     @Mapping(source = "item.description", target = "description")
     @Mapping(source = "item.available", target = "available")
     @Mapping(source = "comments", target = "comments")
+    @Mapping(target = "lastBooking", ignore = true)
+    @Mapping(target = "nextBooking", ignore = true)
     ItemResponseBookingAndCommentTO toDTOResponseWithCommentsFromEntity(ItemEntity item,
                                                                         List<CommentResponseTO> comments);
 
@@ -64,7 +67,7 @@ public interface ItemMapper {
     @Mapping(source = "from", target = "from")
     @Mapping(source = "size", target = "size")
     @Mapping(source = "text", target = "text")
-    ItemRequestListTO toDTOFromRequestParam(Optional<Long> idUser,
+    ItemRequestListTO toDTOFromRequestParam(Long idUser,
                                             Optional<Integer> from,
                                             Optional<Integer> size,
                                             Optional<String> text);
@@ -73,7 +76,7 @@ public interface ItemMapper {
     @Mapping(source = "from", target = "from")
     @Mapping(source = "size", target = "size")
     @Mapping(target = "text", ignore = true)
-    ItemRequestListTO toDTOFromRequestParamWithoutText(Optional<Long> idUser,
+    ItemRequestListTO toDTOFromRequestParamWithoutText(Long idUser,
                                                        Optional<Integer> from,
                                                        Optional<Integer> size);
 

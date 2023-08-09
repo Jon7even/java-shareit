@@ -44,7 +44,7 @@ public class ItemServiceTest extends GenericServiceTest {
     private void initItemRequestList() {
         initOptionalVariable();
         itemRequestListTO = ItemRequestListTO.builder()
-                .idUser(idUserOptional)
+                .idUser(id)
                 .from(fromOptional)
                 .size(sizeOptional)
                 .build();

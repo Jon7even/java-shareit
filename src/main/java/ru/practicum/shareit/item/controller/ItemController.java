@@ -71,7 +71,7 @@ public class ItemController {
 
     @GetMapping
     public ResponseEntity<List<ItemResponseBookingAndCommentTO>> getAllItemsByUserId(
-            @RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
+            @RequestHeader(X_HEADER_USER_ID) Long userId,
             @RequestParam(required = false) Optional<Integer> from,
             @RequestParam(required = false) Optional<Integer> size,
             HttpServletRequest request) {
@@ -89,7 +89,7 @@ public class ItemController {
 
     @GetMapping("/search")
     public ResponseEntity<List<ItemShort>> searchItemBySearchBar(
-            @RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
+            @RequestHeader(X_HEADER_USER_ID) Long userId,
             @RequestParam Optional<String> text,
             @RequestParam(required = false) Optional<Integer> from,
             @RequestParam(required = false) Optional<Integer> size,

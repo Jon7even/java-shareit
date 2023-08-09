@@ -35,7 +35,7 @@ public interface ItemRequestMapper {
     @Mapping(source = "idUser", target = "idUser")
     @Mapping(source = "from", target = "from")
     @Mapping(source = "size", target = "size")
-    ItemRequestRequestListTO toDTOFromRequestParam(Optional<Long> idUser,
+    ItemRequestRequestListTO toDTOFromRequestParam(Long idUser,
                                                    Optional<Integer> from,
                                                    Optional<Integer> size);
 }

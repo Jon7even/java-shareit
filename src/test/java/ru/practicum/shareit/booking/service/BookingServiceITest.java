@@ -40,7 +40,7 @@ public class BookingServiceITest extends GenericServiceTest {
     private void initBookingRequestList() {
         initOptionalVariable();
         bookingRequestListTO = BookingRequestListTO.builder()
-                .idUser(idUserOptional)
+                .idUser(id)
                 .state(state)
                 .from(fromOptional)
                 .size(sizeOptional)
@@ -471,38 +471,6 @@ public class BookingServiceITest extends GenericServiceTest {
         verify(userRepository, times(1)).existsById(anyLong());
         verify(bookingRepository, times(1)).findById(anyLong());
         verify(bookingRepository, never()).save(any());
-    }
-
-    @Test
-    void getListBookingByIdUser_whenIncorrect_X_HEADER_USER_ID() {
-        initBookingRequestList();
-        bookingRequestListTO.setIdUser(Optional.empty());
-        assertThrows(IncorrectParameterException.class, () -> bookingService.getListBookingByIdUser(
-                bookingRequestListTO
-        ));
-
-        verify(userRepository, never()).findById(anyLong());
-        verify(bookingRepository, never()).findAllByUserIdBooking(any(), any());
-        verify(bookingRepository, never()).findCurrentByUserId(any(), any(), any());
-        verify(bookingRepository, never()).findAllPastByUserId(any(), any(), any());
-        verify(bookingRepository, never()).findFutureByUserId(any(), any(), any());
-        verify(bookingRepository, never()).findAllByUserIdAndStatus(any(), any(), any());
-    }
-
-    @Test
-    void getAllItemBookingByIdOwner_whenIncorrect_X_HEADER_USER_ID() {
-        initBookingRequestList();
-        bookingRequestListTO.setIdUser(Optional.empty());
-        assertThrows(IncorrectParameterException.class, () -> bookingService.getAllItemBookingByIdOwner(
-                bookingRequestListTO
-        ));
-
-        verify(userRepository, never()).findById(anyLong());
-        verify(bookingRepository, never()).findAllItemsBookingByOwnerId(any(), any());
-        verify(bookingRepository, never()).findCurrentItemsBookingByOwnerId(any(), any(), any());
-        verify(bookingRepository, never()).findPastItemsBookingByOwnerId(any(), any(), any());
-        verify(bookingRepository, never()).findFutureItemsBookingByOwnerId(any(), any(), any());
-        verify(bookingRepository, never()).findItemsBookingByOwnerIdAndStatus(any(), any(), any());
     }
 
     @Test

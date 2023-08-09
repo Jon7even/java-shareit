@@ -113,18 +113,18 @@ public class ItemServiceIml implements ItemService {
 
     @Override
     public List<ItemResponseBookingAndCommentTO> getAllItemsByUserId(ItemRequestListTO itemRequestListTO) {
-        Long checkedUserId = CommonValidator.checkParameterUserId(itemRequestListTO.getIdUser());
-        existDoesUserEntityById(checkedUserId);
+        Long validUserId = itemRequestListTO.getIdUser();
+        existDoesUserEntityById(validUserId);
 
         Pageable page = CommonValidator.getPageRequest(
                 itemRequestListTO.getFrom(), itemRequestListTO.getSize(), Optional.empty()
         );
 
-        log.debug("Get all items {} by [idUser={}] [page={}]", SERVICE_IN_DB, checkedUserId, page);
-        List<ItemEntity> itemsByIdUser = repositoryItem.findByUserId(checkedUserId, page);
+        log.debug("Get all items {} by [idUser={}] [page={}]", SERVICE_IN_DB, validUserId, page);
+        List<ItemEntity> itemsByIdUser = repositoryItem.findByUserId(validUserId, page);
 
         if (itemsByIdUser.isEmpty()) {
-            log.debug("Has returned empty list items {} by [idUser={}]", SERVICE_FROM_DB, checkedUserId);
+            log.debug("Has returned empty list items {} by [idUser={}]", SERVICE_FROM_DB, validUserId);
             return Collections.emptyList();
         } else {
             List<ItemResponseBookingAndCommentTO> listForResponseDTO = new ArrayList<>();
@@ -135,7 +135,7 @@ public class ItemServiceIml implements ItemService {
             }
 
             log.debug("Found list items [count={}] {} by [idUser={}]",
-                    listForResponseDTO.size(), SERVICE_FROM_DB, checkedUserId);
+                    listForResponseDTO.size(), SERVICE_FROM_DB, validUserId);
 
             return listForResponseDTO;
         }
@@ -143,29 +143,29 @@ public class ItemServiceIml implements ItemService {
 
     @Override
     public List<ItemShort> getListSearchItem(ItemRequestListTO itemRequestListTO) {
-        Long checkedUserId = CommonValidator.checkParameterUserId(itemRequestListTO.getIdUser());
+        Long validUserId = itemRequestListTO.getIdUser();
         String checkedSearchText = checkParameterSearchText(itemRequestListTO.getText());
 
         if (checkedSearchText.isBlank()) {
-            log.debug("Has returned empty list items [searchText is empty] by [idUser={}]", checkedUserId);
+            log.debug("Has returned empty list items [searchText is empty] by [idUser={}]", validUserId);
             return Collections.emptyList();
         }
 
-        existDoesUserEntityById(checkedUserId);
+        existDoesUserEntityById(validUserId);
         Pageable page = CommonValidator.getPageRequest(
                 itemRequestListTO.getFrom(), itemRequestListTO.getSize(), Optional.empty()
         );
 
         log.debug("Get list items [searchText={}] {} by [idUser={}] [page={}]",
-                checkedSearchText, SERVICE_IN_DB, checkedUserId, page);
+                checkedSearchText, SERVICE_IN_DB, validUserId, page);
         List<ItemShort> listFoundItemsByText = repositoryItem.getListSearchItemShort(checkedSearchText, page);
 
         if (listFoundItemsByText.isEmpty()) {
             log.debug("Has returned empty list items [searchText={}] {} by [idUser={}]",
-                    checkedSearchText, SERVICE_FROM_DB, checkedUserId);
+                    checkedSearchText, SERVICE_FROM_DB, validUserId);
         } else {
             log.debug("Found list items [count={}] {} by [idUser={}]",
-                    listFoundItemsByText.size(), SERVICE_FROM_DB, checkedUserId);
+                    listFoundItemsByText.size(), SERVICE_FROM_DB, validUserId);
         }
 
         return listFoundItemsByText;

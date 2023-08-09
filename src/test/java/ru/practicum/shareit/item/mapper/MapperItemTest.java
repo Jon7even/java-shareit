@@ -130,11 +130,11 @@ public class MapperItemTest extends GenericInitEntity {
     void toDTOFromRequestParam() {
         initOptionalVariable();
         ItemRequestListTO resultDTO = ItemMapper.INSTANCE.toDTOFromRequestParam(
-                idUserOptional, fromOptional, sizeOptional, textOptional
+                id, fromOptional, sizeOptional, textOptional
         );
 
         assertNotNull(resultDTO);
-        assertEquals(resultDTO.getIdUser(), idUserOptional);
+        assertEquals(resultDTO.getIdUser(), id);
         assertEquals(resultDTO.getFrom(), fromOptional);
         assertEquals(resultDTO.getSize(), sizeOptional);
         assertEquals(resultDTO.getText(), textOptional);
@@ -144,12 +144,12 @@ public class MapperItemTest extends GenericInitEntity {
     void toDTOFromRequestParamWithoutText() {
         initOptionalVariable();
         ItemRequestListTO resultDTO = ItemMapper.INSTANCE.toDTOFromRequestParamWithoutText(
-                idUserOptional, fromOptional, sizeOptional
+                id, fromOptional, sizeOptional
         );
 
         assertNotNull(resultDTO);
         assertNull(resultDTO.getText());
-        assertEquals(resultDTO.getIdUser(), idUserOptional);
+        assertEquals(resultDTO.getIdUser(), id);
         assertEquals(resultDTO.getFrom(), fromOptional);
         assertEquals(resultDTO.getSize(), sizeOptional);
     }

@@ -235,7 +235,7 @@ public class ItemRequestServiceTest extends GenericServiceTest {
 
         initOptionalVariable();
         ItemRequestRequestListTO itemRequestRequestListTO = ItemRequestRequestListTO.builder()
-                .idUser(idUserOptional)
+                .idUser(id)
                 .from(fromOptional)
                 .size(sizeOptional)
                 .build();
@@ -263,7 +263,7 @@ public class ItemRequestServiceTest extends GenericServiceTest {
 
         initOptionalVariable();
         ItemRequestRequestListTO itemRequestRequestListTO = ItemRequestRequestListTO.builder()
-                .idUser(idUserOptional)
+                .idUser(id)
                 .from(fromOptional)
                 .size(sizeOptional)
                 .build();
@@ -290,7 +290,7 @@ public class ItemRequestServiceTest extends GenericServiceTest {
 
         initOptionalVariable();
         ItemRequestRequestListTO itemRequestRequestListTO = ItemRequestRequestListTO.builder()
-                .idUser(idUserOptional)
+                .idUser(id)
                 .from(fromOptional)
                 .size(sizeOptional)
                 .build();
@@ -326,7 +326,7 @@ public class ItemRequestServiceTest extends GenericServiceTest {
         initOptionalVariable();
         idUserOptional = Optional.of(2L);
         ItemRequestRequestListTO itemRequestRequestListTO = ItemRequestRequestListTO.builder()
-                .idUser(idUserOptional)
+                .idUser(id)
                 .from(fromOptional)
                 .size(sizeOptional)
                 .build();
@@ -366,7 +366,7 @@ public class ItemRequestServiceTest extends GenericServiceTest {
         initOptionalVariable();
         idUserOptional = Optional.of(2L);
         ItemRequestRequestListTO itemRequestRequestListTO = ItemRequestRequestListTO.builder()
-                .idUser(idUserOptional)
+                .idUser(id)
                 .from(fromOptional)
                 .size(sizeOptional)
                 .build();

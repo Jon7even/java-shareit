@@ -101,22 +101,22 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     public List<ItemRequestResponseTO> getListItemRequestByAnyUser(ItemRequestRequestListTO itemRequestRequestListTO) {
-        Long checkedUserId = CommonValidator.checkParameterUserId(itemRequestRequestListTO.getIdUser());
+        Long validUserId = itemRequestRequestListTO.getIdUser();
 
         Optional<Sort> sort = Optional.of(Sort.by(Sort.Direction.DESC, "created"));
         Pageable page = CommonValidator.getPageRequest(
                 itemRequestRequestListTO.getFrom(), itemRequestRequestListTO.getSize(), sort
         );
 
-        UserEntity checkedUserFromDB = findUserEntityById(checkedUserId);
+        UserEntity checkedUserFromDB = findUserEntityById(validUserId);
 
-        log.debug("Get list itemRequests {} by [idUser={}] [page={}]", SERVICE_IN_DB, checkedUserId, page);
+        log.debug("Get list itemRequests {} by [idUser={}] [page={}]", SERVICE_IN_DB, validUserId, page);
         List<ItemRequestEntity> requestListByPages = repositoryRequest.findAll(page).stream()
                 .filter(itemRequestEntity -> !itemRequestEntity.getRequestor().equals(checkedUserFromDB))
                 .collect(Collectors.toList());
 
         if (requestListByPages.isEmpty()) {
-            log.debug("Has returned empty itemRequests {} by [idUser={}]", SERVICE_FROM_DB, checkedUserId);
+            log.debug("Has returned empty itemRequests {} by [idUser={}]", SERVICE_FROM_DB, validUserId);
             return Collections.emptyList();
         } else {
             List<ItemRequestResponseTO> listItemRequestTO = new ArrayList<>();
@@ -127,7 +127,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
             }
 
             log.debug("Found list itemRequests [count={}] {} by [idUser={}]",
-                    listItemRequestTO.size(), SERVICE_FROM_DB, checkedUserId);
+                    listItemRequestTO.size(), SERVICE_FROM_DB, validUserId);
 
             return listItemRequestTO;
         }

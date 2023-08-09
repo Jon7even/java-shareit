@@ -18,7 +18,7 @@ public class BookingRequestListTOJsonTest extends GenericDTOTest {
         initOptionalVariable();
         BookingState bookingState = BookingState.ALL;
         BookingRequestListTO bookingRequestListTO = BookingRequestListTO.builder()
-                .idUser(idUserOptional)
+                .idUser(id)
                 .from(fromOptional)
                 .size(sizeOptional)
                 .state(bookingState)

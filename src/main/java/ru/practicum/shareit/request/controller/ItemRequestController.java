@@ -61,7 +61,7 @@ public class ItemRequestController {
 
     @GetMapping("/all")
     public ResponseEntity<List<ItemRequestResponseTO>> getListItemRequestByAnyUser(
-            @RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
+            @RequestHeader(X_HEADER_USER_ID) Long userId,
             @RequestParam(required = false) Optional<Integer> from,
             @RequestParam(required = false) Optional<Integer> size,
             HttpServletRequest request) {

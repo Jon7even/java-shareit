@@ -107,8 +107,8 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingResponseTO> getListBookingByIdUser(BookingRequestListTO bookingRequestListTO) {
-        Long checkedUserId = CommonValidator.checkParameterUserId(bookingRequestListTO.getIdUser());
-        UserEntity checkedUserFromDB = findUserEntityById(checkedUserId);
+        Long validUserId = bookingRequestListTO.getIdUser();
+        UserEntity checkedUserFromDB = findUserEntityById(validUserId);
 
         LocalDateTime currentTime = LocalDateTime.now();
         List<BookingEntity> bookings = Collections.emptyList();
@@ -117,7 +117,7 @@ public class BookingServiceImpl implements BookingService {
         );
 
         log.debug("Get list booking by user [userId={}] [BookingState={}], [page={}] [currentTime={}] {}",
-                checkedUserId, bookingRequestListTO.getState(), page, currentTime, SERVICE_FROM_DB);
+                validUserId, bookingRequestListTO.getState(), page, currentTime, SERVICE_FROM_DB);
 
         switch (bookingRequestListTO.getState()) {
             case ALL:
@@ -150,8 +150,8 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingResponseTO> getAllItemBookingByIdOwner(BookingRequestListTO bookingRequestListTO) {
-        Long checkedUserId = CommonValidator.checkParameterUserId(bookingRequestListTO.getIdUser());
-        UserEntity checkedUserFromDB = findUserEntityById(checkedUserId);
+        Long validUserId = bookingRequestListTO.getIdUser();
+        UserEntity checkedUserFromDB = findUserEntityById(validUserId);
 
         LocalDateTime currentTime = LocalDateTime.now();
         List<BookingEntity> bookings = Collections.emptyList();
@@ -161,7 +161,7 @@ public class BookingServiceImpl implements BookingService {
         );
 
         log.debug("Get list booking by owner [ownerId={}] [BookingState={}], [page={}] [currentTime={}] {}",
-                checkedUserId, bookingRequestListTO.getState().toString(), page, currentTime, SERVICE_FROM_DB);
+                validUserId, bookingRequestListTO.getState().toString(), page, currentTime, SERVICE_FROM_DB);
 
         switch (bookingRequestListTO.getState()) {
             case ALL:

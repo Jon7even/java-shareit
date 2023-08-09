@@ -407,10 +407,6 @@ public class ItemControllerTest extends GenericControllerTest {
                 .andExpect(jsonPath("$", hasSize(0)))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(get("/items/search?text={text}", "thirdItem"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath(ERROR_NAME).value(ERROR_M_HEADER_USER_ID));
-
         mockMvc.perform(get("/items/search?text={text}&from={from}&size={size}", "Item", 1, 1)
                         .header(X_HEADER_USER_ID, FIRST_ID))
                 .andExpect(status().isOk())

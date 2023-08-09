@@ -60,9 +60,9 @@ public class BookingController {
 
     @GetMapping
     public ResponseEntity<List<BookingResponseTO>> getListBookingByIdUser(
-            @RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
+            @RequestHeader(X_HEADER_USER_ID) Long userId,
             @RequestParam(required = false, defaultValue = DEFAULT_STATE_IN_CONTROLLER) BookingState state,
-            @RequestParam(required = false)  Optional<Integer> from,
+            @RequestParam(required = false) Optional<Integer> from,
             @RequestParam(required = false) Optional<Integer> size,
             HttpServletRequest request) {
 
@@ -75,9 +75,9 @@ public class BookingController {
 
     @GetMapping("/owner")
     public ResponseEntity<List<BookingResponseTO>> getAllItemBookingByIdOwner(
-            @RequestHeader(X_HEADER_USER_ID) Optional<Long> userId,
+            @RequestHeader(X_HEADER_USER_ID) Long userId,
             @RequestParam(required = false, defaultValue = DEFAULT_STATE_IN_CONTROLLER) BookingState state,
-            @RequestParam(required = false)  Optional<Integer> from,
+            @RequestParam(required = false) Optional<Integer> from,
             @RequestParam(required = false) Optional<Integer> size,
             HttpServletRequest request) {
 

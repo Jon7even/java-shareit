@@ -47,7 +47,7 @@ public interface BookingMapper {
     @Mapping(source = "state", target = "state")
     @Mapping(source = "from", target = "from")
     @Mapping(source = "size", target = "size")
-    BookingRequestListTO toDTOFromRequestParam(Optional<Long> idUser,
+    BookingRequestListTO toDTOFromRequestParam(Long idUser,
                                                BookingState state,
                                                Optional<Integer> from,
                                                Optional<Integer> size);
