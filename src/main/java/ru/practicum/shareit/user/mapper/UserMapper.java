@@ -3,27 +3,27 @@ package ru.practicum.shareit.user.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
-import ru.practicum.shareit.user.dto.UserRequestCreateDTO;
-import ru.practicum.shareit.user.dto.UserRequestUpdateDTO;
-import ru.practicum.shareit.user.dto.UserResponseDTO;
-import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.dto.UserCreateTO;
+import ru.practicum.shareit.user.dto.UserResponseTO;
+import ru.practicum.shareit.user.dto.UserUpdateTO;
+import ru.practicum.shareit.user.model.UserEntity;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
     UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(source = "userRequestCreateDTO.name", target = "name")
-    @Mapping(source = "userRequestCreateDTO.email", target = "email")
-    User toEntityFromDTOCreate(UserRequestCreateDTO userRequestCreateDTO);
+    @Mapping(source = "userCreateTO.name", target = "name")
+    @Mapping(source = "userCreateTO.email", target = "email")
+    UserEntity toEntityFromDTOCreate(UserCreateTO userCreateTO);
 
     @Mapping(source = "userId", target = "id")
-    @Mapping(source = "userRequestUpdateDTO.name", target = "name")
-    @Mapping(source = "userRequestUpdateDTO.email", target = "email")
-    User toEntityFromDTOUpdate(UserRequestUpdateDTO userRequestUpdateDTO, Long userId);
+    @Mapping(source = "userUpdateTO.name", target = "name")
+    @Mapping(source = "userUpdateTO.email", target = "email")
+    UserEntity toEntityFromDTOUpdate(UserUpdateTO userUpdateTO, Long userId);
 
     @Mapping(source = "user.id", target = "id")
     @Mapping(source = "user.name", target = "name")
     @Mapping(source = "user.email", target = "email")
-    UserResponseDTO toDTOResponseFromEntity(User user);
+    UserResponseTO toDTOResponseFromEntity(UserEntity user);
 }

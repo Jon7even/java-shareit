@@ -6,14 +6,25 @@ CREATE TABLE IF NOT EXISTS users (
     CONSTRAINT        UNQ_USER_EMAIL UNIQUE(email)
 );
 
+CREATE TABLE IF NOT EXISTS requests (
+    id                BIGINT       NOT NULL GENERATED ALWAYS AS IDENTITY,
+    description       VARCHAR(512) NOT NULL,
+    requestor_id      BIGINT       NOT NULL,
+    created           TIMESTAMP    WITHOUT TIME ZONE     NOT NULL,
+    CONSTRAINT        PK_REQUEST PRIMARY KEY(id),
+    CONSTRAINT        FK_REQUEST_TO_USER FOREIGN KEY(requestor_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS items (
     id                BIGINT       NOT NULL GENERATED ALWAYS AS IDENTITY,
     name              VARCHAR(128) NOT NULL,
     description       VARCHAR(512) NOT NULL,
     is_available      BOOLEAN      NOT NULL,
     user_id           BIGINT       NOT NULL,
+    request_id        BIGINT,
     CONSTRAINT        PK_ITEM PRIMARY KEY(id),
-    CONSTRAINT        FK_ITEM_TO_USER FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+    CONSTRAINT        FK_ITEM_TO_USER FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT        FK_ITEM_TO_REQUEST FOREIGN KEY(request_id) REFERENCES requests(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS bookings (

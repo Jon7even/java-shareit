@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import ru.practicum.shareit.user.dto.UserRequestCreateDTO;
-import ru.practicum.shareit.user.dto.UserRequestUpdateDTO;
-import ru.practicum.shareit.user.dto.UserResponseDTO;
+import ru.practicum.shareit.user.dto.UserCreateTO;
+import ru.practicum.shareit.user.dto.UserResponseTO;
+import ru.practicum.shareit.user.dto.UserUpdateTO;
 import ru.practicum.shareit.user.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -33,8 +33,8 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<UserResponseDTO> createUser(@Valid @RequestBody UserRequestCreateDTO userRequestCreateDTO,
-                                                      HttpServletRequest request) {
+    public ResponseEntity<UserResponseTO> createUser(@Valid @RequestBody UserCreateTO userRequestCreateDTO,
+                                                     HttpServletRequest request) {
 
         log.debug("On {} {} {}", request.getRequestURL(), IN_CONTROLLER_METHOD, request.getMethod());
 
@@ -42,8 +42,8 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Optional<Long> userId,
-                                                       HttpServletRequest request) {
+    public ResponseEntity<UserResponseTO> getUserById(@PathVariable Optional<Long> userId,
+                                                      HttpServletRequest request) {
 
         log.debug("On {} {} {}", request.getRequestURL(), IN_CONTROLLER_METHOD, request.getMethod());
 
@@ -51,9 +51,9 @@ public class UserController {
     }
 
     @PatchMapping("/{userId}")
-    public ResponseEntity<UserResponseDTO> updateUserById(@PathVariable Optional<Long> userId,
-                                                          @Valid @RequestBody UserRequestUpdateDTO userRequestUpdateDTO,
-                                                          HttpServletRequest request) {
+    public ResponseEntity<UserResponseTO> updateUserById(@PathVariable Optional<Long> userId,
+                                                         @Valid @RequestBody UserUpdateTO userRequestUpdateDTO,
+                                                         HttpServletRequest request) {
 
         log.debug("On {} {} {}", request.getRequestURL(), IN_CONTROLLER_METHOD, request.getMethod());
 
@@ -72,11 +72,11 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<List<UserResponseDTO>> getAllUsers(HttpServletRequest request) {
+    public ResponseEntity<List<UserResponseTO>> getAllUsers(HttpServletRequest request) {
 
         log.debug("On {} {} {}", request.getRequestURL(), IN_CONTROLLER_METHOD, request.getMethod());
 
-        List<UserResponseDTO> listAllUsers = userService.getAllUsers();
+        List<UserResponseTO> listAllUsers = userService.getAllUsers();
 
         return ResponseEntity.ok().header(X_COUNT_ITEMS, String.valueOf(listAllUsers.size())).body(listAllUsers);
     }

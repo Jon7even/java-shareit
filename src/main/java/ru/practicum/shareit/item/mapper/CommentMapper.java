@@ -3,11 +3,11 @@ package ru.practicum.shareit.item.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
-import ru.practicum.shareit.item.dto.CommentRequestCreateDTO;
-import ru.practicum.shareit.item.dto.CommentResponseDTO;
-import ru.practicum.shareit.item.model.Comment;
-import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.item.dto.CommentCreateTO;
+import ru.practicum.shareit.item.dto.CommentResponseTO;
+import ru.practicum.shareit.item.model.CommentEntity;
+import ru.practicum.shareit.item.model.ItemEntity;
+import ru.practicum.shareit.user.model.UserEntity;
 
 import java.time.LocalDateTime;
 
@@ -20,11 +20,14 @@ public interface CommentMapper {
     @Mapping(source = "item", target = "item")
     @Mapping(source = "user", target = "user")
     @Mapping(source = "created", target = "created")
-    Comment toEntityFromDTOCreate(CommentRequestCreateDTO comment, Item item, User user, LocalDateTime created);
+    CommentEntity toEntityFromDTOCreate(CommentCreateTO comment,
+                                        ItemEntity item,
+                                        UserEntity user,
+                                        LocalDateTime created);
 
     @Mapping(source = "comment.id", target = "id")
     @Mapping(source = "comment.text", target = "text")
     @Mapping(source = "comment.user.name", target = "authorName")
     @Mapping(source = "comment.created", target = "created")
-    CommentResponseDTO toDTOResponseFromEntity(Comment comment);
+    CommentResponseTO toDTOResponseFromEntity(CommentEntity comment);
 }
