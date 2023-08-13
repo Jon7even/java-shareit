@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.stream.Collectors;
 
+import static ru.practicum.shareit.config.StaticConfig.DEFAULT_SORT_BY_ID;
 import static ru.practicum.shareit.constants.NamesLogsInService.*;
 
 @Slf4j
@@ -117,7 +118,7 @@ public class ItemServiceIml implements ItemService {
         existDoesUserEntityById(validUserId);
 
         Pageable page = CommonValidator.getPageRequest(
-                itemRequestListTO.getFrom(), itemRequestListTO.getSize(), Optional.empty()
+                itemRequestListTO.getFrom(), itemRequestListTO.getSize(), Optional.of(DEFAULT_SORT_BY_ID)
         );
 
         log.debug("Get all items {} by [idUser={}] [page={}]", SERVICE_IN_DB, validUserId, page);

@@ -13,7 +13,7 @@ class ShareItTests {
 
 	@Test
 	void testMain() {
-		Assertions.assertDoesNotThrow(ShareItApp::new);
+		Assertions.assertDoesNotThrow(ShareItServer::new);
 	}
 
 }

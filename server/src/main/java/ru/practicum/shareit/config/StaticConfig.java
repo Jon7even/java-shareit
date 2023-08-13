@@ -28,6 +28,7 @@
 package ru.practicum.shareit.config;
 
 import lombok.experimental.UtilityClass;
+import org.springframework.data.domain.Sort;
 import ru.practicum.shareit.booking.model.BookingStatus;
 
 @UtilityClass
@@ -37,4 +38,6 @@ public class StaticConfig {
     public static final String DEFAULT_STATE_IN_CONTROLLER = "ALL";
 
     public static final int DEFAULT_COUNT_SIZE = 50;
+
+    public static final Sort DEFAULT_SORT_BY_ID = Sort.by(Sort.Direction.ASC, "id");
 }

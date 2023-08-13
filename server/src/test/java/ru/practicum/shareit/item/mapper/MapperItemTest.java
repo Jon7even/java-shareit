@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.mapper;
 
 import org.junit.jupiter.api.Test;
 import ru.practicum.shareit.booking.dto.BookingQueueTO;
+import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.setup.GenericInitEntity;
 import ru.practicum.shareit.item.model.ItemEntity;
 
