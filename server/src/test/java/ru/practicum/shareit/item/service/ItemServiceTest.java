@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import ru.practicum.shareit.booking.model.BookingEntity;
 import ru.practicum.shareit.exception.*;
-import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.model.CommentEntity;
 import ru.practicum.shareit.item.model.ItemEntity;
 import ru.practicum.shareit.item.projections.ItemShort;
