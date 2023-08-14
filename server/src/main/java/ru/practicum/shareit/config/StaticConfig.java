@@ -23,6 +23,9 @@
  * Срабатывает это значение. Это используется для снижения нагрузки на БД
  * Можно увеличивать/уменьшать это количество по потребности
  *
+ * DEFAULT_SORT_BY_ID
+ * Параметр сортировки по возрастанию ID
+ *
  */
 
 package ru.practicum.shareit.config;
@@ -37,7 +40,7 @@ public class StaticConfig {
 
     public static final String DEFAULT_STATE_IN_CONTROLLER = "ALL";
 
-    public static final int DEFAULT_COUNT_SIZE = 50;
+    public static final int DEFAULT_COUNT_SIZE = 20;
 
     public static final Sort DEFAULT_SORT_BY_ID = Sort.by(Sort.Direction.ASC, "id");
 }
