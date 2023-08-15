@@ -113,7 +113,7 @@ public class BookingServiceImpl implements BookingService {
         LocalDateTime currentTime = LocalDateTime.now();
         List<BookingEntity> bookings = Collections.emptyList();
         Pageable page = CommonValidator.getPageRequest(
-                bookingRequestListTO.getFrom(), bookingRequestListTO.getSize(), Optional.empty()
+                bookingRequestListTO.getFrom(), bookingRequestListTO.getSize(), Optional.of(DEFAULT_SORT_BY_ID)
         );
 
         log.debug("Get list booking by user [userId={}] [BookingState={}], [page={}] [currentTime={}] {}",
@@ -157,7 +157,7 @@ public class BookingServiceImpl implements BookingService {
         List<BookingEntity> bookings = Collections.emptyList();
 
         Pageable page = CommonValidator.getPageRequest(
-                bookingRequestListTO.getFrom(), bookingRequestListTO.getSize(), Optional.empty()
+                bookingRequestListTO.getFrom(), bookingRequestListTO.getSize(), Optional.of(DEFAULT_SORT_BY_ID)
         );
 
         log.debug("Get list booking by owner [ownerId={}] [BookingState={}], [page={}] [currentTime={}] {}",

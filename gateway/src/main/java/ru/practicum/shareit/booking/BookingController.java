@@ -36,7 +36,7 @@ public class BookingController {
 
     @GetMapping("/{bookingId}")
     public ResponseEntity<Object> getBookingById(@RequestHeader(X_HEADER_USER_ID) @Positive long userId,
-                                                 @PathVariable Long bookingId) {
+                                                 @PathVariable long bookingId) {
         log.info("Get booking {}, userId={}", bookingId, userId);
 
         return bookingClient.findBookingById(userId, bookingId);

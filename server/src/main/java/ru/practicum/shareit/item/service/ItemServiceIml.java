@@ -154,7 +154,7 @@ public class ItemServiceIml implements ItemService {
 
         existDoesUserEntityById(validUserId);
         Pageable page = CommonValidator.getPageRequest(
-                itemRequestListTO.getFrom(), itemRequestListTO.getSize(), Optional.empty()
+                itemRequestListTO.getFrom(), itemRequestListTO.getSize(), Optional.of(DEFAULT_SORT_BY_ID)
         );
 
         log.debug("Get list items [searchText={}] {} by [idUser={}] [page={}]",

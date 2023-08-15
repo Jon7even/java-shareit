@@ -43,8 +43,7 @@ public class ItemRequestController {
     }
 
     @GetMapping
-    public ResponseEntity<Object> getAllItemRequestByIdOwner(
-            @RequestHeader(X_HEADER_USER_ID) @Positive long userId) {
+    public ResponseEntity<Object> getAllItemRequestByIdOwner(@RequestHeader(X_HEADER_USER_ID) long userId) {
         log.info("Get itemRequests by ownerId={}", userId);
 
         return requestClient.getAllItemRequestByIdOwner(userId);
@@ -64,4 +63,5 @@ public class ItemRequestController {
                 .size(size)
                 .build());
     }
+
 }

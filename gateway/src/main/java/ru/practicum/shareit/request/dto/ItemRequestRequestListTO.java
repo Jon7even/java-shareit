@@ -16,6 +16,8 @@ public class ItemRequestRequestListTO {
     @Positive
     @NotNull
     private long idUser;
+
     private int from;
+
     private int size;
 }

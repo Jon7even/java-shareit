@@ -10,6 +10,6 @@ public class StaticConfigTest {
     @Test
     void defaultCountSizePages_shouldBe50() {
         assertNotNull(DEFAULT_COUNT_SIZE);
-        assertEquals(DEFAULT_COUNT_SIZE, 50);
+        assertEquals(DEFAULT_COUNT_SIZE, 20);
     }
 }

@@ -4,10 +4,6 @@ import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class NamesInController {
-    public static final String IN_CONTROLLER_METHOD = "was used method";
-
-    public static final String X_COUNT_ITEMS = "X-Sharer-List-Count";
-
     public static final String X_HEADER_USER_ID = "X-Sharer-User-Id";
 
     public static final String API_BOOKINGS = "/bookings";

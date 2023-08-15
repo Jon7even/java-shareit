@@ -14,5 +14,5 @@ public class ItemUpdateTO {
 
     private String description;
 
-    private boolean available;
+    private Boolean available;
 }
