@@ -6,7 +6,6 @@ services:
     container_name: shareit_gateway
     ports:
       - "8080:8080"
-    restart: on-failure
     depends_on:
       - server
     environment:
@@ -17,7 +16,6 @@ services:
     container_name: shareit_server
     ports:
       - "9090:9090"
-    restart: on-failure
     depends_on:
       - db
     environment:
@@ -34,7 +32,6 @@ services:
       - /var/lib/postgresql/data/
     ports:
       - "6541:5432"
-    restart: on-failure
     environment:
       - POSTGRES_DB=shareit_base
       - POSTGRES_USER=shareit_user

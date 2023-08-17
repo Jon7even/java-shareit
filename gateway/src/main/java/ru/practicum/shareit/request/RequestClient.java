@@ -27,15 +27,15 @@ public class RequestClient extends BaseClient {
         );
     }
 
-    public ResponseEntity<Object> createItemRequest(long userId, ItemRequestCreateTO itemRequestCreateTO) {
+    public ResponseEntity<Object> createItemRequest(Long userId, ItemRequestCreateTO itemRequestCreateTO) {
         return post("", userId, itemRequestCreateTO);
     }
 
-    public ResponseEntity<Object> findItemRequestById(long userId, long requestId) {
+    public ResponseEntity<Object> findItemRequestById(Long userId, Long requestId) {
         return get("/" + requestId, userId);
     }
 
-    public ResponseEntity<Object> getAllItemRequestByIdOwner(long userId) {
+    public ResponseEntity<Object> getAllItemRequestByIdOwner(Long userId) {
         return get("", userId);
     }
 

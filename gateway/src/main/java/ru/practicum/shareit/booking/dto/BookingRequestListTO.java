@@ -15,12 +15,12 @@ import javax.validation.constraints.Positive;
 public class BookingRequestListTO {
     @NotNull
     @Positive
-    private long idUser;
+    private Long idUser;
 
     @NotNull
     private BookingState state;
 
-    private int from;
+    private Integer from;
 
-    private int size;
+    private Integer size;
 }

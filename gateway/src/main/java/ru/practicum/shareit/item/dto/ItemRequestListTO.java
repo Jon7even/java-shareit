@@ -15,8 +15,8 @@ import javax.validation.constraints.Positive;
 public class ItemRequestListTO {
     @NotNull
     @Positive
-    private long idUser;
-    private int from;
-    private int size;
+    private Long idUser;
+    private Integer from;
+    private Integer size;
     private String text;
 }

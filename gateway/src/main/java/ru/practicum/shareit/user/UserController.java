@@ -30,14 +30,14 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<Object> getUserById(@PathVariable @Positive long userId) {
+    public ResponseEntity<Object> getUserById(@PathVariable @Positive Long userId) {
         log.info("Get user={}", userId);
 
         return userClient.getUserById(userId);
     }
 
     @PatchMapping("/{userId}")
-    public ResponseEntity<Object> updateUserById(@PathVariable @Positive long userId,
+    public ResponseEntity<Object> updateUserById(@PathVariable @Positive Long userId,
                                                  @Valid @RequestBody UserUpdateTO userUpdateTO) {
         log.info("Updating user {}", userUpdateTO);
 
@@ -45,7 +45,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{userId}")
-    public ResponseEntity<Object> removeUserById(@PathVariable @Positive long userId) {
+    public ResponseEntity<Object> removeUserById(@PathVariable @Positive Long userId) {
         log.info("Remove userId={}", userId);
 
         return userClient.deleteUserById(userId);

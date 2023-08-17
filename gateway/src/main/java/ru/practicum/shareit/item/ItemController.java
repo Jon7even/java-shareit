@@ -24,7 +24,7 @@ public class ItemController {
     private final ItemClient itemClient;
 
     @PostMapping
-    public ResponseEntity<Object> createItem(@RequestHeader(X_HEADER_USER_ID) @Positive long userId,
+    public ResponseEntity<Object> createItem(@RequestHeader(X_HEADER_USER_ID) @Positive Long userId,
                                              @Valid @RequestBody ItemCreateTO itemRequestCreateDTO) {
         log.info("Creating item {}, userId={}", itemRequestCreateDTO, userId);
 
@@ -33,16 +33,16 @@ public class ItemController {
 
     @GetMapping("/{itemId}")
     public ResponseEntity<Object> getItemById(
-            @RequestHeader(X_HEADER_USER_ID) @Positive long userId,
-            @PathVariable @Positive long itemId) {
+            @RequestHeader(X_HEADER_USER_ID) @Positive Long userId,
+            @PathVariable @Positive Long itemId) {
         log.info("Get item {}, userId={}", itemId, userId);
 
         return itemClient.findItemById(userId, itemId);
     }
 
     @PatchMapping("/{itemId}")
-    public ResponseEntity<Object> updateItemById(@RequestHeader(X_HEADER_USER_ID) @Positive long userId,
-                                                 @PathVariable @Positive long itemId,
+    public ResponseEntity<Object> updateItemById(@RequestHeader(X_HEADER_USER_ID) @Positive Long userId,
+                                                 @PathVariable @Positive Long itemId,
                                                  @Valid @RequestBody ItemUpdateTO itemRequestUpdateDTO) {
         log.info("Update Item {}, userId={}, itemId={}", itemRequestUpdateDTO, userId, itemId);
 
@@ -51,7 +51,7 @@ public class ItemController {
 
     @GetMapping
     public ResponseEntity<Object> getAllItemsByUserId(
-            @RequestHeader(X_HEADER_USER_ID) long userId,
+            @RequestHeader(X_HEADER_USER_ID) Long userId,
             @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
             @Positive @RequestParam(name = "size", defaultValue = "20") Integer size) {
         log.info("Get item list by user userId={}, from={}, size={}", userId, from, size);
@@ -64,7 +64,7 @@ public class ItemController {
 
     @GetMapping("/search")
     public ResponseEntity<Object> searchItemBySearchBar(
-            @RequestHeader(X_HEADER_USER_ID) long userId,
+            @RequestHeader(X_HEADER_USER_ID) Long userId,
             @RequestParam String text,
             @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
             @Positive @RequestParam(name = "size", defaultValue = "20") Integer size) {
@@ -78,16 +78,16 @@ public class ItemController {
     }
 
     @DeleteMapping("/{itemId}")
-    public ResponseEntity<Object> removeItemById(@RequestHeader(X_HEADER_USER_ID) @Positive long userId,
-                                                 @PathVariable @Positive long itemId) {
+    public ResponseEntity<Object> removeItemById(@RequestHeader(X_HEADER_USER_ID) @Positive Long userId,
+                                                 @PathVariable @Positive Long itemId) {
         log.info("Remove itemId={} by userId={}", itemId, userId);
 
         return itemClient.deleteItemById(userId, itemId);
     }
 
     @PostMapping("/{itemId}/comment")
-    public ResponseEntity<Object> createComment(@RequestHeader(X_HEADER_USER_ID) @Positive long userId,
-                                                @PathVariable @Positive long itemId,
+    public ResponseEntity<Object> createComment(@RequestHeader(X_HEADER_USER_ID) @Positive Long userId,
+                                                @PathVariable @Positive Long itemId,
                                                 @Valid @RequestBody CommentCreateTO commentCreateTO) {
         log.info("Create comment {} by userId={} on itemId={}", commentCreateTO, userId, itemId);
 

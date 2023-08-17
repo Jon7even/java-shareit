@@ -29,15 +29,15 @@ public class ItemClient extends BaseClient {
         );
     }
 
-    public ResponseEntity<Object> createItem(long userId, ItemCreateTO itemCreateTO) {
+    public ResponseEntity<Object> createItem(Long userId, ItemCreateTO itemCreateTO) {
         return post("", userId, itemCreateTO);
     }
 
-    public ResponseEntity<Object> findItemById(long userId, long itemId) {
+    public ResponseEntity<Object> findItemById(Long userId, Long itemId) {
         return get("/" + itemId, userId);
     }
 
-    public ResponseEntity<Object> updateItem(long userId, long itemId, ItemUpdateTO itemUpdateTO) {
+    public ResponseEntity<Object> updateItem(Long userId, Long itemId, ItemUpdateTO itemUpdateTO) {
         return patch("/" + itemId, userId, itemUpdateTO);
     }
 
@@ -58,11 +58,11 @@ public class ItemClient extends BaseClient {
         return get("/search?text={text}&from={from}&size={size}", itemRequestListTO.getIdUser(), parameters);
     }
 
-    public ResponseEntity<Object> deleteItemById(long userId, long itemId) {
+    public ResponseEntity<Object> deleteItemById(Long userId, Long itemId) {
         return delete("/" + itemId, userId);
     }
 
-    public ResponseEntity<Object> createComment(long userId, long itemId, CommentCreateTO commentCreateTO) {
+    public ResponseEntity<Object> createComment(Long userId, Long itemId, CommentCreateTO commentCreateTO) {
         return post("/" + itemId + "/comment", userId, commentCreateTO);
     }
 

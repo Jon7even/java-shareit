@@ -26,7 +26,7 @@ public class ItemRequestController {
 
     @PostMapping
     public ResponseEntity<Object> createItemRequest(
-            @RequestHeader(X_HEADER_USER_ID) @Positive long userId,
+            @RequestHeader(X_HEADER_USER_ID) @Positive Long userId,
             @Valid @RequestBody ItemRequestCreateTO requestCreateTO) {
         log.info("Creating itemRequest {}, userId={}", requestCreateTO, userId);
 
@@ -35,15 +35,15 @@ public class ItemRequestController {
 
     @GetMapping("/{requestId}")
     public ResponseEntity<Object> getItemRequestById(
-            @RequestHeader(X_HEADER_USER_ID) @Positive long userId,
-            @PathVariable @Positive long requestId) {
+            @RequestHeader(X_HEADER_USER_ID) @Positive Long userId,
+            @PathVariable @Positive Long requestId) {
         log.info("Get itemRequest {}, userId={}", requestId, userId);
 
         return requestClient.findItemRequestById(userId, requestId);
     }
 
     @GetMapping
-    public ResponseEntity<Object> getAllItemRequestByIdOwner(@RequestHeader(X_HEADER_USER_ID) long userId) {
+    public ResponseEntity<Object> getAllItemRequestByIdOwner(@RequestHeader(X_HEADER_USER_ID) @Positive Long userId) {
         log.info("Get itemRequests by ownerId={}", userId);
 
         return requestClient.getAllItemRequestByIdOwner(userId);
@@ -51,7 +51,7 @@ public class ItemRequestController {
 
     @GetMapping("/all")
     public ResponseEntity<Object> getListItemRequestByAnyUser(
-            @RequestHeader(X_HEADER_USER_ID) long userId,
+            @RequestHeader(X_HEADER_USER_ID) Long userId,
             @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
             @Positive @RequestParam(name = "size", defaultValue = "20") Integer size) {
 
