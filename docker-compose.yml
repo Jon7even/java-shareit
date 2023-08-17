@@ -34,7 +34,7 @@ services:
       - /var/lib/postgresql/data/
     ports:
       - "6541:5432"
-    restart: unless-stopped
+    restart: on-failure
     environment:
       - POSTGRES_DB=shareit_base
       - POSTGRES_USER=shareit_user
